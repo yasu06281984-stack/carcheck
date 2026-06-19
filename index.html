@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>受付チェックシート</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/ocr.css">
+<link rel="stylesheet" href="assets/checksheet.css">
+<style>
+  body{margin:0;background:#eef1f5;font-family:"Noto Sans JP",sans-serif;color:#131c28;padding:20px 14px}
+  .wrap{max-width:780px;margin:0 auto;padding-bottom:90px}
+  .site-head{background:linear-gradient(180deg,#235784,#1f4e74);color:#fff;border-radius:14px;padding:18px 20px;margin-bottom:16px}
+  .site-head .brand{font-family:"Oswald",sans-serif;font-weight:600;letter-spacing:.04em;font-size:1.4rem;text-transform:uppercase}
+  .site-head small{display:block;font-weight:500;font-size:.8rem;color:#cfe0f0;margin-top:5px}
+  .sec{background:#fff;border:1px solid rgba(19,28,40,.14);border-radius:14px;padding:18px;margin-bottom:16px}
+  .sec > h2{font-size:1.06rem;color:#1f4e74;margin:0 0 4px}
+  .sec > h3{font-size:.98rem;color:#1f4e74;margin:18px 0 4px}
+  .sec > .sec-note{font-size:.83rem;color:#5d6b7a;margin:0 0 14px;line-height:1.7}
+  .field{margin-top:12px}
+  .field > label{display:block;font-size:.84rem;font-weight:700;margin-bottom:5px}
+  .field label .opt{font-weight:500;color:#5d6b7a;font-size:.76rem}
+  .field input[type=text],.field input[type=tel],.field input[type=email],.field input[type=date],.field select{width:100%;border:1px solid rgba(19,28,40,.18);border-radius:9px;padding:11px 13px;font-size:1rem;font-family:inherit;background:#fff;box-sizing:border-box}
+  .field input:focus,.field select:focus{outline:2px solid #f15a00;outline-offset:-2px;border-color:transparent}
+  .two{display:flex;gap:12px;flex-wrap:wrap}
+  .two .field{flex:1;min-width:200px}
+  .suffix{display:flex;align-items:center;gap:8px}
+  .suffix input{flex:1}
+  .suffix span{font-size:.9rem;color:#5d6b7a}
+  .swatches{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .swatches button{width:34px;height:34px;border-radius:8px;border:2px solid rgba(0,0,0,.18);cursor:pointer;padding:0}
+  .swatches button.on{outline:3px solid #f15a00;outline-offset:1px}
+  .color-pick{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .color-pick input[type=color]{width:46px;height:34px;border:1px solid rgba(0,0,0,.18);border-radius:8px;background:#fff;padding:2px;cursor:pointer}
+  .color-prev{width:30px;height:30px;border-radius:7px;border:1px solid #ccc}
+  .color-hex{font-size:.85rem;color:#5d6b7a;font-family:monospace}
+  .muted{color:#5d6b7a;font-size:.85rem;line-height:1.7}
+  .choice{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .choice button{padding:10px 14px;border:1px solid #c1ccd8;border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:.95rem}
+  .choice button.on{background:#1f4e74;color:#fff;border-color:#1f4e74}
+  .banner{background:#eaf4ea;border:1px solid #b7d9b7;color:#1f6b2a;border-radius:10px;padding:12px;font-size:.9rem;margin-top:12px;line-height:1.7}
+  .banner.warn{background:#fff7e6;border-color:#f0d089;color:#8a5a00}
+  .banner.info{background:#eaf0f7;border-color:#b9cce4;color:#234e77}
+
+  /* photos */
+  .photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .photo-thumb{position:relative;width:92px;height:92px;border-radius:8px;overflow:hidden;border:1px solid #ccc}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-thumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:12px;line-height:18px;padding:0}
+  .photo-count{font-size:.82rem;color:#5d6b7a;margin-top:7px}
+  .slot{margin-top:6px;border:1.5px dashed #b7c3d0;border-radius:10px;min-height:120px;display:flex;align-items:center;justify-content:center;color:#5d6b7a;cursor:pointer;background:#fafcff;position:relative;overflow:hidden;text-align:center;padding:8px}
+  .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .slot .rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;z-index:2}
+
+  /* wizard */
+  .type-cards{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
+  .type-card{flex:1;min-width:210px;padding:16px;border:2px solid #c1ccd8;border-radius:12px;background:#fff;cursor:pointer;font-size:1.02rem;font-weight:700;color:#1f4e74;text-align:left}
+  .type-card .d{display:block;font-weight:500;font-size:.78rem;color:#5d6b7a;margin-top:6px;line-height:1.6}
+  .type-card.on{border-color:#f15a00;box-shadow:0 0 0 3px rgba(241,90,0,.15)}
+  .btn{padding:12px 18px;border-radius:10px;border:none;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;background:#1f4e74;color:#fff}
+  .btn.ghost{background:#fff;border:1px solid #c1ccd8;color:#1f4e74}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .step{display:none}
+  .step.active{display:block}
+  .wiz-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+  .wiz-steps{display:flex;gap:6px;flex-wrap:wrap}
+  .wiz-steps .st{font-size:.74rem;padding:5px 10px;border-radius:20px;background:#dde4ec;color:#5d6b7a}
+  .wiz-steps .st.on{background:#1f4e74;color:#fff;font-weight:700}
+  .wiz-steps .st.done{background:#9db8d0;color:#fff}
+  .wiz-type-label{font-size:.82rem;font-weight:700;color:#f15a00}
+  .wiz-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #d3dbe4;display:flex;gap:12px;padding:12px 14px;max-width:780px;margin:0 auto}
+  .wiz-nav button{flex:1;padding:14px;border-radius:10px;border:none;font-size:1.02rem;font-weight:700;cursor:pointer;font-family:inherit}
+  #wizPrev{background:#fff;border:1px solid #c1ccd8;color:#1f4e74;flex:0 0 32%}
+  #wizNext{background:#f15a00;color:#fff}
+  #wizNext:disabled{background:#e6b48f;cursor:not-allowed}
+  .terms-box{height:210px;overflow:auto;border:1px solid #c6d0da;border-radius:10px;padding:12px 14px;font-size:.82rem;line-height:1.85;background:#fff;color:#2c3a48}
+  .checks label{display:flex;align-items:center;gap:10px;padding:9px 4px;font-size:.95rem;border-bottom:1px solid #eef1f5}
+  .checks input{width:20px;height:20px}
+  .edit-btns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+  .edit-btns button{padding:8px 12px;border:1px solid #c1ccd8;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem;color:#1f4e74}
+  .save-no{font-family:"Oswald",monospace;font-size:1.5rem;letter-spacing:.04em;color:#1f4e74}
+
+  /* sheet preview / print (shared) */
+  #cs-print-area{display:none}
+  .p-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1f4e74;padding-bottom:5px}
+  .p-head h2{font-size:17px;color:#1f4e74;margin:0}
+  .p-meta{font-size:10.5px;color:#333}
+  .p-headl{display:flex;flex-direction:column}
+  .p-qr{text-align:center;margin-left:10px}
+  .p-qr img{width:84px;height:84px;display:block;image-rendering:pixelated}
+  .p-qrcap{font-size:8px;color:#444;margin-top:1px}
+  .p-sec{font-size:12.5px;color:#1f4e74;font-weight:700;margin:12px 0 4px;border-left:4px solid #f15a00;padding-left:7px}
+  .p-area table{border-collapse:collapse;width:100%}
+  #cs-print-area table{border-collapse:collapse;width:100%}
+  .p-cust{font-size:11px;margin-top:2px}
+  .p-cust th,.p-cust td{border:1px solid #aab;padding:4px 7px;text-align:left;vertical-align:top}
+  .p-cust th{background:#eef2f6;width:88px;white-space:nowrap;font-weight:600}
+  .p-figs{display:flex;flex-wrap:nowrap;gap:4px;margin-top:2px;align-items:flex-start}
+  .p-cell{flex:1 1 0;min-width:0}
+  .p-vt{font-size:8px;background:#1f4e74;color:#fff;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-fig{position:relative;border:1px solid #ccc;border-top:0}
+  .p-fig img{width:100%;display:block}
+  .p-ly{position:absolute;inset:0}
+  .p-mk{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff}
+  .p-swatch{display:inline-block;width:16px;height:16px;border-radius:3px;border:1px solid #888;vertical-align:middle;margin-right:5px}
+  .p-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .p-photo{width:calc(50% - 3px)}
+  .p-photo img{width:100%;display:block;border:1px solid #ccc}
+  .p-pcap{font-size:9px;color:#444;text-align:center;margin-top:1px}
+  .p-break{break-before:page;page-break-before:always;height:0}
+  .p-sign{margin-top:4px}
+  .p-signnote{font-size:11px;margin-bottom:6px}
+  .p-signrow{display:flex;align-items:flex-end;gap:18px}
+  .p-sigbox{flex:1;border:1px solid #999;border-radius:4px;min-height:72px;padding:4px 8px;display:flex;flex-direction:column;justify-content:flex-end}
+  .p-sigimg{max-height:72px;max-width:100%;object-fit:contain;align-self:flex-start}
+  .p-sigline{height:52px}
+  .p-sigcap{font-size:10px;color:#555;border-top:1px solid #ccc;margin-top:4px;padding-top:2px}
+  .p-sigdate{font-size:11px;white-space:nowrap;padding-bottom:4px}
+  .p-lst{font-size:10.5px;margin-top:2px}
+  .p-lst th,.p-lst td{border:1px solid #aab;padding:3px 6px;text-align:left}
+  .p-lst td.c{text-align:center;white-space:nowrap}
+  .p-lst th{background:#1f4e74;color:#fff;font-weight:600}
+  .p-lst tbody tr:nth-child(even){background:#f5f8fb}
+  .p-area{background:#fff;border:1px solid #e1e7ee;border-radius:8px;padding:12px 14px}
+  .p-cell,.p-cust,.p-lst{break-inside:avoid}
+  .p-legend{font-size:9px;color:#555;margin:3px 0 0}
+  #wizPreview .p-figs{flex-wrap:wrap;gap:6px}
+  #wizPreview .p-cell{flex:1 1 30%;min-width:120px;max-width:32%}
+  #wizPreview .p-vt{font-size:11px;padding:2px 6px}
+  #wizPreview .p-legend{font-size:11.5px;color:#444}
+  .wiz-steps .st{cursor:pointer}
+  .p-title{text-align:center;font-size:18px;color:#1f4e74;margin:0 0 6px;border-bottom:2px solid #1f4e74;padding-bottom:5px;font-weight:700}
+  .p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 2px}
+  .p-custname{font-size:15px;font-weight:700}
+  .p-shop{font-size:10px;color:#333;text-align:right;line-height:1.55}
+  .p-shopco{font-weight:700;font-size:11.5px;color:#1f4e74}
+  .p-figs.big{flex-wrap:wrap;gap:8px}
+  .p-figs.big .p-cell{flex:0 0 calc(50% - 4px)}
+  .p-figs.big .p-vt{font-size:11px;padding:2px 6px}
+  .p-sigqr{text-align:center;margin-left:12px}
+  .p-sigqr img{width:92px;height:92px;image-rendering:pixelated}
+  .p-sigqr div{font-size:8px;color:#444;margin-top:1px}
+  .p-qrbox{margin-top:8px;display:flex;align-items:center;gap:10px}
+  .p-qrbox img{width:90px;height:90px;image-rendering:pixelated}
+  .p-qrbox .c{font-size:10px;color:#444}
+
+  @media print{
+    body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap,.wiz-nav{display:none !important}
+    #cs-print-area{display:block !important;color:#111;padding:10px 14px;font-family:"Noto Sans JP",sans-serif}
+    #cs-print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-head">
+    <div class="brand">AUTO SHOP NAME<small>○○自動車（屋号をここに）｜受付チェックシート</small></div>
+  </div>
+
+  <!-- ===================== 開始画面 ===================== -->
+  <section class="sec" id="wizStart">
+    <h2>受付を開始</h2>
+    <p class="sec-note">シートの種類を選び、担当スタッフを選択して「スタート」を押してください。</p>
+
+    <div class="banner info" style="margin-top:0">
+      <b>ショップ向けメモ</b><br>
+      ・<b>入庫受付チェックシート</b>：入庫が決まったお客様向け。4ページ目で「貴重品・お忘れ物チェック」と「お客様署名」が入ります。<br>
+      ・<b>見積もり依頼チェックシート</b>：見積りだけのお客様向け。貴重品チェックと署名は省略されます。<br>
+      ・見積もりで保存したお客様が<b>入庫になった場合</b>は、下の「見積もり→入庫へ切替」から保存番号で呼び出し、「入庫シートに切り替える」を押すと、貴重品チェックと署名を追加して入庫受付シートに変換できます。
+    </div>
+
+    <div class="field"><label>シート種別を選択</label>
+      <div class="type-cards" id="typeCards">
+        <button type="button" class="type-card" data-type="intake">入庫受付チェックシート<span class="d">入庫が決まったお客様。署名・貴重品チェックあり。</span></button>
+        <button type="button" class="type-card" data-type="estimate">見積もり依頼チェックシート<span class="d">見積りのみ。署名・貴重品チェックなし。</span></button>
+      </div>
+    </div>
+
+    <div class="field"><label for="wizStaff">担当スタッフ</label>
+      <select id="wizStaff"><option value="">選択してください</option></select>
+      <div style="margin-top:8px"><button type="button" class="btn ghost" id="wizStaffEdit" style="padding:8px 12px;font-size:.85rem">スタッフを編集（管理）</button></div>
+      <div id="staffEditor" hidden style="margin-top:8px">
+        <label class="muted">スタッフ名を1行に1人ずつ入力</label>
+        <textarea id="staffList" style="width:100%;height:110px;border:1px solid #c1ccd8;border-radius:9px;padding:10px;font-family:inherit;box-sizing:border-box"></textarea>
+        <div style="margin-top:6px"><button type="button" class="btn" id="staffSave" style="padding:8px 14px;font-size:.9rem">保存</button></div>
+        <p class="muted">※ 正式な管理ページ（ユーザー2用）は今後追加します。当面はこの端末に保存されます。</p>
+      </div>
+    </div>
+
+    <div class="field"><label>店舗情報（管理）</label>
+      <button type="button" class="btn ghost" id="shopEdit" style="padding:8px 12px;font-size:.85rem">店舗情報を編集</button>
+      <div id="shopEditor" hidden style="margin-top:8px">
+        <div class="field" style="margin-top:6px"><label class="muted">会社名</label><input type="text" id="shop_company" placeholder="○○自動車株式会社"></div>
+        <div class="field" style="margin-top:6px"><label class="muted">住所</label><input type="text" id="shop_address" placeholder="東京都〇〇区〇〇 1-2-3"></div>
+        <div class="field" style="margin-top:6px"><label class="muted">電話番号</label><input type="text" id="shop_tel" placeholder="03-0000-0000"></div>
+        <div class="field" style="margin-top:6px"><label class="muted">営業時間</label><input type="text" id="shop_hours" placeholder="9:00〜18:00 / 日祝休"></div>
+        <div class="field" style="margin-top:6px"><label class="muted">ホームページURL</label><input type="text" id="shop_url" placeholder="https://example.com"></div>
+        <div style="margin-top:8px"><button type="button" class="btn" id="shopSave" style="padding:8px 14px;font-size:.9rem">保存</button></div>
+        <p class="muted">※ PDFのヘッダー右側に表示されます。担当者名は受付ごとのスタッフ選択が使われます。</p>
+      </div>
+    </div>
+
+    <div class="field" id="savedArea">
+      <label>過去に見積もりしたお客様の見積もりシートデータを参照し → 入庫へ切り替え（任意）</label>
+      <p class="muted">下書き、又は、入庫シートへの切り替えが反映されていない「見積もり状態での保存」は下記の通りです。</p>
+      <div class="choice" id="estRange" style="margin-bottom:8px">
+        <button type="button" data-range="30" class="on">1ヶ月以内（通常）</button>
+        <button type="button" data-range="90">3ヶ月以内</button>
+      </div>
+      <div id="resumeBox" hidden class="banner warn" style="margin-top:0">
+        入力途中の下書きがあります。<br>
+        <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+          <button type="button" class="btn" id="resumeBtn" style="padding:9px 14px;font-size:.9rem">続きから再開</button>
+          <button type="button" class="btn ghost" id="discardBtn" style="padding:9px 14px;font-size:.9rem">破棄して最初から</button>
+        </div>
+      </div>
+      <div id="estList" class="muted" style="margin-top:10px"></div>
+      <div class="two" style="margin-top:10px">
+        <div class="field" style="margin-top:0"><input type="text" id="convNo" placeholder="保存番号で直接呼び出す"></div>
+        <div style="display:flex;align-items:flex-end"><button type="button" class="btn ghost" id="convLoad" style="padding:11px 14px">呼び出す</button></div>
+      </div>
+      <div id="convResult" class="muted" style="margin-top:6px"></div>
+    </div>
+
+    <div style="margin-top:18px"><button type="button" class="btn" id="wizStartBtn" disabled style="width:100%;padding:15px">スタート</button></div>
+  </section>
+
+  <!-- ===================== ウィザード本体 ===================== -->
+  <div id="wizFlow" hidden>
+    <div class="wiz-bar">
+      <div class="wiz-steps" id="wizSteps"></div>
+      <div class="wiz-type-label" id="wizTypeLabel"></div>
+    </div>
+
+    <!-- ---------- 1P: 店舗入力 ---------- -->
+    <section class="step sec" data-step="1">
+      <h2>1. 受付情報の入力（店舗）</h2>
+      <p class="sec-note">担当スタッフ・お客様情報・車両情報を入力します。</p>
+
+      <div class="field"><label>① 担当スタッフ</label>
+        <div class="banner info" style="margin-top:0">担当スタッフ名：<b id="staffNameDisp">—</b></div>
+      </div>
+
+      <h3>② 車両情報（車検証）</h3>
+      <p class="muted">車検証を撮影する場合は、スタッフへ車検証をご提示ください。</p>
+      <div class="banner info">スタッフからご案内：「車検証データが車検有効期限の確認とお見積りで必要になります。撮影してもよろしいでしょうか？」</div>
+      <div class="choice" id="consentChoice">
+        <button type="button" data-consent="yes">はい（スタッフが撮影）</button>
+        <button type="button" data-consent="no">いいえ（手入力で依頼）</button>
+      </div>
+
+      <div id="vehDetail" hidden>
+        <div id="manualNote" hidden class="banner warn">撮影なしのため、お客様に各項目を手入力でご入力いただいてください。</div>
+        <div class="scan-wrap">
+          <div class="scanner">
+            <div class="scanner-head" id="scannerHead">
+              <h3 style="margin-top:0">車検証をスキャン</h3>
+              <p>写真を選ぶと、サーバーで高精度に読み取り、5項目を自動入力します。</p>
+            </div>
+            <div class="scanner-body">
+              <label class="dropzone" id="shakenDrop">
+                <input type="file" id="shakenFile" name="shaken_photo" accept="image/*" hidden>
+                <div class="dz-inner" id="dzInner">
+                  <span class="dz-ic">＋</span>
+                  <span class="dz-t">車検証を撮影 / 画像を選択</span>
+                  <span class="dz-s">カメラ撮影・写真フォルダどちらでもOK（JPG・PNG・HEIC）</span>
+                </div>
+                <div class="dz-preview" id="dzPreview" hidden>
+                  <img id="shakenImg" alt="車検証プレビュー">
+                  <span class="scanline" id="scanline" hidden></span>
+                </div>
+              </label>
+              <div class="scan-status" id="scanStatus" hidden><span class="spinner"></span><span id="scanMsg">読み取り中…</span></div>
+              <div class="spec">
+                <div class="spec-row"><label for="f_vin">車台番号</label><input type="text" id="f_vin" name="vin" autocomplete="off" placeholder="例：DBA-XXX-1234567"></div>
+                <div class="spec-row"><label for="f_year">初年度年式</label><input type="text" id="f_year" name="first_year" autocomplete="off" placeholder="例：令和3年5月"></div>
+                <div class="spec-row"><label for="f_class">類別区分番号</label><input type="text" id="f_class" name="class_no" autocomplete="off" placeholder="例：0123"></div>
+                <div class="spec-row"><label for="f_model">型式指定番号</label><input type="text" id="f_model" name="model_no" autocomplete="off" placeholder="例：12345"></div>
+                <div class="spec-row"><label for="f_engine">原動機の型式</label><input type="text" id="f_engine" name="engine" autocomplete="off" placeholder="例：1KR"></div>
+              </div>
+              <p class="spec-hint">※ 画像は読み取りのためだけに使用します。自動読み取りは目安です。読み取れない項目は各欄に直接ご入力ください。</p>
+              <details class="raw-box" id="rawBox" hidden>
+                <summary>読み取った全文を表示</summary>
+                <pre id="rawText"></pre>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <div class="field"><label for="cust_name">お名前</label>
+          <input type="text" id="cust_name" autocomplete="name" placeholder="車検証の使用者名が自動入力されます">
+          <p class="muted">車検証の使用者名が自動入力されます。</p>
+        </div>
+        <div class="field"><label for="cust_reqname">ご依頼者 <span class="opt">（任意）</span></label>
+          <input type="text" id="cust_reqname" placeholder="使用者と異なる場合に入力">
+          <p class="muted">入力された場合、PDF等のお客様名はこちらが使われます。</p>
+        </div>
+        <div class="field"><label for="cust_tel">電話番号</label><input type="tel" id="cust_tel" autocomplete="tel" placeholder="例：090-1234-5678"></div>
+        <div class="field"><label for="cust_addr">住所</label>
+          <input type="text" id="cust_addr" autocomplete="street-address" placeholder="車検証の使用者の本拠の位置が自動入力されます">
+          <p class="muted">車検証の「使用者の本拠の位置」が自動入力されます。</p>
+        </div>
+        <div class="field"><label for="cust_reqaddr">ご依頼者様の住所 <span class="opt">（任意）</span></label>
+          <input type="text" id="cust_reqaddr" placeholder="上記と異なる場合に入力">
+          <p class="muted">入力された場合、PDF等の住所はこちらが使われます。</p>
+        </div>
+        <div class="field"><label for="cust_mail">メールアドレス <span class="opt">（任意）</span></label>
+          <input type="email" id="cust_mail" autocomplete="email" placeholder="例：taro@example.com">
+          <p class="muted">メールでのお知らせを希望される場合は、ご入力ください。</p>
+        </div>
+        <div class="field"><label for="est_date">見積もり日</label>
+          <input type="date" id="est_date">
+        </div>
+
+        <div class="field"><label>代車の有無</label>
+          <div class="choice" id="daishaChoice">
+            <button type="button" data-daisha="yes">あり</button>
+            <button type="button" data-daisha="no">なし</button>
+          </div>
+        </div>
+        <div class="field"><label>希望お支払い方法</label>
+          <div class="choice" id="payChoice">
+            <button type="button" data-pay="現金">現金</button>
+            <button type="button" data-pay="クレジットカード">クレジットカード</button>
+            <button type="button" data-pay="保険利用">保険利用</button>
+            <button type="button" data-pay="ローン">ローン</button>
+            <button type="button" data-pay="その他">その他</button>
+          </div>
+          <input type="text" id="payOther" placeholder="その他の内容を入力" style="margin-top:8px;display:none">
+        </div>
+
+        <h3>③ その他車両情報</h3>
+        <div class="field"><label for="cust_vehicle">車種</label><input type="text" id="cust_vehicle" placeholder="例：アルファード／プリウス／ハイエース など"></div>
+        <div class="two">
+          <div class="field"><label for="cust_mileage">走行距離</label><div class="suffix"><input type="text" inputmode="numeric" id="cust_mileage" placeholder="例：48500"><span>km</span></div></div>
+          <div class="field"><label for="cust_colorno">カラー番号</label><input type="text" id="cust_colorno" placeholder="例：070 / 1G3"></div>
+        </div>
+        <div class="field"><label for="cust_colorname">カラー種別</label><input type="text" id="cust_colorname" placeholder="色見本を選ぶと自動入力（手入力も可）"></div>
+        <div class="field">
+          <label>色見本（選ぶとPDFにその色がカラー印刷されます）</label>
+          <div class="swatches" id="swatches"></div>
+          <div class="color-pick">
+            <input type="color" id="cust_color" value="#cccccc" aria-label="色を直接指定">
+            <span class="color-prev" id="colorPrev"></span>
+            <span class="color-hex" id="colorHex">未選択</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 2P: 写真（任意） ---------- -->
+    <section class="step sec" data-step="2">
+      <h2>2. 車両の撮影（すべて任意）</h2>
+      <p class="sec-note">前後を斜め45度から撮影するのが推奨です。撮影が不要な場合は、何も選ばずに下の「次へ」を押してください。</p>
+      <div class="field"><label>フロント斜め45度写真 <span class="opt">（推奨）</span></label>
+        <input type="file" id="photoFront" accept="image/*" capture="environment" hidden>
+        <div class="slot" id="slotFront" data-for="photoFront">タップして撮影 / 選択</div>
+      </div>
+      <div class="field"><label>リア斜め45度写真 <span class="opt">（推奨）</span></label>
+        <input type="file" id="photoRear" accept="image/*" capture="environment" hidden>
+        <div class="slot" id="slotRear" data-for="photoRear">タップして撮影 / 選択</div>
+      </div>
+      <div class="field"><label>その他の写真 <span class="opt">（最大8枚・任意）</span></label>
+        <input type="file" id="photoOther" accept="image/*" multiple capture="environment">
+        <div class="photo-grid" id="otherGrid"></div>
+        <div class="photo-count" id="otherCount">0 / 8 枚</div>
+      </div>
+    </section>
+
+    <!-- ---------- 3P: 損傷チェック ---------- -->
+    <section class="step" data-step="3" style="margin-bottom:16px">
+      <div class="sec" style="padding:0;overflow:hidden">
+        <div class="checksheet" data-checksheet>
+          <div class="cs-head">
+            <h3>3. 車両損傷チェック</h3>
+            <p>車種・ビューを切り替え、該当箇所をタップして記録</p>
+          </div>
+          <div class="cs-body">
+            <div class="cs-tabs" data-cs-tabs></div>
+            <div class="cs-tools" data-cs-tools>
+              <button type="button" data-tool="A"><span class="cs-dot" style="background:#E24B4A"></span>傷（A）</button>
+              <button type="button" data-tool="B"><span class="cs-dot" style="background:#BA7517"></span>凹み（B）</button>
+              <button type="button" data-tool="X"><span class="cs-dot" style="background:#378ADD"></span>その他（X）</button>
+            </div>
+            <div class="cs-views" data-cs-views></div>
+            <div class="cs-stage">
+              <img class="cs-img" data-cs-img alt="車両図">
+              <div class="cs-layer" data-cs-layer></div>
+            </div>
+            <p class="cs-hint">※ タップ位置から部位を自動判定します（違うときは一覧のプルダウンで修正）。マーカーは表示中のビューにのみ表示され、一覧には全ビュー分が残ります。</p>
+            <div class="cs-list">
+              <h4>チェック入力欄詳細</h4>
+              <div data-cs-rows></div>
+              <div class="cs-foot">
+                <span class="cs-count" data-cs-count>記録：0件</span>
+                <div class="cs-actions" style="display:none">
+                  <button type="button" class="cs-btn primary" data-cs-print="with2">PDF</button>
+                  <button type="button" class="cs-btn" data-cs-copy>コピー</button>
+                  <button type="button" class="cs-btn" data-cs-share>共有</button>
+                  <button type="button" class="cs-btn" data-cs-clear>消去</button>
+                </div>
+              </div>
+              <div class="cs-share-out" data-cs-share-out style="display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 4P: 確認・規約・署名 ---------- -->
+    <section class="step sec" data-step="4">
+      <h2>4. 内容の確認</h2>
+      <p class="sec-note">入力内容をご確認ください。修正する場合は各「編集」ボタンから戻れます。</p>
+      <div class="edit-btns">
+        <button type="button" data-edit="1">1ページ目（受付情報）を編集</button>
+        <button type="button" data-edit="2">2ページ目（写真）を編集</button>
+        <button type="button" data-edit="3">3ページ目（損傷チェック）を編集</button>
+      </div>
+      <div id="wizPreview" class="p-area"></div>
+
+      <div id="intakeOnly">
+        <div class="field" style="margin-top:18px"><label for="intake_date">入庫予定日 <span class="opt">（任意）</span></label>
+          <input type="date" id="intake_date">
+          <p class="muted">現段階で入庫が決まっている場合は、ご記入ください。</p>
+        </div>
+        <h3 style="margin-top:18px">貴重品・お忘れ物チェック</h3>
+        <p class="muted">車内の貴重品・お忘れ物がないかご確認ください。</p>
+        <div class="checks" id="valuables">
+          <label><input type="checkbox" data-val="ETCカード"> ETCカードを抜いた／確認した</label>
+          <label><input type="checkbox" data-val="現金・貴重品"> 現金・貴重品</label>
+          <label><input type="checkbox" data-val="スマホ・電子機器"> スマホ・電子機器</label>
+          <label><input type="checkbox" data-val="駐車券・カード類"> 駐車券・カード類</label>
+          <label><input type="checkbox" data-val="メガネ・サングラス"> メガネ・サングラス</label>
+          <label><input type="checkbox" data-val="その他"> その他の貴重品</label>
+        </div>
+
+        <h3 style="margin-top:18px">利用規約</h3>
+        <div class="terms-box" id="termsBox"></div>
+        <p class="muted" id="termsHint">※ 最後までスクロールすると、ご署名いただけます。</p>
+
+        <h3 style="margin-top:14px">お客様署名</h3>
+        <p class="muted">上記内容・利用規約に同意のうえ、枠内にご署名ください。</p>
+        <div style="border:1px solid #c6d0da;border-radius:10px;background:#fff;overflow:hidden;opacity:.5;pointer-events:none" id="signWrap">
+          <canvas id="sign_pad" style="display:block;width:100%;height:170px;touch-action:none"></canvas>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+          <button type="button" id="sign_clear" class="cs-btn">署名をクリア</button>
+          <span id="sign_status" style="font-size:.85rem;color:#5a6b7b">未署名</span>
+        </div>
+        <div id="signDoneMsg" hidden class="banner">ご署名ありがとうございました。<b>スタッフへお返しください。</b></div>
+      </div>
+    </section>
+
+    <!-- ---------- 5P: 完了 ---------- -->
+    <section class="step sec" data-step="5">
+      <h2>5. 受付完了</h2>
+      <div class="banner" id="saveMsg">保存番号：<span class="save-no" id="saveNo">…</span></div>
+      <div id="dbMsg" class="muted" style="margin-top:10px"></div>
+
+      <h3 style="margin-top:18px">PDFの出力</h3>
+      <p class="muted">印刷パターンを選んでPDF保存・印刷できます。</p>
+      <div class="choice">
+        <button type="button" data-pdf="with2">PDF（写真2枚あり）</button>
+        <button type="button" data-pdf="none">PDF（写真なし）</button>
+        <button type="button" data-pdf="separate">PDF（写真は別紙）</button>
+        <button type="button" data-pdf="big">PDF（図を大きく・別ページ）</button>
+      </div>
+
+      <h3 style="margin-top:18px">共有QR</h3>
+      <p class="muted">お客様がスキャンすると、この受付票を表示・PDF保存できます。</p>
+      <button type="button" class="btn ghost" id="finalShare" style="padding:10px 14px">共有QRを作成</button>
+      <div id="finalShareOut" style="margin-top:12px"></div>
+
+      <div style="margin-top:20px"><button type="button" class="btn" id="finishBtn" style="width:100%">新しい受付を開始</button></div>
+    </section>
+
+    <div class="wiz-nav">
+      <button id="wizPrev" type="button">戻る</button>
+      <button id="wizNext" type="button">次へ</button>
+    </div>
+  </div>
+</div>
+
+<div id="cs-print-area"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="assets/ocr.js" defer></script>
+<script src="assets/qrcode.js" defer></script>
+<script src="assets/checksheet.js" defer></script>
+<script>
+/* ---- カラー見本 ---- */
+(function () {
+  var presets = [
+    ['パールホワイト', '#f3f3ef'], ['ホワイト', '#ffffff'], ['シルバーメタリック', '#c9ccce'], ['グレーメタリック', '#8d9094'],
+    ['ブラックメタリック', '#1c1c1e'], ['レッド', '#b5293a'], ['ワインレッド', '#6e1f2a'], ['オレンジ', '#d4641e'],
+    ['イエロー', '#e6c12e'], ['ブルー', '#2a4d8f'], ['ネイビー', '#1e2a44'], ['ライトブルー', '#7fa9d6'],
+    ['グリーン', '#2f6b46'], ['ベージュ', '#cbb892'], ['ブラウン', '#5a4632'], ['ピンク', '#d98aa6']
+  ];
+  var wrap = document.getElementById('swatches');
+  var picker = document.getElementById('cust_color');
+  var prev = document.getElementById('colorPrev');
+  var hex = document.getElementById('colorHex');
+  var nameInp = document.getElementById('cust_colorname');
+  if (!wrap || !picker) return;
+  function setColor(h, name, btn) {
+    picker.value = h; prev.style.background = h; hex.textContent = h;
+    if (name) nameInp.value = name;
+    Array.prototype.forEach.call(wrap.children, function (b) { b.classList.toggle('on', b === btn); });
+  }
+  presets.forEach(function (p) {
+    var b = document.createElement('button'); b.type = 'button'; b.style.background = p[1]; b.title = p[0];
+    b.addEventListener('click', function () { setColor(p[1], p[0], b); });
+    wrap.appendChild(b);
+  });
+  picker.addEventListener('input', function () {
+    prev.style.background = picker.value; hex.textContent = picker.value;
+    Array.prototype.forEach.call(wrap.children, function (b) { b.classList.remove('on'); });
+  });
+})();
+</script>
+<script>
+/* ---- 写真（フロント / リア / その他8） ---- */
+(function () {
+  window.csPhotoData = { front: null, rear: null, others: [] };
+  window.csIntakePhotos = [];
+  function sync() {
+    var a = [];
+    if (window.csPhotoData.front) a.push(window.csPhotoData.front);
+    if (window.csPhotoData.rear) a.push(window.csPhotoData.rear);
+    window.csPhotoData.others.forEach(function (s) { a.push(s); });
+    window.csIntakePhotos = a;
+    if (window.wizardOnChange) window.wizardOnChange();
+  }
+  function downscale(file, cb) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1280, w = img.width, h = img.height;
+        if (w > max || h > max) { if (w >= h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        cb(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = function () { cb(fr.result); };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function renderSlot(slot, dataUrl, key) {
+    slot.innerHTML = '';
+    if (dataUrl) {
+      var im = new Image(); im.src = dataUrl; slot.appendChild(im);
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×';
+      rm.addEventListener('click', function (e) { e.stopPropagation(); window.csPhotoData[key] = null; renderSlot(slot, null, key); sync(); });
+      slot.appendChild(rm);
+    } else { slot.textContent = 'タップして撮影 / 選択'; }
+  }
+  function wireSlot(slotId, inputId, key) {
+    var slot = document.getElementById(slotId), input = document.getElementById(inputId);
+    if (!slot || !input) return;
+    slot.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      if (!input.files || !input.files[0]) return;
+      downscale(input.files[0], function (d) { window.csPhotoData[key] = d; renderSlot(slot, d, key); sync(); });
+      input.value = '';
+    });
+  }
+  wireSlot('slotFront', 'photoFront', 'front');
+  wireSlot('slotRear', 'photoRear', 'rear');
+  var other = document.getElementById('photoOther'), grid = document.getElementById('otherGrid'), cnt = document.getElementById('otherCount');
+  function renderOthers() {
+    if (!grid) return;
+    grid.innerHTML = '';
+    window.csPhotoData.others.forEach(function (src, i) {
+      var d = document.createElement('div'); d.className = 'photo-thumb';
+      var im = new Image(); im.src = src; d.appendChild(im);
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = '×';
+      b.addEventListener('click', function () { window.csPhotoData.others.splice(i, 1); renderOthers(); sync(); });
+      d.appendChild(b); grid.appendChild(d);
+    });
+    if (cnt) cnt.textContent = window.csPhotoData.others.length + ' / 8 枚';
+  }
+  if (other) {
+    other.addEventListener('change', function () {
+      Array.prototype.slice.call(other.files).forEach(function (f) {
+        if (window.csPhotoData.others.length >= 8) return;
+        downscale(f, function (d) { if (window.csPhotoData.others.length >= 8) { return; } window.csPhotoData.others.push(d); renderOthers(); sync(); });
+      });
+      other.value = '';
+    });
+  }
+  window.csPhotosGet = function () { return JSON.parse(JSON.stringify(window.csPhotoData)); };
+  window.csPhotosSet = function (obj) {
+    window.csPhotoData = { front: (obj && obj.front) || null, rear: (obj && obj.rear) || null, others: (obj && obj.others) ? obj.others.slice(0, 8) : [] };
+    renderSlot(document.getElementById('slotFront'), window.csPhotoData.front, 'front');
+    renderSlot(document.getElementById('slotRear'), window.csPhotoData.rear, 'rear');
+    renderOthers(); sync();
+  };
+  renderOthers();
+})();
+</script>
+<script>
+/* ---- 署名パッド ---- */
+(function () {
+  var cv = document.getElementById('sign_pad'); if (!cv) return;
+  var ctx = cv.getContext('2d'); var status = document.getElementById('sign_status');
+  var dpr = Math.max(1, window.devicePixelRatio || 1);
+  var drawn = false, drawing = false, last = null;
+  function fit(keep) {
+    var w = cv.clientWidth || 600, h = cv.clientHeight || 170;
+    var snap = (keep && drawn) ? cv.toDataURL() : null;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#10243b';
+    if (snap) { var im = new Image(); im.onload = function () { ctx.drawImage(im, 0, 0, w, h); }; im.src = snap; }
+  }
+  function pos(e) { var r = cv.getBoundingClientRect(); var t = e.touches ? e.touches[0] : e; return { x: t.clientX - r.left, y: t.clientY - r.top }; }
+  function start(e) { e.preventDefault(); drawing = true; last = pos(e); }
+  function move(e) { if (!drawing) return; e.preventDefault(); var p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; drawn = true; }
+  function end() { if (!drawing) return; drawing = false; if (drawn) { window.csSignature = cv.toDataURL('image/png'); if (status) status.textContent = '署名あり'; if (window.wizardOnSign) window.wizardOnSign(); if (window.wizardOnChange) window.wizardOnChange(); } }
+  cv.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+  cv.addEventListener('touchstart', start, { passive: false }); cv.addEventListener('touchmove', move, { passive: false }); cv.addEventListener('touchend', end);
+  document.getElementById('sign_clear').addEventListener('click', function () { ctx.clearRect(0, 0, cv.width, cv.height); drawn = false; window.csSignature = ''; if (status) status.textContent = '未署名'; if (window.wizardOnChange) window.wizardOnChange(); });
+  window.csSignature = '';
+  window.csSignFit = function () { fit(true); };
+  window.csSignSet = function (dataUrl) {
+    if (!dataUrl) return;
+    fit(false);
+    var im = new Image(); im.onload = function () { var w = cv.clientWidth || 600, h = cv.clientHeight || 170; ctx.drawImage(im, 0, 0, w, h); drawn = true; window.csSignature = dataUrl; if (status) status.textContent = '署名あり'; }; im.src = dataUrl;
+  };
+  setTimeout(function () { fit(false); }, 80);
+})();
+</script>
+<script src="assets/wizard.js" defer></script>
+</body>
+</html>

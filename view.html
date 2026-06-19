@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>受付チェックシート</title>
+<style>
+  body{margin:0;font-family:"Noto Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:#111;background:#f4f6f8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:900px;margin:0 auto;padding:14px}
+  .bar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .btn{padding:10px 16px;border:1px solid #1f4e74;background:#1f4e74;color:#fff;border-radius:9px;cursor:pointer;font:inherit}
+  .st{color:#5a6b7b;font-size:.9rem}
+  .sheet{background:#fff;padding:14px 16px;border:1px solid #d8e0e8;border-radius:8px}
+  .sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1f4e74;padding-bottom:5px}
+  .p-head h2{font-size:17px;color:#1f4e74;margin:0}
+  .p-meta{font-size:10.5px;color:#333}
+  .p-headl{display:flex;flex-direction:column}
+  .p-sec{font-size:12.5px;color:#1f4e74;font-weight:700;margin:12px 0 4px;border-left:4px solid #f15a00;padding-left:7px}
+  .sheet table{border-collapse:collapse;width:100%}
+  .p-cust{font-size:11px;margin-top:2px}
+  .p-cust th,.p-cust td{border:1px solid #aab;padding:4px 7px;text-align:left;vertical-align:top}
+  .p-cust th{background:#eef2f6;width:88px;white-space:nowrap;font-weight:600}
+  .p-figs{display:flex;flex-wrap:nowrap;gap:4px;margin-top:2px;align-items:flex-start}
+  .p-cell{flex:1 1 0;min-width:0}
+  .p-vt{font-size:8px;background:#1f4e74;color:#fff;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-fig{position:relative;border:1px solid #ccc;border-top:0}
+  .p-fig img{width:100%;display:block}
+  .p-ly{position:absolute;inset:0}
+  .p-mk{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff}
+  .p-swatch{display:inline-block;width:16px;height:16px;border-radius:3px;border:1px solid #888;vertical-align:middle;margin-right:5px}
+  .p-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .p-photo{width:calc(50% - 3px)}
+  .p-photo img{width:100%;display:block;border:1px solid #ccc}
+  .p-pcap{font-size:9px;color:#444;text-align:center;margin-top:1px}
+  .p-sign{margin-top:4px}
+  .p-signnote{font-size:11px;margin-bottom:6px}
+  .p-signrow{display:flex;align-items:flex-end;gap:18px}
+  .p-sigbox{flex:1;border:1px solid #999;border-radius:4px;min-height:72px;padding:4px 8px;display:flex;flex-direction:column;justify-content:flex-end}
+  .p-sigimg{max-height:72px;max-width:100%;object-fit:contain;align-self:flex-start}
+  .p-sigline{height:52px}
+  .p-sigcap{font-size:10px;color:#555;border-top:1px solid #ccc;margin-top:4px;padding-top:2px}
+  .p-lst{font-size:10.5px;margin-top:2px}
+  .p-lst th,.p-lst td{border:1px solid #aab;padding:3px 6px;text-align:left}
+  .p-lst td.c{text-align:center;white-space:nowrap}
+  .p-lst th{background:#1f4e74;color:#fff;font-weight:600}
+  .p-lst tbody tr:nth-child(even){background:#f5f8fb}
+  @media print{ .bar{display:none} .wrap{max-width:none;padding:0} .sheet{border:0;border-radius:0} body{background:#fff} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <button class="btn" onclick="window.print()">PDFを保存 / 印刷</button>
+    <span class="st" id="st">読み込み中…</span>
+  </div>
+  <div class="sheet" id="sheet"></div>
+</div>
+<script>
+var TOOL = { A:{c:'#E24B4A',w:'傷'}, B:{c:'#BA7517',w:'凹み'}, X:{c:'#378ADD',w:'その他'}, Op:{c:'#8E44AD',w:'エアロ'} };
+var VIEWLBL = { front:'正面', rear:'後方', left:'左側面', right:'右側面', roof:'ルーフ' };
+var VEHLBL = { hatchback:'ハッチバック', sedan:'セダン', suv:'SUV', minivan:'ミニバン', onebox:'ワンボックス' };
+var VIEWS = ['front','rear','left','right','roof'];
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];}); }
+function render(d){
+  var v=d.v, c=d.cust||{}, recs=d.records||[], sign=d.sign||'', photos=d.photos||[];
+  var dir='assets/vehicles/'+v;
+  var colorCell = c.colorname ? ((c.color?'<span class="p-swatch" style="background:'+esc(c.color)+'"></span>':'')+esc(c.colorname)) : '';
+  var cust='<table class="p-cust">'+
+    '<tr><th>お客様名</th><td>'+(c.name?esc(c.name)+' 様':'')+'</td><th>電話番号</th><td>'+esc(c.tel)+'</td></tr>'+
+    '<tr><th>住所</th><td colspan="3">'+esc(c.addr)+'</td></tr>'+
+    '<tr><th>車台番号</th><td>'+esc(c.vin)+'</td><th>初年度登録</th><td>'+esc(c.year)+'</td></tr>'+
+    '<tr><th>型式指定番号</th><td>'+esc(c.model)+'</td><th>類別区分番号</th><td>'+esc(c.cls)+'</td></tr>'+
+    '<tr><th>原動機の型式</th><td>'+esc(c.engine)+'</td><th>走行距離</th><td>'+(c.mileage?esc(c.mileage)+' km':'')+'</td></tr>'+
+    '<tr><th>カラー番号</th><td>'+esc(c.colorno)+'</td><th>カラー</th><td>'+colorCell+'</td></tr>'+
+    '</table>';
+  function viewBlock(vk){
+    var ms=recs.filter(function(r){return r.views?r.views.indexOf(vk)>=0:r.view===vk;}).map(function(r){
+      var col=TOOL[r.tool]?TOOL[r.tool].c:'#888';
+      return '<span class="p-mk" style="left:'+r.x+'%;top:'+r.y+'%;background:'+col+'">'+esc(r.code)+'</span>';
+    }).join('');
+    return '<div class="p-cell"><div class="p-vt">'+VIEWLBL[vk]+'</div><div class="p-fig"><img src="'+dir+'/'+vk+'.png" alt=""><div class="p-ly">'+ms+'</div></div></div>';
+  }
+  var figs='<div class="p-figs">'+VIEWS.map(viewBlock).join('')+'</div>';
+  var rows=recs.map(function(r){
+    var T=TOOL[r.tool]||{w:''};
+    var sz=(r.tool==='X'||r.tool==='Op')?'—':(r.size?((r.tool==='A'?'長さ':'直径')+'約'+esc(r.size)+'cm'):'—');
+    var vlab=(r.views&&r.views.length>1)?'左右側面':VIEWLBL[r.view];
+    return '<tr><td class="c">'+esc(r.code)+'</td><td>'+vlab+'</td><td>'+T.w+'</td><td>'+esc(r.part)+'</td><td>'+sz+'</td><td>'+esc(r.note)+'</td><td>'+esc(r.repair)+'</td></tr>';
+  }).join('')||'<tr><td colspan="7">記録なし</td></tr>';
+  var signImg = sign ? '<img class="p-sigimg" src="'+sign+'" alt="署名">' : '<div class="p-sigline"></div>';
+  var signSec='<div class="p-sec">確認・お客様署名</div><div class="p-sign"><div class="p-signnote">上記の内容（車両の状態・損傷・修理希望）を確認しました。</div>'+
+    '<div class="p-signrow"><div class="p-sigbox">'+signImg+'<div class="p-sigcap">お客様署名'+(c.name?'：'+esc(c.name)+' 様':'')+'</div></div></div></div>';
+  var photoSec = photos.length ? ('<div class="p-sec">入庫時画像</div><div class="p-photos">'+photos.map(function(s,i){return '<div class="p-photo"><img src="'+s+'" alt=""><div class="p-pcap">入庫時画像 '+(i+1)+'</div></div>';}).join('')+'</div>') : '';
+  var head='<div class="p-head"><div class="p-headl"><h2>車両損傷チェックシート</h2><div class="p-meta">車種：'+(VEHLBL[v]||esc(v))+'</div></div></div>';
+  document.getElementById('sheet').innerHTML =
+    head + '<div class="p-sec">お客様情報</div>'+cust +
+    '<div class="p-sec">損傷チェック図</div>'+figs +
+    '<div class="p-sec">入力チェック欄一覧</div><table class="p-lst"><thead><tr><th>番号</th><th>ビュー</th><th>種別</th><th>部位</th><th>サイズ</th><th>備考</th><th>修理内容</th></tr></thead><tbody>'+rows+'</tbody></table>' +
+    signSec + photoSec;
+}
+(function(){
+  var id=new URLSearchParams(location.search).get('id');
+  var st=document.getElementById('st');
+  if(!id){ st.textContent='IDがありません。'; return; }
+  fetch('api/sheet?id='+encodeURIComponent(id)).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(d){ if(!d||d.error) throw 0; render(d); st.textContent=''; })
+    .catch(function(){ st.textContent='読み込めませんでした。URLをご確認ください（公開設定が必要です）。'; });
+})();
+</script>
+</body>
+</html>
