@@ -501,6 +501,7 @@
         <button type="button" data-pdf="none">PDF（写真なし）</button>
         <button type="button" data-pdf="separate">PDF（写真は別紙）</button>
         <button type="button" data-pdf="big">PDF（図を大きく・別ページ）</button>
+        <button type="button" id="loanPdfBtn" style="display:none;background:#E8810C;color:#fff;border:0;font-weight:700">代車貸出シートのPDF</button>
       </div>
 
       <h3 style="margin-top:18px">共有QR</h3>
@@ -533,6 +534,8 @@
     <iframe id="loanFrame" style="flex:1;border:0;width:100%"></iframe>
   </div>
 </div>
+
+<iframe id="loanPrintFrame" style="position:fixed;width:0;height:0;border:0;left:-9999px"></iframe>
 
 <div id="cs-print-area"></div>
 

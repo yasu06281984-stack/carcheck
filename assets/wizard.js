@@ -233,6 +233,22 @@
     var la = $('loanArea'); if (la) la.style.display = '';
     openLoanOverlay();
   }
+  function printDoc(html) {
+    var f = $('loanPrintFrame'); if (!f || !html) return;
+    var doc = f.contentWindow.document; doc.open(); doc.write(html); doc.close();
+    setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} }, 700);
+  }
+  window.addEventListener('message', function (ev) {
+    var d = ev.data || {};
+    if (d.type === 'cs_loan_done') {
+      window.csLoanDoc = d.html;
+      var b = $('loanPdfBtn'); if (b) b.style.display = '';
+      var ov = $('loanOverlay'); if (ov) ov.style.display = 'none';
+      var f = $('loanFrame'); if (f) f.src = 'about:blank';
+      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを再表示・編集';
+      var out = $('outputs'); if (out) out.style.display = '';
+    }
+  });
 
   /* ---------------- ステップ遷移 ---------------- */
   var STEP_NAMES = ['受付情報', '写真', '損傷チェック', '確認・署名', '完了'];
@@ -444,6 +460,7 @@
     if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', chooseLoanYes);
     if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', showOutputs);
     if ($('openLoanBtn')) $('openLoanBtn').addEventListener('click', openLoanOverlay);
+    if ($('loanPdfBtn')) $('loanPdfBtn').addEventListener('click', function () { if (window.csLoanDoc) printDoc(window.csLoanDoc); });
     if ($('closeLoanBtn')) $('closeLoanBtn').addEventListener('click', function () {
       var ov = $('loanOverlay'); if (ov) ov.style.display = 'none';
       var f = $('loanFrame'); if (f) f.src = 'about:blank';
