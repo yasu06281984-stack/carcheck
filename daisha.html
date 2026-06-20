@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>代車貸出シート — CARCHECK</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EBEEF2;--surface:#fff;--surface2:#F6F8FA;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--brand:#1F4E74;--brand-deep:#143A57;--brand-soft:#E7EEF5;--amber:#E8810C;--green:#2E9E6B;--green-soft:#E2F2EA;--red:#C8443B;--purple:#7A3DB8}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink)}
+  .topbar{background:var(--brand-deep);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .brand b{letter-spacing:.06em}.brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
+  .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:10px}
+  .who a,.who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;text-decoration:none}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 18px 90px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .card-l{font-size:.7rem;letter-spacing:.12em;font-weight:700;color:var(--muted);margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:.74rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:.95rem;font-family:inherit;background:#fff}
+  .ro{font-size:.92rem}.ro b{color:var(--ink)}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:.9rem}
+  .info div span{color:var(--muted);font-size:.8rem;display:block}
+  .views{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
+  .vtile{border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+  .vlbl{font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:4px;text-align:center}
+  .vwrap{position:relative;width:100%}
+  .vwrap img{width:100%;display:block}
+  .mk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3);display:grid;place-items:center;font-size:.58rem;color:#fff;font-weight:700}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 14px;font-size:.88rem;font-weight:700;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .terms{height:130px;overflow-y:auto;border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--surface2);font-size:.8rem;white-space:pre-wrap;line-height:1.6}
+  .signbox{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+  #sign_pad{display:block;width:100%;height:170px;touch-action:none}
+  .primary{background:var(--brand);color:#fff;border:0;padding:12px 22px;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer}
+  .ghost{background:#fff;color:var(--brand);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.88rem}
+  .msg{font-size:.84rem;margin-top:10px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+  .small{font-size:.78rem;color:var(--muted)}
+  .pick{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;background:#fff}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  /* print */
+  #printArea{display:none}
+  @media print{
+    body{background:#fff}
+    body > .topbar,body > .wrap{display:none!important}
+    #printArea{display:block;padding:0;color:#111}
+    .p-title{text-align:center;font-size:18px;font-weight:700;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:8px}
+    .p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}
+    .p-sec{background:#143A57;color:#fff;font-size:12px;font-weight:700;padding:3px 8px;margin:10px 0 6px}
+    table.pt{width:100%;border-collapse:collapse;font-size:12px}
+    table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}
+    table.pt th{background:#eef2f6;width:22%}
+    .pfigs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+    .pfig{border:1px solid #ccc;border-radius:6px;padding:4px;position:relative}
+    .pfig .l{font-size:9px;text-align:center;color:#555}
+    .pfig .w{position:relative}.pfig img{width:100%;display:block}
+    .pmk{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:7px;display:grid;place-items:center;font-weight:700}
+    .pterms{font-size:9px;white-space:pre-wrap;line-height:1.5;border:1px solid #ccc;padding:6px;border-radius:4px}
+    .psign{display:flex;gap:14px;align-items:flex-end;margin-top:8px}
+    .psign .box{flex:1;border:1px solid #999;border-radius:6px;min-height:80px;display:flex;align-items:center;justify-content:center}
+    .psign img{max-height:78px}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">C</span><div><b id="shopName">代車貸出シート</b><small>CARCHECK</small></div></div>
+  <div class="who"><span id="whoName"></span><a href="index.html">受付</a><a href="schedule.html">工場</a><button id="out">ログアウト</button></div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-l">代車を選択</div>
+    <div class="field" style="margin:0"><select id="loanSel"><option value="">登録済みの代車から選択</option></select></div>
+  </div>
+
+  <div class="card" id="loanInfoCard" style="display:none">
+    <div class="card-l">代車情報（登録内容を自動表示）</div>
+    <div class="info" id="loanInfo"></div>
+    <div class="views" id="loanViews"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-l">貸出先（お客様）</div>
+    <div style="margin-bottom:10px"><button class="ghost" id="loadIntakeBtn">入庫受付シートから読み込む</button><div id="intakePick" style="margin-top:8px"></div></div>
+    <div class="grid2">
+      <div class="field"><label>お客様名</label><input id="c_name"></div>
+      <div class="field"><label>連絡先</label><input id="c_tel"></div>
+      <div class="field"><label>預かり車両（お客様の車）</label><input id="c_veh"></div>
+      <div class="field"><label>納車予定日</label><input id="c_due" type="date"></div>
+      <div class="field"><label>貸出日</label><input id="lend_date" type="date"></div>
+      <div class="field"><label>返却予定日</label><input id="return_date" type="date"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-l">代車金額</div>
+    <div class="seg" id="amtSeg">
+      <button data-a="once">1回</button><button data-a="day">1日</button><button data-a="insurance">保険利用</button><button data-a="free">無料</button>
+    </div>
+    <div class="field" id="amtField" style="margin-top:10px;display:none"><label>金額（円）</label><input id="amt" inputmode="numeric" placeholder="例：3300"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-l">利用規約</div>
+    <div class="terms" id="termsBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-l">お客様署名</div>
+    <p class="small" style="margin-top:0">上記内容・利用規約に同意のうえ、枠内にご署名ください。</p>
+    <div class="signbox"><canvas id="sign_pad"></canvas></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:8px"><button class="ghost" id="sign_clear">署名をクリア</button><span class="small" id="sign_status">未署名</span></div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="saveBtn">保存</button>
+    <button class="ghost" id="pdfBtn">PDF出力</button>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+  var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
+  var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
+  var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+
+  var FIGS={hatchback:'ハッチバック',sedan:'セダン',suv:'SUV',minivan:'ミニバン',onebox:'ワンボックス'};
+  var VIEWS=[['front','正面'],['rear','後方'],['left','左側面'],['right','右側面'],['roof','ルーフ']];
+  var KINDS={kizu:{label:'キズ',color:'#E8810C'},heko:{label:'ヘコミ',color:'#C8443B'},ware:{label:'割れ・欠け',color:'#7A3DB8'},sabi:{label:'サビ',color:'#2E9E6B'}};
+  var AMT={once:'1回',day:'1日',insurance:'保険利用',free:'無料'};
+  var FUELMAP={};
+  var TERMS='【代車貸出 利用規約（サンプル）】\n\n1. 貸出車両は当店の所有物です。丁寧な運転と適切な管理をお願いします。\n2. 走行中の事故・違反・駐車違反等は、原則として借受人の責任となります。\n3. 返却時は貸出時と同等の状態（燃料・清掃・装備）でのご返却をお願いします。\n4. 車両に新たな傷・汚損・破損が生じた場合は、別途修理費等をご負担いただくことがあります。\n5. 禁煙車での喫煙、ペットの同乗等はご遠慮ください。\n6. 返却予定日を過ぎる場合は、事前に必ずご連絡ください。\n\n上記の内容に同意のうえ、ご署名ください。\n（本文はサンプルです。実際の規約文に差し替えてください。）';
+
+  var SHOP=null, SHOPINFO={}, LOANS=[], curLoan=null, amtType='', signData='';
+
+  document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+  document.getElementById('termsBox').textContent=TERMS;
+
+  function renderViews(host,fig,damage){
+    host.innerHTML=VIEWS.map(function(v){
+      var marks=((damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="mk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      return '<div class="vtile"><div class="vlbl">'+v[1]+'</div><div class="vwrap"><img src="assets/vehicles/'+(fig||'hatchback')+'/'+v[0]+'.png" alt="'+v[1]+'">'+marks+'</div></div>';
+    }).join('');
+  }
+  function eqText(eq){eq=eq||{};var a=[];if(eq.nav)a.push('カーナビ');if(eq.etc)a.push('ETC');if(eq.smoke==='no')a.push('禁煙車');if(eq.smoke==='ok')a.push('喫煙可');return a.join('・')||'—';}
+  function showLoan(x){
+    curLoan=x;
+    document.getElementById('loanInfoCard').style.display='';
+    document.getElementById('loanInfo').innerHTML=
+      '<div><span>車名</span><b>'+esc(x.car)+'</b></div>'+
+      '<div><span>ナンバー</span><b>'+esc(x.number||'—')+'</b></div>'+
+      '<div><span>車種</span>'+esc(FIGS[x.fig_type]||x.fig_type)+'</div>'+
+      '<div><span>車検期限</span>'+esc(x.shaken||'—')+'</div>'+
+      '<div><span>保険対象年齢</span>'+esc(x.age||'—')+'</div>'+
+      '<div><span>ガソリン</span>'+esc(x.fuel||'—')+'</div>'+
+      '<div style="grid-column:1/-1"><span>装備</span>'+esc(eqText(x.equip))+'</div>';
+    renderViews(document.getElementById('loanViews'),x.fig_type,x.damage);
+  }
+  document.getElementById('loanSel').onchange=function(){
+    var x=LOANS.filter(function(l){return l.id===this.value;}.bind(this))[0];
+    if(x)showLoan(x);else{curLoan=null;document.getElementById('loanInfoCard').style.display='none';}
+  };
+
+  document.querySelectorAll('#amtSeg button').forEach(function(b){b.onclick=function(){
+    amtType=b.getAttribute('data-a');
+    document.querySelectorAll('#amtSeg button').forEach(function(x){x.classList.toggle('on',x===b);});
+    document.getElementById('amtField').style.display=(amtType==='once'||amtType==='day')?'':'none';
+  };});
+
+  document.getElementById('loadIntakeBtn').onclick=async function(){
+    var box=document.getElementById('intakePick');box.innerHTML='読み込み中…';
+    var r=await sb.from('sheets').select('id,created_at,data').eq('shop_id',SHOP).order('created_at',{ascending:false}).limit(30);
+    if(r.error){box.innerHTML='<span class="small" style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=(r.data||[]).filter(function(x){var d=x.data||{};return d.sheetType==='intake';});
+    if(!rows.length){box.innerHTML='<span class="small">入庫受付シートがありません。</span>';return;}
+    box.innerHTML=rows.map(function(x){var d=x.data||{};var c=d.cust||{};var dai=(d.daisha==='yes')?'（代車あり）':'';
+      return '<div class="pick"><div>'+esc(c.name||'（無名）')+' 様 <span class="small">'+esc(d.vehicleName||'')+' '+dai+'</span></div><button class="ghost" data-iid="'+x.id+'">読み込む</button></div>';}).join('');
+    box.querySelectorAll('[data-iid]').forEach(function(b){b.onclick=function(){
+      var x=rows.filter(function(r){return r.id===b.getAttribute('data-iid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
+      setVal('c_name',c.name||'');setVal('c_tel',c.tel||'');setVal('c_veh',d.vehicleName||'');setVal('c_due',d.intakeDate||'');
+      box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
+    };});
+  };
+
+  /* signature pad */
+  (function(){
+    var cv=document.getElementById('sign_pad');var ctx=cv.getContext('2d');var drawing=false,dirty=false;
+    function resize(){var r=cv.getBoundingClientRect();cv.width=r.width;cv.height=170;ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle='#14304a';}
+    setTimeout(resize,60);window.addEventListener('resize',resize);
+    function pos(e){var r=cv.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top};}
+    function down(e){drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}
+    function move(e){if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();dirty=true;e.preventDefault();}
+    function up(){if(!drawing)return;drawing=false;if(dirty){signData=cv.toDataURL('image/png');document.getElementById('sign_status').textContent='署名済み';}}
+    cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+    cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+    document.getElementById('sign_clear').onclick=function(){ctx.clearRect(0,0,cv.width,cv.height);signData='';dirty=false;document.getElementById('sign_status').textContent='未署名';};
+  })();
+
+  function amountLabel(){if(!amtType)return '';if(amtType==='free')return '無料';if(amtType==='insurance')return '保険利用';return AMT[amtType]+'　'+(val('amt')?'¥'+val('amt'):'');}
+
+  function buildPrint(){
+    var x=curLoan||{};
+    var shopLines='';if(SHOPINFO.company)shopLines+='<div><b>'+esc(SHOPINFO.company)+'</b></div>';
+    if(SHOPINFO.tel)shopLines+='<div>TEL：'+esc(SHOPINFO.tel)+'</div>';if(SHOPINFO.address)shopLines+='<div>'+esc(SHOPINFO.address)+'</div>';
+    var figs='<div class="pfigs">'+VIEWS.map(function(v){
+      var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w"><img src="assets/vehicles/'+(x.fig_type||'hatchback')+'/'+v[0]+'.png">'+marks+'</div></div>';
+    }).join('')+'</div>';
+    var sigImg=signData?'<img src="'+signData+'">':'';
+    var html='<div class="p-title">代車貸出チェックシート</div>'+
+      '<div class="p-hdr"><div>貸出日：'+esc(val('lend_date')||'____/__/__')+'</div><div>'+shopLines+'</div></div>'+
+      '<div class="p-sec">貸出先（お客様）</div>'+
+      '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
+      '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
+      '<tr><th>貸出日</th><td>'+esc(val('lend_date'))+'</td><th>返却予定日</th><td>'+esc(val('return_date'))+'</td></tr>'+
+      '<tr><th>代車金額</th><td colspan="3">'+esc(amountLabel())+'</td></tr></table>'+
+      '<div class="p-sec">貸出代車</div>'+
+      '<table class="pt"><tr><th>車名</th><td>'+esc(x.car||'')+'</td><th>ナンバー</th><td>'+esc(x.number||'')+'</td></tr>'+
+      '<tr><th>車種</th><td>'+esc(FIGS[x.fig_type]||x.fig_type||'')+'</td><th>車検期限</th><td>'+esc(x.shaken||'')+'</td></tr>'+
+      '<tr><th>保険対象年齢</th><td>'+esc(x.age||'')+'</td><th>ガソリン</th><td>'+esc(x.fuel||'')+'</td></tr>'+
+      '<tr><th>装備</th><td colspan="3">'+esc(eqText(x.equip))+'</td></tr></table>'+
+      '<div class="p-sec">代車の状態（傷）</div>'+figs+
+      '<div class="p-sec">利用規約</div><div class="pterms">'+esc(TERMS)+'</div>'+
+      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">上記内容・利用規約に同意し、車両をお借りします。<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>';
+    document.getElementById('printArea').innerHTML=html;
+  }
+  document.getElementById('pdfBtn').onclick=function(){
+    if(!curLoan){document.getElementById('msg').textContent='先に代車を選択してください。';document.getElementById('msg').className='msg err';return;}
+    buildPrint();setTimeout(function(){window.print();},150);
+  };
+
+  document.getElementById('saveBtn').onclick=async function(){
+    var msg=document.getElementById('msg');msg.textContent='';msg.className='msg';
+    if(!curLoan){msg.textContent='先に代車を選択してください。';msg.className='msg err';return;}
+    if(!val('c_name')){msg.textContent='お客様名を入力してください。';msg.className='msg err';return;}
+    var row={shop_id:SHOP,loan_car_id:curLoan.id,customer:val('c_name'),cust_vehicle:val('c_veh'),cust_tel:val('c_tel'),
+      amount_type:amtType||null,amount:val('amt')||null,lend_date:val('lend_date')||null,return_date:val('return_date')||null,
+      sign:signData||null,snapshot:{car:curLoan.car,number:curLoan.number,shaken:curLoan.shaken,fig_type:curLoan.fig_type,equip:curLoan.equip,age:curLoan.age,fuel:curLoan.fuel,damage:curLoan.damage}};
+    this.disabled=true;this.textContent='保存中…';
+    var r=await sb.from('loan_sheets').insert(row);
+    this.disabled=false;this.textContent='保存';
+    if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='保存しました。PDF出力もできます。';msg.className='msg ok';
+  };
+
+  (async function(){
+    var s=await sb.auth.getSession();
+    if(!s.data||!s.data.session){location.replace('login.html');return;}
+    var uid=s.data.session.user.id;
+    var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
+    if(!p.data||!p.data.shop_id){location.replace('home.html');return;}
+    SHOP=p.data.shop_id;document.getElementById('whoName').textContent=(p.data.name||'')+' さん';
+    var sh=await sb.from('shops').select('name,company,address,tel').eq('id',SHOP).single();
+    if(sh.data){SHOPINFO=sh.data;document.getElementById('shopName').textContent=sh.data.name||'代車貸出シート';}
+    var lc=await sb.from('loan_cars').select('*').eq('shop_id',SHOP).order('created_at');LOANS=(lc.data)||[];
+    document.getElementById('loanSel').innerHTML='<option value="">登録済みの代車から選択</option>'+LOANS.map(function(l){return '<option value="'+l.id+'">'+esc(l.car)+(l.number?'（'+esc(l.number)+'）':'')+'</option>';}).join('');
+  })();
+</script>
+</body>
+</html>
