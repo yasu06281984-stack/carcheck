@@ -46,6 +46,14 @@
   .hrow input:disabled{background:var(--surface2);color:#aaa}
   .cl{display:flex;align-items:center;gap:5px;font-size:.82rem;color:var(--muted)}
   .hprev{font-size:.8rem;color:var(--brand);font-weight:600;background:var(--brand-soft);border-radius:8px;padding:7px 10px;margin-top:8px}
+  .eqrow{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
+  .palette{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .views{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .vtile{border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+  .vlbl{font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:4px;text-align:center}
+  .vwrap{position:relative;width:100%;cursor:crosshair;touch-action:manipulation}
+  .vwrap img{width:100%;display:block;pointer-events:none;-webkit-user-drag:none}
+  .mk{position:absolute;width:19px;height:19px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35);display:grid;place-items:center;font-size:.6rem;color:#fff;font-weight:700;cursor:pointer}
   .hide{display:none!important}
   @media(max-width:680px){.form{grid-template-columns:1fr}}
 </style>
@@ -116,7 +124,36 @@
   </div>
 
   <div data-c="loan" class="hide">
-    <div class="card"><div class="card-l">代車登録</div><div class="small">代車は、受付シートと同じ5方向イラストへの傷登録があるため、次のステップで専用画面を追加します。</div></div>
+    <div class="card">
+      <div class="card-l">代車を登録</div>
+      <div class="form">
+        <div class="field"><label>車名</label><input id="lc_car" placeholder="例：N-BOX"></div>
+        <div class="field"><label>ナンバー</label><input id="lc_number" placeholder="品川 580 あ 12-34"></div>
+        <div class="field"><label>車検期限</label><input id="lc_shaken" type="date"></div>
+        <div class="field"><label>車種（イラスト）</label><select id="lc_fig"></select></div>
+        <div class="field"><label>保険対象年齢</label><select id="lc_age"></select></div>
+        <div class="field"><label>ガソリン種別</label><select id="lc_fuel"></select></div>
+      </div>
+      <div style="margin-top:12px">
+        <label style="font-size:.74rem;color:var(--muted);font-weight:600">装備</label>
+        <div class="eqrow">
+          <label class="cl"><input type="checkbox" id="lc_nav">カーナビ</label>
+          <label class="cl"><input type="checkbox" id="lc_etc">ETC</label>
+          <label class="cl"><input type="radio" name="lc_smk" id="lc_smk_no">禁煙車</label>
+          <label class="cl"><input type="radio" name="lc_smk" id="lc_smk_ok">喫煙可</label>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="card-l" style="margin-bottom:8px">傷の登録（種類を選び、イラストをタップして印を付けます／印をタップで取消）</div>
+        <div class="palette" id="lc_palette"></div>
+        <div class="views" id="lc_views"></div>
+        <div style="margin-top:8px"><button class="lnk" id="lc_clear">傷を全てクリア</button></div>
+      </div>
+      <button class="primary" id="lc_save">保存</button>
+      <button class="primary" id="lc_reset" style="background:#7a8794;margin-left:8px">新規（クリア）</button>
+      <div class="msg" id="lc_msg"></div>
+    </div>
+    <div class="card"><div class="card-l">登録済みの代車</div><div id="lc_list" class="small">読み込み中…</div></div>
   </div>
 </div>
 
@@ -236,6 +273,90 @@
   document.getElementById('v_add').onclick=function(){addMaster('vendors','v_name','vendorList','v_msg');};
   document.getElementById('o_add').onclick=function(){addMaster('outsourcers','o_name','outList','o_msg');};
 
+  /* ---------------- 代車登録 ---------------- */
+  var FIGS=[['hatchback','ハッチバック'],['sedan','セダン'],['suv','SUV'],['minivan','ミニバン'],['onebox','ワンボックス']];
+  var VIEWS=[['front','正面'],['rear','後方'],['left','左側面'],['right','右側面'],['roof','ルーフ']];
+  var KINDS=[{id:'kizu',label:'キズ',color:'#E8810C'},{id:'heko',label:'ヘコミ',color:'#C8443B'},{id:'ware',label:'割れ・欠け',color:'#7A3DB8'},{id:'sabi',label:'サビ',color:'#2E9E6B'}];
+  var lcKind='kizu', lcEditId=null, lcDamage={front:[],rear:[],left:[],right:[],roof:[]};
+  function kindOf(id){for(var i=0;i<KINDS.length;i++){if(KINDS[i].id===id)return KINDS[i];}return KINDS[0];}
+  function lcFig(){var e=document.getElementById('lc_fig');return (e&&e.value)||'hatchback';}
+  function paintPalette(){document.querySelectorAll('#lc_palette button').forEach(function(b){var on=b.getAttribute('data-k')===lcKind;b.style.outline=on?'2px solid var(--brand)':'none';b.style.fontWeight=on?'700':'500';});}
+  function renderViews(){
+    var fig=lcFig();var box=document.getElementById('lc_views');if(!box)return;
+    box.innerHTML=VIEWS.map(function(v){
+      var marks=(lcDamage[v[0]]||[]).map(function(m,i){var k=kindOf(m.k);return '<span class="mk" data-v="'+v[0]+'" data-i="'+i+'" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      return '<div class="vtile"><div class="vlbl">'+v[1]+'</div><div class="vwrap" data-v="'+v[0]+'"><img src="assets/vehicles/'+fig+'/'+v[0]+'.png" alt="'+v[1]+'">'+marks+'</div></div>';
+    }).join('');
+    box.querySelectorAll('.vwrap').forEach(function(w){
+      w.onclick=function(e){
+        if(e.target&&e.target.classList&&e.target.classList.contains('mk'))return;
+        var r=w.getBoundingClientRect();if(r.width<1||r.height<1)return;
+        var x=((e.clientX-r.left)/r.width)*100, y=((e.clientY-r.top)/r.height)*100;
+        var view=w.getAttribute('data-v');(lcDamage[view]=lcDamage[view]||[]).push({x:Math.round(x*10)/10,y:Math.round(y*10)/10,k:lcKind});renderViews();
+      };
+    });
+    box.querySelectorAll('.mk').forEach(function(m){
+      m.onclick=function(e){e.stopPropagation();var v=m.getAttribute('data-v');var i=parseInt(m.getAttribute('data-i'),10);lcDamage[v].splice(i,1);renderViews();};
+    });
+  }
+  function buildLoanUI(){
+    var fg=document.getElementById('lc_fig');if(!fg)return;
+    fg.innerHTML=FIGS.map(function(f){return '<option value="'+f[0]+'">'+f[1]+'</option>';}).join('');
+    document.getElementById('lc_age').innerHTML=['制限なし','21歳以上','26歳以上','30歳以上'].map(function(a){return '<option>'+a+'</option>';}).join('');
+    document.getElementById('lc_fuel').innerHTML=['レギュラー','ハイオク','軽油','EV','ハイブリッド'].map(function(a){return '<option>'+a+'</option>';}).join('');
+    document.getElementById('lc_palette').innerHTML=KINDS.map(function(k){return '<button type="button" data-k="'+k.id+'" style="border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:'+k.color+';display:inline-block"></span>'+k.label+'</button>';}).join('');
+    document.querySelectorAll('#lc_palette button').forEach(function(b){b.onclick=function(){lcKind=b.getAttribute('data-k');paintPalette();};});
+    paintPalette();fg.onchange=renderViews;renderViews();
+  }
+  function lcResetForm(){
+    lcEditId=null;lcDamage={front:[],rear:[],left:[],right:[],roof:[]};
+    ['lc_car','lc_number','lc_shaken'].forEach(function(id){setVal(id,'');});
+    document.getElementById('lc_fig').value='hatchback';document.getElementById('lc_age').selectedIndex=0;document.getElementById('lc_fuel').selectedIndex=0;
+    document.getElementById('lc_nav').checked=false;document.getElementById('lc_etc').checked=false;
+    document.getElementById('lc_smk_no').checked=false;document.getElementById('lc_smk_ok').checked=false;
+    var msg=document.getElementById('lc_msg');if(msg){msg.textContent='';msg.className='msg';}renderViews();
+  }
+  function editLoan(x){
+    lcEditId=x.id;
+    setVal('lc_car',x.car);setVal('lc_number',x.number);setVal('lc_shaken',x.shaken);
+    document.getElementById('lc_fig').value=x.fig_type||'hatchback';
+    document.getElementById('lc_age').value=x.age||'制限なし';
+    document.getElementById('lc_fuel').value=x.fuel||'レギュラー';
+    var eq=x.equip||{};document.getElementById('lc_nav').checked=!!eq.nav;document.getElementById('lc_etc').checked=!!eq.etc;
+    document.getElementById('lc_smk_no').checked=eq.smoke==='no';document.getElementById('lc_smk_ok').checked=eq.smoke==='ok';
+    lcDamage={front:[],rear:[],left:[],right:[],roof:[]};if(x.damage){VIEWS.forEach(function(v){lcDamage[v[0]]=(x.damage[v[0]]||[]).slice();});}
+    renderViews();
+    var msg=document.getElementById('lc_msg');if(msg){msg.textContent='編集中：'+(x.car||'');msg.className='msg';}
+    window.scrollTo(0,0);
+  }
+  async function loadLoanCars(){
+    var el=document.getElementById('lc_list');if(!el)return;
+    var r=await sb.from('loan_cars').select('*').eq('shop_id',SHOP).order('created_at');
+    if(r.error){el.innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=r.data||[];if(!rows.length){el.innerHTML='まだ登録がありません。';return;}
+    var figmap={};FIGS.forEach(function(f){figmap[f[0]]=f[1];});
+    var h='<table><thead><tr><th>車名</th><th>ナンバー</th><th>車種</th><th>車検</th><th>傷</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(x){var dc=0;if(x.damage){VIEWS.forEach(function(v){dc+=(x.damage[v[0]]||[]).length;});}
+      h+='<tr><td>'+esc(x.car)+'</td><td class="small">'+esc(x.number||'')+'</td><td>'+esc(figmap[x.fig_type]||x.fig_type)+'</td><td class="small">'+esc(x.shaken||'')+'</td><td class="small">'+dc+'箇所</td>'+
+      '<td class="ops"><button class="lnk" data-edit="'+x.id+'" style="color:var(--brand)">編集</button> <button class="lnk" data-del="'+x.id+'">削除</button></td></tr>';});
+    el.innerHTML=h+'</tbody></table>';
+    el.querySelectorAll('[data-del]').forEach(function(b){b.onclick=async function(){if(!confirm('削除しますか？'))return;await sb.from('loan_cars').delete().eq('id',b.getAttribute('data-del'));loadLoanCars();};});
+    el.querySelectorAll('[data-edit]').forEach(function(b){b.onclick=function(){var id=b.getAttribute('data-edit');var row=rows.filter(function(x){return x.id===id;})[0];if(row)editLoan(row);};});
+  }
+  if(document.getElementById('lc_clear'))document.getElementById('lc_clear').onclick=function(){lcDamage={front:[],rear:[],left:[],right:[],roof:[]};renderViews();};
+  if(document.getElementById('lc_reset'))document.getElementById('lc_reset').onclick=lcResetForm;
+  if(document.getElementById('lc_save'))document.getElementById('lc_save').onclick=async function(){
+    var msg=document.getElementById('lc_msg');msg.textContent='';msg.className='msg';
+    var car=val('lc_car');if(!car){msg.textContent='車名を入力してください。';msg.className='msg err';return;}
+    var equip={nav:document.getElementById('lc_nav').checked,etc:document.getElementById('lc_etc').checked,smoke:document.getElementById('lc_smk_ok').checked?'ok':(document.getElementById('lc_smk_no').checked?'no':'')};
+    var row={shop_id:SHOP,car:car,number:val('lc_number'),shaken:val('lc_shaken')||null,fig_type:lcFig(),age:document.getElementById('lc_age').value,fuel:document.getElementById('lc_fuel').value,equip:equip,damage:lcDamage};
+    this.disabled=true;this.textContent='保存中…';
+    var r=lcEditId?await sb.from('loan_cars').update(row).eq('id',lcEditId):await sb.from('loan_cars').insert(row);
+    this.disabled=false;this.textContent='保存';
+    if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='保存しました。';msg.className='msg ok';lcResetForm();loadLoanCars();
+  };
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -244,7 +365,8 @@
     if(!p.data||p.data.role!=='shop_admin'){location.replace('home.html');return;}
     SHOP=p.data.shop_id;
     document.getElementById('whoName').textContent=(p.data.name||'店舗管理者')+' さん';
-    loadShop();loadStaff();loadStInvites();listMaster('vendors','vendorList');listMaster('outsourcers','outList');
+    buildLoanUI();
+    loadShop();loadStaff();loadStInvites();listMaster('vendors','vendorList');listMaster('outsourcers','outList');loadLoanCars();
   })();
 </script>
 </body>
