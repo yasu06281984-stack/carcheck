@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工場スケジュール — CARCHECK</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EBEEF2;--surface:#fff;--surface2:#F6F8FA;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--brand:#1F4E74;--brand-deep:#143A57;--brand-soft:#E7EEF5;--amber:#E8810C;--amber-soft:#FCEFD9;--green:#2E9E6B;--green-soft:#E2F2EA;--red:#C8443B;--red-soft:#F7E3E1;--purple:#7A3DB8}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink)}
+  .topbar{background:var(--brand-deep);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .brand b{letter-spacing:.06em}.brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
+  .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:10px}
+  .who a,.who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;text-decoration:none}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 18px 80px}
+  .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px;position:relative;overflow:hidden}
+  .tile .k{font-size:.72rem;color:var(--muted);font-weight:600}
+  .tile .v{font-family:"SFMono-Regular",monospace;font-size:1.7rem;font-weight:700;margin-top:2px}
+  .tile .bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
+  .tile.w .bar{background:var(--muted)}.tile.in .bar{background:var(--brand)}.tile.out .bar{background:var(--purple)}.tile.done .bar{background:var(--green)}.tile.loan .bar{background:var(--amber)}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap}
+  .tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;font-size:.85rem;font-weight:600;color:var(--muted);border-radius:999px;cursor:pointer}
+  .tabs button.on{color:#fff;background:var(--brand);border-color:var(--brand)}
+  .primary{background:var(--brand);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .job{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:13px;cursor:pointer;position:relative}
+  .job:hover{border-color:var(--brand)}
+  .job .cust{font-weight:700;font-size:1rem}
+  .job .veh{font-size:.82rem;color:var(--muted);margin-top:2px}
+  .job .meta{font-size:.78rem;color:var(--muted);margin-top:8px}
+  .job .prog{height:6px;border-radius:4px;background:var(--surface2);margin-top:9px;overflow:hidden}
+  .job .prog i{display:block;height:100%;background:var(--green)}
+  .sp{font-size:.64rem;font-weight:700;padding:2px 9px;border-radius:999px;position:absolute;top:13px;right:13px}
+  .sp.waiting{background:var(--surface2);color:var(--muted)}.sp.in{background:var(--brand-soft);color:var(--brand)}.sp.out{background:#efe4fa;color:var(--purple)}.sp.done{background:var(--green-soft);color:#1d6d49}
+  .chip{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--amber-soft);color:#9a5800;margin-top:8px}
+  .empty{color:var(--muted);font-size:.86rem;padding:20px;text-align:center}
+  /* drawer */
+  .ov{position:fixed;inset:0;background:rgba(15,25,35,.45);display:none;z-index:40}
+  .ov.on{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--paper);z-index:50;transform:translateX(100%);transition:transform .22s;overflow-y:auto;box-shadow:-8px 0 24px rgba(0,0,0,.2)}
+  .drawer.on{transform:translateX(0)}
+  .dhead{background:var(--brand-deep);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+  .dhead b{font-size:1rem}
+  .dhead button{background:rgba(255,255,255,.15);color:#fff;border:0;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:1rem}
+  .dbody{padding:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .card-l{font-size:.7rem;letter-spacing:.1em;font-weight:700;color:var(--muted);margin-bottom:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field label{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:.92rem;font-family:inherit;background:#fff}
+  .field{margin-bottom:10px}
+  .stage{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .stage:last-child{border-bottom:0}
+  .stage .slbl{font-size:.82rem;font-weight:600}
+  .stage .sin{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .stage input[type=date]{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px}
+  .stage input[type=time]{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px}
+  .stage select{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px;background:#fff;max-width:120px}
+  .stage .ck{display:flex;align-items:center;gap:4px;font-size:.74rem;color:var(--muted)}
+  .row-btns{display:flex;gap:8px;margin-top:6px}
+  .danger{background:var(--red-soft);color:var(--red);border:0;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+  .ghost{background:#fff;color:var(--brand);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+  .msg{font-size:.84rem;margin-top:8px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+  .small{font-size:.78rem;color:var(--muted)}
+  .pick{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;background:#fff}
+  .pick button{font-size:.78rem;padding:5px 10px}
+  @media(max-width:760px){.tiles{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">C</span><div><b id="shopName">工場スケジュール</b><small>CARCHECK</small></div></div>
+  <div class="who"><span id="whoName"></span><a id="homeLink" href="home.html">メニュー</a><button id="out">ログアウト</button></div>
+</div>
+
+<div class="wrap">
+  <div class="tiles" id="tiles"></div>
+  <div class="toolbar">
+    <div class="tabs" id="statusTabs">
+      <button class="on" data-s="all">すべて</button>
+      <button data-s="waiting">入庫待ち</button>
+      <button data-s="in">入庫中</button>
+      <button data-s="out">外注中</button>
+      <button data-s="done">納車済</button>
+    </div>
+    <button class="primary" id="addJob">＋ 入庫を追加</button>
+  </div>
+  <div class="jobs" id="jobList"></div>
+</div>
+
+<div class="ov" id="ov"></div>
+<div class="drawer" id="drawer">
+  <div class="dhead"><b id="dTitle">入庫案件</b><button id="dClose">×</button></div>
+  <div class="dbody">
+    <div class="card" id="fromSheetCard">
+      <div class="card-l">受付シートから読み込む</div>
+      <button class="ghost" id="loadSheetBtn" style="font-size:.85rem;padding:8px 14px">受付シート一覧を表示</button>
+      <div id="sheetPick" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-l">基本情報</div>
+      <div class="grid2">
+        <div class="field"><label>お客様名</label><input id="j_customer"></div>
+        <div class="field"><label>ナンバー</label><input id="j_number"></div>
+        <div class="field"><label>車種名</label><input id="j_vehicle"></div>
+        <div class="field"><label>イラスト種別</label><select id="j_fig"></select></div>
+        <div class="field"><label>入庫日</label><input id="j_intake" type="date"></div>
+        <div class="field"><label>納車予定日</label><input id="j_due" type="date"></div>
+        <div class="field"><label>状態</label><select id="j_status"></select></div>
+        <div class="field"><label>貸出代車</label><select id="j_loan"></select></div>
+        <div class="field" style="grid-column:1/-1"><label>外注先</label><select id="j_vendor"></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-l">工程（日時・担当・完了）</div>
+      <div id="stageList"></div>
+    </div>
+    <div class="card">
+      <div class="card-l">メモ</div>
+      <div class="field" style="margin:0"><textarea id="j_note" rows="2"></textarea></div>
+    </div>
+    <div class="row-btns">
+      <button class="primary" id="j_save">保存</button>
+      <button class="ghost" id="j_close2">閉じる</button>
+      <button class="danger" id="j_del" style="margin-left:auto;display:none">削除</button>
+    </div>
+    <div class="msg" id="j_msg"></div>
+  </div>
+</div>
+
+<script>
+  var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
+  var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
+  var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+
+  var FIGS=[['hatchback','ハッチバック'],['sedan','セダン'],['suv','SUV'],['minivan','ミニバン'],['onebox','ワンボックス']];
+  var FIGMAP={};FIGS.forEach(function(f){FIGMAP[f[0]]=f[1];});
+  var STATUS=[['waiting','入庫待ち'],['in','入庫中'],['out','外注中'],['done','納車済']];
+  var STATUSMAP={};STATUS.forEach(function(s){STATUSMAP[s[0]]=s[1];});
+  var STAGES=[['bara','脱着ばらし'],['ban','鈑金'],['prep','塗装準備'],['paint','塗装'],['polish','磨き仕上げ'],['seibi','整備'],['hoken','保険修理'],['out_req','外注依頼'],['out_ret','外注戻り'],['deliver','納車']];
+
+  var SHOP=null, ROLE=null, JOBS=[], LOANS=[], STAFFS=[], VENDORS=[], curFilter='all', editId=null;
+
+  document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+  document.querySelectorAll('#statusTabs button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('#statusTabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    curFilter=b.getAttribute('data-s');renderJobs();
+  };});
+
+  function staffOptions(sel){return '<option value="">（未割当）</option>'+STAFFS.map(function(n){return '<option'+(n===sel?' selected':'')+'>'+esc(n)+'</option>';}).join('');}
+
+  function tilesRender(){
+    var c={waiting:0,in:0,out:0,done:0,loan:0};
+    JOBS.forEach(function(j){if(c[j.status]!=null)c[j.status]++;if(j.loan_car_id&&j.status!=='done')c.loan++;});
+    var t=document.getElementById('tiles');
+    function tl(cls,k,v){return '<div class="tile '+cls+'"><span class="bar"></span><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';}
+    t.innerHTML=tl('w','入庫待ち',c.waiting)+tl('in','入庫中',c.in)+tl('out','外注中',c.out)+tl('done','納車済',c.done)+tl('loan','代車合計',LOANS.length)+tl('loan','貸出中',c.loan);
+  }
+  function progOf(j){var used=0,done=0;STAGES.forEach(function(s){var st=(j.stages||{})[s[0]];if(st&&(st.date||st.staff||st.done)){used++;if(st.done)done++;}});return used?Math.round(done/used*100):0;}
+  function renderJobs(){
+    var box=document.getElementById('jobList');
+    var list=JOBS.filter(function(j){return curFilter==='all'||j.status===curFilter;});
+    if(!list.length){box.innerHTML='<div class="empty">該当する案件はありません。「＋ 入庫を追加」から登録できます。</div>';return;}
+    box.innerHTML=list.map(function(j){
+      var loan=LOANS.filter(function(l){return l.id===j.loan_car_id;})[0];
+      var pr=progOf(j);
+      return '<div class="job" data-id="'+j.id+'"><span class="sp '+j.status+'">'+STATUSMAP[j.status]+'</span>'+
+        '<div class="cust">'+esc(j.customer||'（無名）')+' 様</div>'+
+        '<div class="veh">'+esc(j.vehicle||FIGMAP[j.fig_type]||'')+(j.number?'　'+esc(j.number):'')+'</div>'+
+        '<div class="meta">入庫 '+esc(j.intake_date||'—')+' ／ 納車予定 '+esc(j.due_date||'—')+'</div>'+
+        (loan?'<span class="chip">代車：'+esc(loan.car)+'</span>':'')+
+        '<div class="prog"><i style="width:'+pr+'%"></i></div></div>';
+    }).join('');
+    box.querySelectorAll('.job').forEach(function(el){el.onclick=function(){openJob(el.getAttribute('data-id'));};});
+  }
+
+  function buildSelectors(){
+    document.getElementById('j_fig').innerHTML=FIGS.map(function(f){return '<option value="'+f[0]+'">'+f[1]+'</option>';}).join('');
+    document.getElementById('j_status').innerHTML=STATUS.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>';}).join('');
+  }
+  function fillRefSelectors(){
+    document.getElementById('j_loan').innerHTML='<option value="">（なし）</option>'+LOANS.map(function(l){return '<option value="'+l.id+'">'+esc(l.car)+(l.number?'（'+esc(l.number)+'）':'')+'</option>';}).join('');
+    document.getElementById('j_vendor').innerHTML='<option value="">（なし）</option>'+VENDORS.map(function(v){return '<option>'+esc(v.name)+'</option>';}).join('');
+  }
+  function renderStages(stages){
+    stages=stages||{};
+    document.getElementById('stageList').innerHTML=STAGES.map(function(s){
+      var st=stages[s[0]]||{};
+      return '<div class="stage" data-k="'+s[0]+'"><div class="slbl">'+s[1]+'</div>'+
+        '<div class="sin"><input type="date" class="sdate" value="'+esc(st.date||'')+'">'+
+        '<input type="time" class="stime" value="'+esc(st.time||'')+'">'+
+        '<select class="sstaff">'+staffOptions(st.staff||'')+'</select>'+
+        '<label class="ck"><input type="checkbox" class="sdone"'+(st.done?' checked':'')+'>完了</label></div></div>';
+    }).join('');
+  }
+  function collectStages(){
+    var out={};
+    document.querySelectorAll('#stageList .stage').forEach(function(row){
+      var k=row.getAttribute('data-k');
+      var d=row.querySelector('.sdate').value, t=row.querySelector('.stime').value, s=row.querySelector('.sstaff').value, done=row.querySelector('.sdone').checked;
+      if(d||t||s||done)out[k]={date:d||'',time:t||'',staff:s||'',done:done};
+    });
+    return out;
+  }
+
+  function openDrawer(){document.getElementById('ov').classList.add('on');document.getElementById('drawer').classList.add('on');}
+  function closeDrawer(){document.getElementById('ov').classList.remove('on');document.getElementById('drawer').classList.remove('on');document.getElementById('sheetPick').innerHTML='';}
+  document.getElementById('ov').onclick=closeDrawer;
+  document.getElementById('dClose').onclick=closeDrawer;
+  document.getElementById('j_close2').onclick=closeDrawer;
+
+  function fillJob(j){
+    setVal('j_customer',j.customer);setVal('j_number',j.number);setVal('j_vehicle',j.vehicle);
+    document.getElementById('j_fig').value=j.fig_type||'hatchback';
+    setVal('j_intake',j.intake_date);setVal('j_due',j.due_date);
+    document.getElementById('j_status').value=j.status||'waiting';
+    document.getElementById('j_loan').value=j.loan_car_id||'';
+    document.getElementById('j_vendor').value=(j.outsource&&j.outsource.vendor)||'';
+    setVal('j_note',j.note);renderStages(j.stages);
+  }
+  function newJob(){editId=null;document.getElementById('dTitle').textContent='入庫を追加';document.getElementById('j_del').style.display='none';document.getElementById('fromSheetCard').style.display='block';
+    fillJob({status:'waiting',fig_type:'hatchback',stages:{}});var m=document.getElementById('j_msg');m.textContent='';m.className='msg';openDrawer();}
+  function openJob(id){var j=JOBS.filter(function(x){return x.id===id;})[0];if(!j)return;editId=id;
+    document.getElementById('dTitle').textContent='入庫案件';document.getElementById('j_del').style.display='inline-block';document.getElementById('fromSheetCard').style.display='none';
+    fillJob(j);var m=document.getElementById('j_msg');m.textContent='';m.className='msg';openDrawer();}
+  document.getElementById('addJob').onclick=newJob;
+
+  document.getElementById('j_save').onclick=async function(){
+    var m=document.getElementById('j_msg');m.textContent='';m.className='msg';
+    var cust=val('j_customer');if(!cust){m.textContent='お客様名を入力してください。';m.className='msg err';return;}
+    var row={shop_id:SHOP,customer:cust,number:val('j_number'),vehicle:val('j_vehicle'),fig_type:document.getElementById('j_fig').value,
+      intake_date:val('j_intake')||null,due_date:val('j_due')||null,status:document.getElementById('j_status').value,
+      loan_car_id:document.getElementById('j_loan').value||null,outsource:{vendor:document.getElementById('j_vendor').value||''},
+      stages:collectStages(),note:val('j_note')};
+    if(window._srcSheet){row.source_sheet_id=window._srcSheet;}
+    this.disabled=true;this.textContent='保存中…';
+    var r=editId?await sb.from('jobs').update(row).eq('id',editId):await sb.from('jobs').insert(row);
+    this.disabled=false;this.textContent='保存';
+    if(r.error){m.textContent='保存できませんでした：'+r.error.message;m.className='msg err';return;}
+    window._srcSheet=null;closeDrawer();await loadAll();
+  };
+  document.getElementById('j_del').onclick=async function(){
+    if(!editId||!confirm('この案件を削除しますか？'))return;
+    await sb.from('jobs').delete().eq('id',editId);closeDrawer();await loadAll();
+  };
+
+  document.getElementById('loadSheetBtn').onclick=async function(){
+    var box=document.getElementById('sheetPick');box.innerHTML='読み込み中…';
+    var r=await sb.from('sheets').select('id,created_at,data').eq('shop_id',SHOP).order('created_at',{ascending:false}).limit(30);
+    if(r.error){box.innerHTML='<span class="small" style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=(r.data||[]).filter(function(x){var d=x.data||{};return d.sheetType==='intake';});
+    if(!rows.length){box.innerHTML='<span class="small">入庫受付シートがありません。</span>';return;}
+    box.innerHTML=rows.map(function(x){var d=x.data||{};var c=d.cust||{};var nm=c.name||'（無名）';var veh=d.vehicleName||FIGMAP[d.v]||'';
+      return '<div class="pick"><div>'+esc(nm)+' 様　<span class="small">'+esc(veh)+'</span></div><button class="ghost" data-sid="'+x.id+'">読み込む</button></div>';}).join('');
+    box.querySelectorAll('[data-sid]').forEach(function(b){b.onclick=function(){
+      var x=rows.filter(function(r){return r.id===b.getAttribute('data-sid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
+      setVal('j_customer',c.name||'');setVal('j_vehicle',d.vehicleName||FIGMAP[d.v]||'');document.getElementById('j_fig').value=d.v||'hatchback';
+      setVal('j_number',c.number||'');window._srcSheet=x.id;box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
+    };});
+  };
+
+  async function loadAll(){
+    var jr=await sb.from('jobs').select('*').eq('shop_id',SHOP).order('created_at',{ascending:false});
+    JOBS=(jr.data)||[];
+    tilesRender();renderJobs();
+  }
+
+  (async function(){
+    var s=await sb.auth.getSession();
+    if(!s.data||!s.data.session){location.replace('login.html');return;}
+    var uid=s.data.session.user.id;
+    var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
+    if(!p.data||!p.data.shop_id){location.replace('home.html');return;}
+    SHOP=p.data.shop_id;ROLE=p.data.role;
+    document.getElementById('whoName').textContent=(p.data.name||'')+' さん';
+    var sh=await sb.from('shops').select('name').eq('id',SHOP).single();
+    if(sh.data)document.getElementById('shopName').textContent=sh.data.name||'工場スケジュール';
+    var st=await sb.from('profiles').select('name,role').eq('shop_id',SHOP);
+    STAFFS=((st.data)||[]).filter(function(x){return x.name;}).map(function(x){return x.name;});
+    var lc=await sb.from('loan_cars').select('id,car,number').eq('shop_id',SHOP).order('created_at');
+    LOANS=(lc.data)||[];
+    var vn=await sb.from('outsourcers').select('name').eq('shop_id',SHOP).order('created_at');
+    VENDORS=(vn.data)||[];
+    buildSelectors();fillRefSelectors();
+    await loadAll();
+  })();
+</script>
+</body>
+</html>
