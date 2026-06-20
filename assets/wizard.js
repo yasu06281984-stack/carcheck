@@ -216,6 +216,18 @@
   }
   function renderPreview() { var el = $('wizPreview'); if (el) el.innerHTML = renderSheet(previewData()); }
 
+  function goLoanSheet() {
+    var d = previewData(); var c = d.cust || {};
+    var name = (wiz.type === 'business') ? (d.bizName || c.name || '') : (c.name || '');
+    var handoff = {
+      kind: wiz.type, name: name, tel: c.tel || '', vehicle: d.vehicleName || '',
+      due: (wiz.type === 'business') ? (d.bizDue || '') : (d.intakeDate || ''),
+      sign: (wiz.type === 'intake') ? (d.sign || window.csSignature || '') : ''
+    };
+    try { sessionStorage.setItem('cs_loan_handoff', JSON.stringify(handoff)); } catch (e) {}
+    location.href = 'daisha.html';
+  }
+
   /* ---------------- ステップ遷移 ---------------- */
   var STEP_NAMES = ['受付情報', '写真', '損傷チェック', '確認・署名', '完了'];
   function buildIndicator() {
@@ -263,7 +275,11 @@
     box.onscroll = check; check();
   }
   window.wizardOnSign = function () { var m = $('signDoneMsg'); if (m) m.hidden = false; };
-  function onEnterStep5() { wizardSave(); }
+  function onEnterStep5() {
+    wizardSave();
+    var lp = $('loanPrompt');
+    if (lp) lp.style.display = (wiz.type === 'intake' || wiz.type === 'business') ? '' : 'none';
+  }
 
   /* ---------------- 保存・共有 ---------------- */
   function makeQR(text) { if (typeof qrcode === 'undefined') return ''; try { var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createDataURL(5, 8); } catch (e) { return ''; } }
@@ -411,6 +427,8 @@
     qa('.step[data-step="5"] [data-pdf]').forEach(function (b) { b.addEventListener('click', function () { setMeta(); if (window.csAPI) window.csAPI.print(b.getAttribute('data-pdf')); }); });
     if ($('finalShare')) $('finalShare').addEventListener('click', showFinalShare);
     if ($('finishBtn')) $('finishBtn').addEventListener('click', function () { clearDraft(); location.reload(); });
+    if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', goLoanSheet);
+    if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', function () { var lp = $('loanPrompt'); if (lp) lp.style.display = 'none'; });
 
     document.addEventListener('input', function () { if (wiz.started) window.wizardOnChange(); });
     document.addEventListener('change', function () { if (wiz.started) window.wizardOnChange(); });

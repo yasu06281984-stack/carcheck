@@ -483,6 +483,15 @@
       <div class="banner" id="saveMsg">保存番号：<span class="save-no" id="saveNo">…</span></div>
       <div id="dbMsg" class="muted" style="margin-top:10px"></div>
 
+      <div id="loanPrompt" style="display:none;margin-top:18px;border:2px solid #E8810C;background:#FCEFD9;border-radius:12px;padding:16px">
+        <div style="font-weight:800;font-size:1.05rem;color:#9a5800">🚗 代車を貸し出しますか？</div>
+        <div style="font-size:.85rem;color:#7a5a20;margin-top:4px">代車を利用される場合は、代車貸出シートを作成します。お客様情報（入庫の場合は署名も）をこのまま引き継ぎ、再入力の手間を省きます。</div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <button type="button" id="loanYesBtn" style="background:#E8810C;color:#fff;border:0;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem">はい、代車貸出シートを作成する</button>
+          <button type="button" id="loanNoBtn" style="background:#fff;color:#9a5800;border:1px solid #E8810C;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer">いいえ</button>
+        </div>
+      </div>
+
       <h3 style="margin-top:18px">PDFの出力</h3>
       <p class="muted">印刷パターンを選んでPDF保存・印刷できます。</p>
       <div class="choice">

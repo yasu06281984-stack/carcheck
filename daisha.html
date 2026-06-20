@@ -113,9 +113,17 @@
 
   <div class="card">
     <div class="card-l">お客様署名</div>
-    <p class="small" style="margin-top:0">上記内容・利用規約に同意のうえ、枠内にご署名ください。</p>
-    <div class="signbox"><canvas id="sign_pad"></canvas></div>
-    <div style="display:flex;align-items:center;gap:12px;margin-top:8px"><button class="ghost" id="sign_clear">署名をクリア</button><span class="small" id="sign_status">未署名</span></div>
+    <div id="signCarried" style="display:none">
+      <p class="small" style="margin-top:0">入庫チェックシートの署名を反映しています。</p>
+      <img id="carriedImg" style="max-height:90px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;display:block">
+      <div style="margin-top:8px"><button class="ghost" id="resignBtn">署名し直す</button></div>
+    </div>
+    <button class="ghost" id="signStartBtn">署名する</button>
+    <div id="signArea" style="display:none">
+      <p class="small" style="margin-top:0">上記内容・利用規約に同意のうえ、枠内にご署名ください。</p>
+      <div class="signbox"><canvas id="sign_pad"></canvas></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px"><button class="ghost" id="sign_clear">署名をクリア</button><span class="small" id="sign_status">未署名</span></div>
+    </div>
   </div>
 
   <div class="actions">
@@ -194,18 +202,23 @@
   };
 
   /* signature pad */
-  (function(){
-    var cv=document.getElementById('sign_pad');var ctx=cv.getContext('2d');var drawing=false,dirty=false;
-    function resize(){var r=cv.getBoundingClientRect();cv.width=r.width;cv.height=170;ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle='#14304a';}
-    setTimeout(resize,60);window.addEventListener('resize',resize);
-    function pos(e){var r=cv.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top};}
-    function down(e){drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();}
-    function move(e){if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();dirty=true;e.preventDefault();}
-    function up(){if(!drawing)return;drawing=false;if(dirty){signData=cv.toDataURL('image/png');document.getElementById('sign_status').textContent='署名済み';}}
-    cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
-    cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
-    document.getElementById('sign_clear').onclick=function(){ctx.clearRect(0,0,cv.width,cv.height);signData='';dirty=false;document.getElementById('sign_status').textContent='未署名';};
-  })();
+  var signCv, signCtx, signDirty=false;
+  function resizeSign(){ if(!signCv)return; var r=signCv.getBoundingClientRect(); if(r.width<1)return; signCv.width=r.width; signCv.height=170; signCtx.lineWidth=2.2; signCtx.lineCap='round'; signCtx.strokeStyle='#14304a'; }
+  function initSignPad(){
+    signCv=document.getElementById('sign_pad'); signCtx=signCv.getContext('2d'); var drawing=false;
+    function pos(e){var r=signCv.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top};}
+    function down(e){drawing=true;var p=pos(e);signCtx.beginPath();signCtx.moveTo(p.x,p.y);e.preventDefault();}
+    function move(e){if(!drawing)return;var p=pos(e);signCtx.lineTo(p.x,p.y);signCtx.stroke();signDirty=true;e.preventDefault();}
+    function up(){if(!drawing)return;drawing=false;if(signDirty){signData=signCv.toDataURL('image/png');document.getElementById('sign_status').textContent='署名済み';}}
+    signCv.addEventListener('mousedown',down);signCv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+    signCv.addEventListener('touchstart',down,{passive:false});signCv.addEventListener('touchmove',move,{passive:false});signCv.addEventListener('touchend',up);
+    document.getElementById('sign_clear').onclick=function(){signCtx.clearRect(0,0,signCv.width,signCv.height);signData='';signDirty=false;document.getElementById('sign_status').textContent='未署名';};
+  }
+  function showSignArea(){document.getElementById('signStartBtn').style.display='none';document.getElementById('signCarried').style.display='none';document.getElementById('signArea').style.display='';setTimeout(resizeSign,60);}
+  initSignPad();
+  document.getElementById('signStartBtn').onclick=showSignArea;
+  document.getElementById('resignBtn').onclick=function(){signData='';showSignArea();};
+  window.addEventListener('resize',resizeSign);
 
   function amountLabel(){if(!amtType)return '';if(amtType==='free')return '無料';if(amtType==='insurance')return '保険利用';return AMT[amtType]+'　'+(val('amt')?'¥'+val('amt'):'');}
 
@@ -265,6 +278,15 @@
     if(sh.data){SHOPINFO=sh.data;document.getElementById('shopName').textContent=sh.data.name||'代車貸出シート';}
     var lc=await sb.from('loan_cars').select('*').eq('shop_id',SHOP).order('created_at');LOANS=(lc.data)||[];
     document.getElementById('loanSel').innerHTML='<option value="">登録済みの代車から選択</option>'+LOANS.map(function(l){return '<option value="'+l.id+'">'+esc(l.car)+(l.number?'（'+esc(l.number)+'）':'')+'</option>';}).join('');
+    try{
+      var hoRaw=sessionStorage.getItem('cs_loan_handoff');
+      if(hoRaw){var ho=JSON.parse(hoRaw);sessionStorage.removeItem('cs_loan_handoff');
+        setVal('c_name',ho.name);setVal('c_tel',ho.tel);setVal('c_veh',ho.vehicle);setVal('c_due',ho.due);
+        var today=new Date();setVal('lend_date',today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2));
+        if(ho.sign){signData=ho.sign;document.getElementById('carriedImg').src=ho.sign;document.getElementById('signCarried').style.display='';document.getElementById('signStartBtn').style.display='none';}
+        var m=document.getElementById('msg');m.textContent='入庫'+(ho.kind==='business'?'（業者）':'')+'シートから引き継ぎました。代車を選んでPDF出力できます。';m.className='msg ok';
+      }
+    }catch(e){}
   })();
 </script>
 </body>
