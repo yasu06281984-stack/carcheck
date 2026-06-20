@@ -47,9 +47,10 @@
   /* print */
   #printArea{display:none}
   @media print{
-    body{background:#fff}
+    body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body > .topbar,body > .wrap{display:none!important}
     #printArea{display:block;padding:0;color:#111}
+    #printArea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .p-title{text-align:center;font-size:18px;font-weight:700;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:8px}
     .p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}
     .p-sec{background:#143A57;color:#fff;font-size:12px;font-weight:700;padding:3px 8px;margin:10px 0 6px}
@@ -129,7 +130,7 @@
   </div>
 
   <div class="actions">
-    <button class="primary" id="saveBtn">保存</button>
+    <button class="primary" id="saveBtn">完了</button>
     <button class="ghost" id="pdfBtn">PDF出力</button>
   </div>
   <div class="msg" id="msg"></div>
@@ -265,7 +266,8 @@
   function buildPrint(){ document.getElementById('printArea').innerHTML=buildSheetInner(); }
   function buildLoanDoc(){
     var css='<style>'+
-      'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111}'+
+      'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '.p-title{text-align:center;font-size:18px;font-weight:700;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:8px}'+
       '.p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}'+
       '.p-sec{background:#143A57;color:#fff;font-size:12px;font-weight:700;padding:3px 8px;margin:10px 0 6px}'+
@@ -317,13 +319,13 @@
     var row={shop_id:SHOP,loan_car_id:curLoan.id,customer:val('c_name'),cust_vehicle:val('c_veh'),cust_tel:val('c_tel'),
       amount_type:amtType||null,amount:val('amt')||null,lend_date:val('lend_date')||null,return_date:val('return_date')||null,
       sign:signData||null,snapshot:{car:curLoan.car,number:curLoan.number,shaken:curLoan.shaken,fig_type:curLoan.fig_type,equip:curLoan.equip,age:curLoan.age,fuel:curLoan.fuel,damage:curLoan.damage}};
-    this.disabled=true;this.textContent='保存中…';
+    this.disabled=true;this.textContent='完了処理中…';
     var r=await sb.from('loan_sheets').insert(row);
-    this.disabled=false;this.textContent='保存';
+    this.disabled=false;this.textContent='完了';
     if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
     if(EMBED){
       try{window.parent.postMessage({type:'cs_loan_done',html:buildLoanDoc()},'*');}catch(e){}
-      msg.textContent='保存しました。受付完了画面の「代車貸出シートのPDF」から出力できます。右上の×で閉じてください。';msg.className='msg ok';
+      msg.textContent='完了しました。受付完了画面に「代車貸出シートのPDF」を追加しました。';msg.className='msg ok';
     } else {
       msg.textContent='保存しました。下の最終確認から、受付・代車のPDF／QRを出せます。';msg.className='msg ok';
       showFinal();

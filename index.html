@@ -152,6 +152,7 @@
   @media print{
     body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .wrap,.wiz-nav{display:none !important}
+    #loanOverlay,#loanPrintFrame,#loanArea{display:none !important}
     #cs-print-area{display:block !important;color:#111;padding:10px 14px;font-family:"Noto Sans JP",sans-serif}
     #cs-print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
@@ -512,8 +513,8 @@
 
       <div id="loanArea" style="display:none;margin-top:20px;border-top:1px solid #e1e7ee;padding-top:16px">
         <h3>代車貸出シート</h3>
-        <p class="muted">代車を選び、署名のご確認（チェック）をして、代車のPDFを出力できます。受付情報・署名は引き継がれます。</p>
-        <button type="button" class="btn" id="openLoanBtn" style="padding:11px 16px">代車貸出シートを作成・PDF</button>
+        <p class="muted">代車を選び、署名のご確認（チェック）をして「完了」を押すと、上のPDF欄に「代車貸出シートのPDF」が追加されます。受付情報・署名は引き継がれます。</p>
+        <button type="button" class="btn" id="openLoanBtn" style="padding:11px 16px">代車貸出シートを入力する</button>
       </div>
 
       <div style="margin-top:20px"><button type="button" class="btn" id="finishBtn" style="width:100%">新しい受付を開始</button></div>

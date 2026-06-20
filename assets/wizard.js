@@ -236,7 +236,15 @@
   function printDoc(html) {
     var f = $('loanPrintFrame'); if (!f || !html) return;
     var doc = f.contentWindow.document; doc.open(); doc.write(html); doc.close();
-    setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} }, 700);
+    var w = f.contentWindow, imgs = doc.images, total = imgs.length, loaded = 0, done = false;
+    function go() { if (done) return; done = true; try { w.focus(); w.print(); } catch (e) {} }
+    if (total === 0) { setTimeout(go, 200); return; }
+    for (var i = 0; i < total; i++) {
+      if (imgs[i].complete) loaded++;
+      else imgs[i].onload = imgs[i].onerror = function () { loaded++; if (loaded >= total) go(); };
+    }
+    if (loaded >= total) setTimeout(go, 150);
+    setTimeout(go, 2500);
   }
   window.addEventListener('message', function (ev) {
     var d = ev.data || {};
@@ -245,7 +253,7 @@
       var b = $('loanPdfBtn'); if (b) b.style.display = '';
       var ov = $('loanOverlay'); if (ov) ov.style.display = 'none';
       var f = $('loanFrame'); if (f) f.src = 'about:blank';
-      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを再表示・編集';
+      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを修正する';
       var out = $('outputs'); if (out) out.style.display = '';
     }
   });
