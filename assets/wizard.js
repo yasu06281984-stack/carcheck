@@ -345,7 +345,10 @@
 
   /* ---------------- バリデーション ---------------- */
   function validateStep(n) {
-    if (n === 1) { if (!wiz.consent) { alert('車検証の撮影可否を選択してください。'); return false; } }
+    if (n === 1) {
+      if (wiz.type === 'business') { if (!val('biz_name')) { alert('業者名を選択してください。'); return false; } }
+      else { if (!wiz.consent) { alert('車検証の撮影可否を選択してください。'); return false; } }
+    }
     return true;
   }
 
