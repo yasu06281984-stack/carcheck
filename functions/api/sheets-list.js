@@ -2,10 +2,22 @@
 // 必要な環境変数: SUPABASE_URL, SUPABASE_SERVICE_KEY
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
 
+import { getAuth } from './_auth.js';
+
 function sbHeaders(key, extra) {
   const h = Object.assign({ 'apikey': key }, extra || {});
   if (key && key.slice(0, 3) === 'eyJ') h['Authorization'] = 'Bearer ' + key;
   return h;
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization'
+    }
+  });
 }
 
 export async function onRequestGet({ request, env }) {
@@ -14,12 +26,15 @@ export async function onRequestGet({ request, env }) {
       return new Response(JSON.stringify({ error: 'not_configured' }), { status: 503, headers: CORS });
     }
     const u = new URL(request.url);
+    const auth = await getAuth(request, env);
+    if (!auth || !auth.shopId) return new Response(JSON.stringify([]), { headers: CORS });
     const type = u.searchParams.get('type') || 'estimate';
     let days = parseInt(u.searchParams.get('days') || '30', 10);
     if (!(days > 0) || days > 366) days = 30;
     const since = new Date(Date.now() - days * 86400000).toISOString();
     const q = env.SUPABASE_URL + '/rest/v1/sheets'
       + '?select=id,created_at,data'
+      + '&shop_id=eq.' + encodeURIComponent(auth.shopId)
       + '&created_at=gte.' + encodeURIComponent(since)
       + '&data->>sheetType=eq.' + encodeURIComponent(type)
       + '&order=created_at.desc&limit=50';

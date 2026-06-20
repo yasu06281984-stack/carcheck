@@ -2,6 +2,8 @@
 // 必要な環境変数: SUPABASE_URL, SUPABASE_SERVICE_KEY
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
 
+import { getAuth } from './_auth.js';
+
 function sbHeaders(key, extra) {
   const h = Object.assign({ 'apikey': key }, extra || {});
   if (key && key.slice(0, 3) === 'eyJ') h['Authorization'] = 'Bearer ' + key; // 旧service_role(JWT)のみBearer付与
@@ -13,7 +15,7 @@ export async function onRequestOptions() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization'
     }
   });
 }
@@ -24,8 +26,9 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ error: 'not_configured' }), { status: 503, headers: CORS });
     }
     const body = await request.json();
+    const auth = await getAuth(request, env);
     const id = Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
-    const row = { id: id, data: body, created_at: new Date().toISOString() };
+    const row = { id: id, data: body, created_at: new Date().toISOString(), shop_id: auth ? auth.shopId : null };
     const r = await fetch(env.SUPABASE_URL + '/rest/v1/sheets', {
       method: 'POST',
       headers: sbHeaders(env.SUPABASE_SERVICE_KEY, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),

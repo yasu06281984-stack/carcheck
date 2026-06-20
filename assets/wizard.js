@@ -230,7 +230,8 @@
     var no = $('saveNo'), db = $('dbMsg');
     if (no) no.textContent = '保存中…';
     var payload = previewData();
-    fetch('api/sheet-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    var _sh = { 'Content-Type': 'application/json' }; if (window.csAuth && window.csAuth.token) _sh['Authorization'] = 'Bearer ' + window.csAuth.token;
+    fetch('api/sheet-save', { method: 'POST', headers: _sh, body: JSON.stringify(payload) })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (d) {
         if (!d || !d.id) throw 0;
@@ -284,7 +285,8 @@
   function loadEstimates(days) {
     var box = $('estList'); if (!box) return;
     box.textContent = '読み込み中…';
-    fetch('api/sheets-list?type=estimate&days=' + days).then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    var _lh = {}; if (window.csAuth && window.csAuth.token) _lh['Authorization'] = 'Bearer ' + window.csAuth.token;
+    fetch('api/sheets-list?type=estimate&days=' + days, { headers: _lh }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (list) {
         if (!list || !list.length) { box.innerHTML = '<span class="muted">該当する見積もりはありません。</span>'; return; }
         box.innerHTML = list.map(function (it) {

@@ -29,15 +29,17 @@
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
     var uid=s.data.session.user.id;
-    var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
+    var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
     var role=(p.data&&p.data.role)||'staff';
+    var shopId=p.data&&p.data.shop_id;
     if(role==='site_admin'){location.replace('siteadmin.html');return;}
     if(role==='shop_admin'){location.replace('shopadmin.html');return;}
-    // 店舗管理者・スタッフ用の画面は順次追加します
+    if(role==='staff'&&shopId){location.replace('index.html');return;}
+    // 店舗未所属など
     var label=ROLES[role]||role;
     document.getElementById('body').innerHTML=
       '<h1>ログイン中：'+label+'</h1>'+
-      '<div class="sub">この役割（'+label+'）の画面は現在準備中です。順番に追加していきます。</div>'+
+      '<div class="sub">この方はまだ店舗に所属していません。店舗からの招待メールで登録されているかご確認ください。</div>'+
       '<button id="out">ログアウト</button>';
     document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   })();
