@@ -3,30 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ホーム — CARCHECK</title>
+<title>CARCHECK</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--surface2:#F6F8FA;--green:#2E9E6B}
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--surface2:#F6F8FA}
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;background:#EBEEF2;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);display:grid;place-items:center;padding:20px}
-  .card{background:#fff;width:100%;max-width:460px;border-radius:18px;box-shadow:0 12px 40px rgba(20,32,40,.12);padding:28px 26px}
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-  .logo{width:32px;height:32px;border-radius:9px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
-  .brand b{letter-spacing:.08em}
-  h1{font-size:1.2rem;margin:0 0 4px}
-  .sub{color:var(--muted);font-size:.85rem;margin-bottom:18px}
-  .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:.95rem;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px}
-  .kv .k{color:var(--muted)}
-  .role{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:3px 11px;border-radius:999px;background:#E7EEF5;color:var(--brand)}
-  .next{font-size:.85rem;color:var(--muted);line-height:1.7;background:#FCF6EC;border:1px solid #F1D29C;border-radius:12px;padding:13px 15px;margin-bottom:18px}
-  button{background:var(--brand);color:#fff;border:0;padding:11px 20px;border-radius:10px;font-size:.92rem;font-weight:700;cursor:pointer}
-  .ghost{background:#fff;border:1px solid var(--line);color:var(--brand)}
-  .row{display:flex;gap:10px}
+  .card{background:#fff;width:100%;max-width:420px;border-radius:18px;box-shadow:0 12px 40px rgba(20,32,40,.12);padding:28px 26px;text-align:center}
+  .logo{width:36px;height:36px;border-radius:9px;background:var(--amber);display:inline-grid;place-items:center;font-weight:800;color:#1b1b1b;margin-bottom:10px}
+  h1{font-size:1.1rem;margin:0 0 6px}.sub{color:var(--muted);font-size:.88rem;line-height:1.7}
+  button{margin-top:16px;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px 18px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
-<div class="card" id="card">
-  <div class="brand"><span class="logo">C</span><b>CARCHECK</b></div>
+<div class="card">
+  <div class="logo">C</div>
   <div id="body"><div class="sub">読み込み中…</div></div>
 </div>
 <script>
@@ -34,24 +25,20 @@
   var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
   var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
   var ROLES={site_admin:'運営管理者',shop_admin:'店舗管理者',staff:'スタッフ'};
-  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
     var uid=s.data.session.user.id;
-    var email=s.data.session.user.email;
-    var p=await sb.from('profiles').select('name,role,shop_id').eq('id',uid).single();
+    var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     var role=(p.data&&p.data.role)||'staff';
-    var name=(p.data&&p.data.name)||'';
-    var roleLabel=ROLES[role]||role;
+    if(role==='site_admin'){location.replace('siteadmin.html');return;}
+    // 店舗管理者・スタッフ用の画面は順次追加します
+    var label=ROLES[role]||role;
     document.getElementById('body').innerHTML=
-      '<h1>ログインできました</h1><div class="sub">認証とデータ保護（RLS）が正しく動いています。</div>'+
-      '<div class="kv"><span class="k">お名前</span><span>'+(name?esc(name):'（未設定）')+'</span>'+
-      '<span class="k">メール</span><span>'+esc(email)+'</span>'+
-      '<span class="k">役割</span><span><span class="role">'+esc(roleLabel)+'</span></span></div>'+
-      '<div class="next">次のステップ：この役割（'+esc(roleLabel)+'）に応じて、運営管理／店舗管理／スタッフ用アプリへ自動で振り分ける画面を作っていきます。今回はログインの動作確認までです。</div>'+
-      '<div class="row"><button class="ghost" id="out">ログアウト</button></div>';
-    document.getElementById('out').addEventListener('click',function(){sb.auth.signOut().then(function(){location.replace('login.html');});});
+      '<h1>ログイン中：'+label+'</h1>'+
+      '<div class="sub">この役割（'+label+'）の画面は現在準備中です。順番に追加していきます。</div>'+
+      '<button id="out">ログアウト</button>';
+    document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   })();
 </script>
 </body>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>運営管理 — CARCHECK</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EBEEF2;--surface:#fff;--surface2:#F6F8FA;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--brand:#1F4E74;--brand-deep:#143A57;--brand-soft:#E7EEF5;--amber:#E8810C;--amber-soft:#FCEFD9;--green:#2E9E6B;--green-soft:#E2F2EA;--red:#C8443B;--red-soft:#F7E3E1}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink)}
+  .mono{font-family:"SFMono-Regular",Menlo,monospace}
+  .topbar{background:var(--brand-deep);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .brand b{letter-spacing:.06em}
+  .brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
+  .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:12px}
+  .who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 13px;border-radius:8px;font-size:.8rem;cursor:pointer}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 20px 60px}
+  .subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .subtabs button{border:0;background:none;padding:10px 14px;font-size:.9rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
+  .subtabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative;overflow:hidden}
+  .tile .k{font-size:.74rem;color:var(--muted);font-weight:600}
+  .tile .v{font-family:"SFMono-Regular",monospace;font-size:1.9rem;font-weight:700;margin-top:4px}
+  .tile .v small{font-size:.85rem;color:var(--muted)}
+  .tile .bar{position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--brand)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(20,32,40,.05);margin-bottom:14px}
+  .card-l{font-size:.7rem;letter-spacing:.12em;font-weight:700;color:var(--muted);margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{text-align:left;font-size:.68rem;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:7px 8px;border-bottom:1px solid var(--line)}
+  td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .sp{font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .sp.ok{background:var(--green-soft);color:#1d6d49}.sp.warn{background:var(--amber-soft);color:#9a5800}
+  .sp.off{background:var(--surface2);color:var(--muted)}.sp.info{background:var(--brand-soft);color:var(--brand)}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field label{display:block;font-size:.74rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:.95rem;font-family:inherit;background:#fff}
+  .chk{display:flex;align-items:center;gap:8px;font-size:.9rem;margin-top:6px}
+  .primary{background:var(--brand);color:#fff;border:0;padding:11px 22px;border-radius:10px;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:14px}
+  .primary:disabled{opacity:.6}
+  .msg{font-size:.84rem;margin-top:10px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+  .yes{color:var(--green);font-weight:700}.no{color:var(--muted)}
+  .small{font-size:.76rem;color:var(--muted)}
+  .hide{display:none!important}
+  @media(max-width:680px){.tiles{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">C</span><div><b>CARCHECK</b><small>運営管理</small></div></div>
+  <div class="who"><span id="whoName"></span><button id="out">ログアウト</button></div>
+</div>
+<div class="wrap">
+  <div class="subtabs" id="tabs">
+    <button class="on" data-t="dash">ダッシュボード</button>
+    <button data-t="shops">店舗</button>
+    <button data-t="plans">プラン・機能</button>
+  </div>
+
+  <div data-c="dash">
+    <div class="tiles" id="tiles"></div>
+  </div>
+
+  <div data-c="shops" class="hide">
+    <div class="card">
+      <div class="card-l">店舗（テナント）一覧</div>
+      <div id="shopList" class="small">読み込み中…</div>
+    </div>
+    <div class="card">
+      <div class="card-l">店舗を作成</div>
+      <div class="form">
+        <div class="field"><label>店舗名</label><input id="s_name" placeholder="○○自動車"></div>
+        <div class="field"><label>サブドメイン（任意）</label><input id="s_sub" placeholder="maruo"></div>
+        <div class="field"><label>初期プラン</label><select id="s_plan"><option value="free">無料</option><option value="standard">標準</option><option value="vip">VIP</option></select></div>
+        <div class="field"><label>状態</label><select id="s_status"><option value="trial">トライアル</option><option value="active">稼働中</option></select></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="s_trial" checked> 30日トライアルの期限を設定する</label>
+      <div><button class="primary" id="s_create">店舗を作成</button></div>
+      <div class="msg" id="s_msg"></div>
+      <div class="small" style="margin-top:6px">※ 店舗管理者（ユーザー2）アカウントの招待は、次のステップで安全な仕組みを追加します。まずは店舗の作成までです。</div>
+    </div>
+  </div>
+
+  <div data-c="plans" class="hide">
+    <div class="card">
+      <div class="card-l">プラン定義と機能フラグ</div>
+      <div id="planTable" class="small">読み込み中…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
+  var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
+  var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  var STATUS={active:['稼働中','ok'],trial:['トライアル','warn'],suspended:['停止中','off']};
+  var PLANLBL={free:['無料','off'],standard:['標準','ok'],vip:['VIP','info']};
+
+  // tabs
+  document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    var t=b.getAttribute('data-t');
+    document.querySelectorAll('[data-c]').forEach(function(c){c.classList.toggle('hide',c.getAttribute('data-c')!==t);});
+  };});
+  document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+
+  function fmtDate(s){if(!s)return '';return s.slice(0,10);}
+
+  async function loadShops(){
+    var r=await sb.from('shops').select('*').order('created_at',{ascending:false});
+    if(r.error){document.getElementById('shopList').innerHTML='<span style="color:#C8443B">読み込みエラー：'+esc(r.error.message)+'</span>';return;}
+    var rows=r.data||[];
+    // tiles
+    var total=rows.length,act=0,tri=0,sus=0;
+    rows.forEach(function(s){if(s.status==='active')act++;else if(s.status==='trial')tri++;else if(s.status==='suspended')sus++;});
+    document.getElementById('tiles').innerHTML=
+      tile('契約店舗',total,'店')+tile('稼働中',act,'店')+tile('トライアル',tri,'店')+tile('停止中',sus,'店');
+    if(!rows.length){document.getElementById('shopList').innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
+    var h='<table><thead><tr><th>店舗名</th><th>サブドメイン</th><th>プラン</th><th>状態</th><th>作成</th></tr></thead><tbody>';
+    rows.forEach(function(s){
+      var pl=PLANLBL[s.plan]||[s.plan,'off'];var st=STATUS[s.status]||[s.status,'off'];
+      h+='<tr><td>'+esc(s.name)+'</td><td class="mono">'+(s.subdomain?esc(s.subdomain)+'.carcheck.app':'—')+'</td>'+
+        '<td><span class="sp '+pl[1]+'">'+pl[0]+'</span></td><td><span class="sp '+st[1]+'">'+st[0]+'</span></td>'+
+        '<td class="mono">'+fmtDate(s.created_at)+'</td></tr>';
+    });
+    document.getElementById('shopList').innerHTML=h+'</tbody></table>';
+  }
+  function tile(k,v,u){return '<div class="tile"><span class="bar"></span><div class="k">'+k+'</div><div class="v">'+v+'<small>'+u+'</small></div></div>';}
+
+  async function loadPlans(){
+    var r=await sb.from('plans').select('*').order('sort');
+    if(r.error){document.getElementById('planTable').innerHTML='<span style="color:#C8443B">読み込みエラー：'+esc(r.error.message)+'</span>';return;}
+    var ps=r.data||[];
+    var feats=[['reception','受付・見積もりシート'],['loan','代車シート'],['biz','業者受付シート'],['schedule','工場スケジュール管理']];
+    var h='<table><thead><tr><th>機能 / 上限</th>'+ps.map(function(p){return '<th>'+esc(p.label)+'</th>';}).join('')+'</tr></thead><tbody>';
+    h+='<tr><td>月額</td>'+ps.map(function(p){return '<td class="mono">¥'+(p.monthly_yen||0).toLocaleString()+'</td>';}).join('')+'</tr>';
+    h+='<tr><td>スタッフ数</td>'+ps.map(function(p){var n=(p.limits&&p.limits.staff_max);return '<td>'+(n===-1?'<span class="yes">無制限</span>':'<span class="mono">'+n+'</span>')+'</td>';}).join('')+'</tr>';
+    h+='<tr><td>保存件数（月）</td>'+ps.map(function(p){var n=(p.limits&&p.limits.save_max);return '<td>'+(n===-1?'<span class="yes">無制限</span>':'<span class="mono">'+(n||0).toLocaleString()+'</span>')+'</td>';}).join('')+'</tr>';
+    h+='<tr><td>写真容量</td>'+ps.map(function(p){return '<td class="mono">'+((p.limits&&p.limits.photo_gb)||0)+'GB</td>';}).join('')+'</tr>';
+    feats.forEach(function(f){h+='<tr><td>'+f[1]+'</td>'+ps.map(function(p){var on=p.features&&p.features[f[0]];return '<td>'+(on?'<span class="yes">✓</span>':'<span class="no">—</span>')+'</td>';}).join('')+'</tr>';});
+    document.getElementById('planTable').innerHTML=h+'</tbody></table><div class="small" style="margin-top:8px">※ 値の編集機能は次のステップで追加します。現在は定義の確認のみです。</div>';
+  }
+
+  document.getElementById('s_create').onclick=async function(){
+    var msg=document.getElementById('s_msg');msg.textContent='';msg.className='msg';
+    var name=document.getElementById('s_name').value.trim();
+    if(!name){msg.textContent='店舗名を入力してください。';msg.className='msg err';return;}
+    var row={name:name,
+      subdomain:document.getElementById('s_sub').value.trim()||null,
+      plan:document.getElementById('s_plan').value,
+      status:document.getElementById('s_status').value};
+    if(document.getElementById('s_trial').checked){row.trial_ends_at=new Date(Date.now()+30*864e5).toISOString();}
+    this.disabled=true;this.textContent='作成中…';
+    var r=await sb.from('shops').insert(row);
+    this.disabled=false;this.textContent='店舗を作成';
+    if(r.error){msg.textContent='作成できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='店舗を作成しました。';msg.className='msg ok';
+    document.getElementById('s_name').value='';document.getElementById('s_sub').value='';
+    loadShops();
+  };
+
+  // guard + init
+  (async function(){
+    var s=await sb.auth.getSession();
+    if(!s.data||!s.data.session){location.replace('login.html');return;}
+    var uid=s.data.session.user.id;
+    var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
+    if(!p.data||p.data.role!=='site_admin'){location.replace('home.html');return;}
+    document.getElementById('whoName').textContent=(p.data.name||'運営')+' さん';
+    loadShops();loadPlans();
+  })();
+</script>
+</body>
+</html>
