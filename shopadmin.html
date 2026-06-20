@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>店舗管理 — CARCHECK</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EBEEF2;--surface:#fff;--surface2:#F6F8FA;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--brand:#1F4E74;--brand-deep:#143A57;--brand-soft:#E7EEF5;--amber:#E8810C;--green:#2E9E6B;--green-soft:#E2F2EA;--red:#C8443B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink)}
+  .topbar{background:var(--brand-deep);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .brand b{letter-spacing:.06em}.brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
+  .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:12px}
+  .who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 13px;border-radius:8px;font-size:.8rem;cursor:pointer}
+  .wrap{max-width:820px;margin:0 auto;padding:22px 20px 60px}
+  .subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+  .subtabs button{border:0;background:none;padding:10px 14px;font-size:.9rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
+  .subtabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(20,32,40,.05);margin-bottom:14px}
+  .card-l{font-size:.7rem;letter-spacing:.12em;font-weight:700;color:var(--muted);margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{text-align:left;font-size:.68rem;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:7px 8px;border-bottom:1px solid var(--line)}
+  td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .ava2{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:inline-grid;place-items:center;font-size:.66rem;font-weight:700}
+  .sp{font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand)}
+  .sp.staff{background:var(--surface2);color:var(--muted)}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-col{display:flex;flex-direction:column;gap:12px}
+  .field label{display:block;font-size:.74rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:.95rem;font-family:inherit;background:#fff}
+  .primary{background:var(--brand);color:#fff;border:0;padding:11px 22px;border-radius:10px;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:14px}
+  .primary:disabled{opacity:.6}
+  .lnk{border:0;background:none;color:var(--red);font-size:.82rem;font-weight:600;cursor:pointer}
+  .ops{text-align:right;white-space:nowrap}
+  .msg{font-size:.84rem;margin-top:10px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+  .small{font-size:.76rem;color:var(--muted)}
+  .add{display:flex;gap:10px}.add input{flex:1}
+  .hide{display:none!important}
+  @media(max-width:680px){.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">C</span><div><b>CARCHECK</b><small>店舗管理</small></div></div>
+  <div class="who"><span id="whoName"></span><button id="out">ログアウト</button></div>
+</div>
+<div class="wrap">
+  <div class="subtabs" id="tabs">
+    <button class="on" data-t="shop">店舗情報</button>
+    <button data-t="staff">スタッフ</button>
+    <button data-t="vendor">業者名</button>
+    <button data-t="outsrc">外注先</button>
+    <button data-t="loan">代車登録</button>
+  </div>
+
+  <div data-c="shop">
+    <div class="card">
+      <div class="card-l">店舗情報（受付シートのPDFヘッダーに表示されます）</div>
+      <div class="form-col">
+        <div class="field"><label>店舗名</label><input id="sh_name"></div>
+        <div class="field"><label>会社名</label><input id="sh_company"></div>
+        <div class="field"><label>住所</label><input id="sh_address"></div>
+        <div class="field"><label>電話番号</label><input id="sh_tel"></div>
+        <div class="field"><label>営業時間</label><input id="sh_hours"></div>
+        <div class="field"><label>ホームページURL</label><input id="sh_url"></div>
+      </div>
+      <button class="primary" id="sh_save">保存</button>
+      <div class="msg" id="sh_msg"></div>
+    </div>
+  </div>
+
+  <div data-c="staff" class="hide">
+    <div class="card"><div class="card-l">スタッフ一覧</div><div id="staffList" class="small">読み込み中…</div></div>
+    <div class="card">
+      <div class="card-l">スタッフを招待</div>
+      <div class="form">
+        <div class="field"><label>お名前（姓 名）</label><input id="st_name" placeholder="田中 健"></div>
+        <div class="field"><label>メールアドレス</label><input id="st_email" type="email" placeholder="staff@example.com"></div>
+      </div>
+      <button class="primary" id="st_invite">招待を登録</button>
+      <div class="msg" id="st_msg"></div>
+      <div class="small" style="margin-top:6px">登録後、この方が新規登録ページ（/signup.html）でこのメールで登録すると、この店舗のスタッフになります。</div>
+    </div>
+    <div class="card"><div class="card-l">招待中（未登録）</div><div id="stInviteList" class="small">読み込み中…</div></div>
+  </div>
+
+  <div data-c="vendor" class="hide">
+    <div class="card"><div class="card-l">業者一覧</div><div id="vendorList" class="small">読み込み中…</div></div>
+    <div class="card"><div class="card-l">業者を追加</div><div class="add"><input id="v_name" placeholder="○○モータース"><button class="primary" id="v_add" style="margin-top:0">追加</button></div><div class="msg" id="v_msg"></div></div>
+  </div>
+
+  <div data-c="outsrc" class="hide">
+    <div class="card"><div class="card-l">外注先一覧</div><div id="outList" class="small">読み込み中…</div></div>
+    <div class="card"><div class="card-l">外注先を追加</div><div class="add"><input id="o_name" placeholder="△△塗装"><button class="primary" id="o_add" style="margin-top:0">追加</button></div><div class="msg" id="o_msg"></div></div>
+  </div>
+
+  <div data-c="loan" class="hide">
+    <div class="card"><div class="card-l">代車登録</div><div class="small">代車は、受付シートと同じ5方向イラストへの傷登録があるため、次のステップで専用画面を追加します。</div></div>
+  </div>
+</div>
+
+<script>
+  var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
+  var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
+  var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function badge(name){if(!name)return '—';var n=name.trim();if(/\s/.test(n)){var p=n.split(/\s+/);return (p[0]||'').slice(0,1)+(p[1]||'').slice(0,1);}return n.slice(0,2);}
+  var SHOP=null;
+
+  document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    var t=b.getAttribute('data-t');
+    document.querySelectorAll('[data-c]').forEach(function(c){c.classList.toggle('hide',c.getAttribute('data-c')!==t);});
+  };});
+  document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+
+  async function loadShop(){
+    var r=await sb.from('shops').select('*').eq('id',SHOP).single();
+    if(r.error||!r.data)return;
+    var s=r.data;
+    setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_address',s.address);
+    setVal('sh_tel',s.tel);setVal('sh_hours',s.hours);setVal('sh_url',s.url);
+  }
+  document.getElementById('sh_save').onclick=async function(){
+    var msg=document.getElementById('sh_msg');msg.textContent='';msg.className='msg';
+    this.disabled=true;this.textContent='保存中…';
+    var r=await sb.from('shops').update({name:val('sh_name'),company:val('sh_company'),address:val('sh_address'),tel:val('sh_tel'),hours:val('sh_hours'),url:val('sh_url')}).eq('id',SHOP);
+    this.disabled=false;this.textContent='保存';
+    if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='保存しました。';msg.className='msg ok';
+  };
+
+  async function loadStaff(){
+    var r=await sb.from('profiles').select('name,email,role').eq('shop_id',SHOP);
+    if(r.error){document.getElementById('staffList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=(r.data||[]).sort(function(a,b){return (a.role==='shop_admin'?0:1)-(b.role==='shop_admin'?0:1);});
+    if(!rows.length){document.getElementById('staffList').innerHTML='まだスタッフがいません。';return;}
+    var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>メール</th><th>役割</th></tr></thead><tbody>';
+    rows.forEach(function(p){h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+esc(p.name||'（未設定）')+'</td>'+
+      '<td class="small">'+esc(p.email||'')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td></tr>';});
+    document.getElementById('staffList').innerHTML=h+'</tbody></table>';
+  }
+  async function loadStInvites(){
+    var r=await sb.from('invites').select('email,name').eq('shop_id',SHOP).eq('role','staff');
+    if(r.error){document.getElementById('stInviteList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=r.data||[];
+    if(!rows.length){document.getElementById('stInviteList').innerHTML='招待中のものはありません。';return;}
+    var h='<table><tbody>';rows.forEach(function(v){h+='<tr><td>'+esc(v.name||'')+'</td><td class="small">'+esc(v.email)+'</td><td class="ops"><button class="lnk" data-del="'+esc(v.email)+'">取消</button></td></tr>';});
+    document.getElementById('stInviteList').innerHTML=h+'</tbody></table>';
+    document.querySelectorAll('#stInviteList [data-del]').forEach(function(b){b.onclick=async function(){await sb.from('invites').delete().eq('email',b.getAttribute('data-del'));loadStInvites();};});
+  }
+  document.getElementById('st_invite').onclick=async function(){
+    var msg=document.getElementById('st_msg');msg.textContent='';msg.className='msg';
+    var email=val('st_email');if(!email){msg.textContent='メールアドレスを入力してください。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='登録中…';
+    var r=await sb.from('invites').upsert({email:email,name:val('st_name')||null,role:'staff',shop_id:SHOP});
+    this.disabled=false;this.textContent='招待を登録';
+    if(r.error){msg.textContent='登録できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='招待を登録しました。';msg.className='msg ok';setVal('st_email','');setVal('st_name','');loadStInvites();
+  };
+
+  function listMaster(table,listId){
+    return sb.from(table).select('id,name').eq('shop_id',SHOP).order('created_at').then(function(r){
+      var el=document.getElementById(listId);
+      if(r.error){el.innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+      var rows=r.data||[];
+      if(!rows.length){el.innerHTML='まだ登録がありません。';return;}
+      var h='<table><tbody>';rows.forEach(function(x){h+='<tr><td>'+esc(x.name)+'</td><td class="ops"><button class="lnk" data-id="'+x.id+'">削除</button></td></tr>';});
+      el.innerHTML=h+'</tbody></table>';
+      el.querySelectorAll('[data-id]').forEach(function(b){b.onclick=async function(){await sb.from(table).delete().eq('id',b.getAttribute('data-id'));listMaster(table,listId);};});
+    });
+  }
+  function addMaster(table,inputId,listId,msgId){
+    var msg=document.getElementById(msgId);msg.textContent='';msg.className='msg';
+    var name=val(inputId);if(!name){msg.textContent='名前を入力してください。';msg.className='msg err';return;}
+    sb.from(table).insert({shop_id:SHOP,name:name}).then(function(r){
+      if(r.error){msg.textContent='追加できませんでした：'+r.error.message;msg.className='msg err';return;}
+      setVal(inputId,'');listMaster(table,listId);
+    });
+  }
+  document.getElementById('v_add').onclick=function(){addMaster('vendors','v_name','vendorList','v_msg');};
+  document.getElementById('o_add').onclick=function(){addMaster('outsourcers','o_name','outList','o_msg');};
+
+  (async function(){
+    var s=await sb.auth.getSession();
+    if(!s.data||!s.data.session){location.replace('login.html');return;}
+    var uid=s.data.session.user.id;
+    var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
+    if(!p.data||p.data.role!=='shop_admin'){location.replace('home.html');return;}
+    SHOP=p.data.shop_id;
+    document.getElementById('whoName').textContent=(p.data.name||'店舗管理者')+' さん';
+    loadShop();loadStaff();loadStInvites();listMaster('vendors','vendorList');listMaster('outsourcers','outList');
+  })();
+</script>
+</body>
+</html>

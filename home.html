@@ -32,6 +32,7 @@
     var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     var role=(p.data&&p.data.role)||'staff';
     if(role==='site_admin'){location.replace('siteadmin.html');return;}
+    if(role==='shop_admin'){location.replace('shopadmin.html');return;}
     // 店舗管理者・スタッフ用の画面は順次追加します
     var label=ROLES[role]||role;
     document.getElementById('body').innerHTML=
