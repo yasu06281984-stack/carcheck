@@ -13,12 +13,11 @@
   .topbar{background:var(--brand-deep);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{display:flex;align-items:center;gap:10px}
   .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
-  .brand b{letter-spacing:.06em}
-  .brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
+  .brand b{letter-spacing:.06em}.brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
   .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:12px}
   .who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 13px;border-radius:8px;font-size:.8rem;cursor:pointer}
   .wrap{max-width:900px;margin:0 auto;padding:22px 20px 60px}
-  .subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
   .subtabs button{border:0;background:none;padding:10px 14px;font-size:.9rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
   .subtabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
   .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
@@ -42,6 +41,7 @@
   .chk{display:flex;align-items:center;gap:8px;font-size:.9rem;margin-top:6px}
   .primary{background:var(--brand);color:#fff;border:0;padding:11px 22px;border-radius:10px;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:14px}
   .primary:disabled{opacity:.6}
+  .lnk{border:0;background:none;color:var(--red);font-size:.82rem;font-weight:600;cursor:pointer}
   .msg{font-size:.84rem;margin-top:10px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
   .yes{color:var(--green);font-weight:700}.no{color:var(--muted)}
   .small{font-size:.76rem;color:var(--muted)}
@@ -58,18 +58,14 @@
   <div class="subtabs" id="tabs">
     <button class="on" data-t="dash">ダッシュボード</button>
     <button data-t="shops">店舗</button>
+    <button data-t="invite">招待</button>
     <button data-t="plans">プラン・機能</button>
   </div>
 
-  <div data-c="dash">
-    <div class="tiles" id="tiles"></div>
-  </div>
+  <div data-c="dash"><div class="tiles" id="tiles"></div></div>
 
   <div data-c="shops" class="hide">
-    <div class="card">
-      <div class="card-l">店舗（テナント）一覧</div>
-      <div id="shopList" class="small">読み込み中…</div>
-    </div>
+    <div class="card"><div class="card-l">店舗（テナント）一覧</div><div id="shopList" class="small">読み込み中…</div></div>
     <div class="card">
       <div class="card-l">店舗を作成</div>
       <div class="form">
@@ -81,15 +77,26 @@
       <label class="chk"><input type="checkbox" id="s_trial" checked> 30日トライアルの期限を設定する</label>
       <div><button class="primary" id="s_create">店舗を作成</button></div>
       <div class="msg" id="s_msg"></div>
-      <div class="small" style="margin-top:6px">※ 店舗管理者（ユーザー2）アカウントの招待は、次のステップで安全な仕組みを追加します。まずは店舗の作成までです。</div>
     </div>
   </div>
 
-  <div data-c="plans" class="hide">
+  <div data-c="invite" class="hide">
     <div class="card">
-      <div class="card-l">プラン定義と機能フラグ</div>
-      <div id="planTable" class="small">読み込み中…</div>
+      <div class="card-l">店舗管理者を招待</div>
+      <div class="form">
+        <div class="field"><label>対象の店舗</label><select id="i_shop"></select></div>
+        <div class="field"><label>お名前</label><input id="i_name" placeholder="店長 名前"></div>
+        <div class="field" style="grid-column:1/-1"><label>メールアドレス</label><input id="i_email" type="email" placeholder="manager@example.com"></div>
+      </div>
+      <button class="primary" id="i_create">招待を登録</button>
+      <div class="msg" id="i_msg"></div>
+      <div class="small" style="margin-top:6px">登録後、この方が「新規登録ページ（/signup.html）」でこのメールで登録すると、自動的にこの店舗の管理者になります。</div>
     </div>
+    <div class="card"><div class="card-l">招待中（未登録）</div><div id="inviteList" class="small">読み込み中…</div></div>
+  </div>
+
+  <div data-c="plans" class="hide">
+    <div class="card"><div class="card-l">プラン定義と機能フラグ</div><div id="planTable" class="small">読み込み中…</div></div>
   </div>
 </div>
 
@@ -100,37 +107,48 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   var STATUS={active:['稼働中','ok'],trial:['トライアル','warn'],suspended:['停止中','off']};
   var PLANLBL={free:['無料','off'],standard:['標準','ok'],vip:['VIP','info']};
+  var SHOPS=[];
 
-  // tabs
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
     var t=b.getAttribute('data-t');
     document.querySelectorAll('[data-c]').forEach(function(c){c.classList.toggle('hide',c.getAttribute('data-c')!==t);});
   };});
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
-
   function fmtDate(s){if(!s)return '';return s.slice(0,10);}
+  function tile(k,v,u){return '<div class="tile"><span class="bar"></span><div class="k">'+k+'</div><div class="v">'+v+'<small>'+u+'</small></div></div>';}
 
   async function loadShops(){
     var r=await sb.from('shops').select('*').order('created_at',{ascending:false});
     if(r.error){document.getElementById('shopList').innerHTML='<span style="color:#C8443B">読み込みエラー：'+esc(r.error.message)+'</span>';return;}
-    var rows=r.data||[];
-    // tiles
-    var total=rows.length,act=0,tri=0,sus=0;
-    rows.forEach(function(s){if(s.status==='active')act++;else if(s.status==='trial')tri++;else if(s.status==='suspended')sus++;});
-    document.getElementById('tiles').innerHTML=
-      tile('契約店舗',total,'店')+tile('稼働中',act,'店')+tile('トライアル',tri,'店')+tile('停止中',sus,'店');
-    if(!rows.length){document.getElementById('shopList').innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
+    SHOPS=r.data||[];
+    var total=SHOPS.length,act=0,tri=0,sus=0;
+    SHOPS.forEach(function(s){if(s.status==='active')act++;else if(s.status==='trial')tri++;else if(s.status==='suspended')sus++;});
+    document.getElementById('tiles').innerHTML=tile('契約店舗',total,'店')+tile('稼働中',act,'店')+tile('トライアル',tri,'店')+tile('停止中',sus,'店');
+    // shop select for invite
+    document.getElementById('i_shop').innerHTML=SHOPS.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+'</option>';}).join('');
+    if(!SHOPS.length){document.getElementById('shopList').innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
     var h='<table><thead><tr><th>店舗名</th><th>サブドメイン</th><th>プラン</th><th>状態</th><th>作成</th></tr></thead><tbody>';
-    rows.forEach(function(s){
-      var pl=PLANLBL[s.plan]||[s.plan,'off'];var st=STATUS[s.status]||[s.status,'off'];
+    SHOPS.forEach(function(s){var pl=PLANLBL[s.plan]||[s.plan,'off'];var st=STATUS[s.status]||[s.status,'off'];
       h+='<tr><td>'+esc(s.name)+'</td><td class="mono">'+(s.subdomain?esc(s.subdomain)+'.carcheck.app':'—')+'</td>'+
         '<td><span class="sp '+pl[1]+'">'+pl[0]+'</span></td><td><span class="sp '+st[1]+'">'+st[0]+'</span></td>'+
-        '<td class="mono">'+fmtDate(s.created_at)+'</td></tr>';
-    });
+        '<td class="mono">'+fmtDate(s.created_at)+'</td></tr>';});
     document.getElementById('shopList').innerHTML=h+'</tbody></table>';
   }
-  function tile(k,v,u){return '<div class="tile"><span class="bar"></span><div class="k">'+k+'</div><div class="v">'+v+'<small>'+u+'</small></div></div>';}
+
+  async function loadInvites(){
+    var r=await sb.from('invites').select('email,name,role,shop_id,created_at,shops(name)').order('created_at',{ascending:false});
+    if(r.error){document.getElementById('inviteList').innerHTML='<span style="color:#C8443B">読み込みエラー：'+esc(r.error.message)+'</span>';return;}
+    var rows=r.data||[];
+    if(!rows.length){document.getElementById('inviteList').innerHTML='招待中のものはありません。';return;}
+    var h='<table><thead><tr><th>メール</th><th>お名前</th><th>店舗</th><th>役割</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(v){h+='<tr><td class="mono">'+esc(v.email)+'</td><td>'+esc(v.name||'')+'</td>'+
+      '<td>'+esc(v.shops?v.shops.name:'')+'</td><td>'+(v.role==='shop_admin'?'店舗管理者':'スタッフ')+'</td>'+
+      '<td class="ops"><button class="lnk" data-del="'+esc(v.email)+'">取消</button></td></tr>';});
+    document.getElementById('inviteList').innerHTML=h+'</tbody></table>';
+    document.querySelectorAll('#inviteList [data-del]').forEach(function(b){b.onclick=async function(){
+      await sb.from('invites').delete().eq('email',b.getAttribute('data-del'));loadInvites();};});
+  }
 
   async function loadPlans(){
     var r=await sb.from('plans').select('*').order('sort');
@@ -143,17 +161,15 @@
     h+='<tr><td>保存件数（月）</td>'+ps.map(function(p){var n=(p.limits&&p.limits.save_max);return '<td>'+(n===-1?'<span class="yes">無制限</span>':'<span class="mono">'+(n||0).toLocaleString()+'</span>')+'</td>';}).join('')+'</tr>';
     h+='<tr><td>写真容量</td>'+ps.map(function(p){return '<td class="mono">'+((p.limits&&p.limits.photo_gb)||0)+'GB</td>';}).join('')+'</tr>';
     feats.forEach(function(f){h+='<tr><td>'+f[1]+'</td>'+ps.map(function(p){var on=p.features&&p.features[f[0]];return '<td>'+(on?'<span class="yes">✓</span>':'<span class="no">—</span>')+'</td>';}).join('')+'</tr>';});
-    document.getElementById('planTable').innerHTML=h+'</tbody></table><div class="small" style="margin-top:8px">※ 値の編集機能は次のステップで追加します。現在は定義の確認のみです。</div>';
+    document.getElementById('planTable').innerHTML=h+'</tbody></table>';
   }
 
   document.getElementById('s_create').onclick=async function(){
     var msg=document.getElementById('s_msg');msg.textContent='';msg.className='msg';
     var name=document.getElementById('s_name').value.trim();
     if(!name){msg.textContent='店舗名を入力してください。';msg.className='msg err';return;}
-    var row={name:name,
-      subdomain:document.getElementById('s_sub').value.trim()||null,
-      plan:document.getElementById('s_plan').value,
-      status:document.getElementById('s_status').value};
+    var row={name:name,subdomain:document.getElementById('s_sub').value.trim()||null,
+      plan:document.getElementById('s_plan').value,status:document.getElementById('s_status').value};
     if(document.getElementById('s_trial').checked){row.trial_ends_at=new Date(Date.now()+30*864e5).toISOString();}
     this.disabled=true;this.textContent='作成中…';
     var r=await sb.from('shops').insert(row);
@@ -164,7 +180,20 @@
     loadShops();
   };
 
-  // guard + init
+  document.getElementById('i_create').onclick=async function(){
+    var msg=document.getElementById('i_msg');msg.textContent='';msg.className='msg';
+    var email=document.getElementById('i_email').value.trim();
+    var shop=document.getElementById('i_shop').value;
+    if(!email||!shop){msg.textContent='店舗とメールアドレスを入力してください。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='登録中…';
+    var r=await sb.from('invites').upsert({email:email,name:document.getElementById('i_name').value.trim()||null,role:'shop_admin',shop_id:shop});
+    this.disabled=false;this.textContent='招待を登録';
+    if(r.error){msg.textContent='登録できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='招待を登録しました。新規登録ページでこのメールで登録すると店舗管理者になります。';msg.className='msg ok';
+    document.getElementById('i_email').value='';document.getElementById('i_name').value='';
+    loadInvites();
+  };
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -172,7 +201,7 @@
     var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     if(!p.data||p.data.role!=='site_admin'){location.replace('home.html');return;}
     document.getElementById('whoName').textContent=(p.data.name||'運営')+' さん';
-    loadShops();loadPlans();
+    loadShops();loadInvites();loadPlans();
   })();
 </script>
 </body>
