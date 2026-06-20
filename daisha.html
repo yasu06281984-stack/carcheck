@@ -114,7 +114,7 @@
   <div class="card">
     <div class="card-l">お客様署名</div>
     <div id="signCarried" style="display:none">
-      <p class="small" style="margin-top:0">入庫チェックシートの署名を反映しています。</p>
+      <p class="small" style="margin-top:0">上記同意の上で、入庫チェックシートの署名を反映して利用します。</p>
       <img id="carriedImg" style="max-height:90px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;display:block">
       <div style="margin-top:8px"><button class="ghost" id="resignBtn">署名し直す</button></div>
     </div>
@@ -150,7 +150,7 @@
   var FUELMAP={};
   var TERMS='【代車貸出 利用規約（サンプル）】\n\n1. 貸出車両は当店の所有物です。丁寧な運転と適切な管理をお願いします。\n2. 走行中の事故・違反・駐車違反等は、原則として借受人の責任となります。\n3. 返却時は貸出時と同等の状態（燃料・清掃・装備）でのご返却をお願いします。\n4. 車両に新たな傷・汚損・破損が生じた場合は、別途修理費等をご負担いただくことがあります。\n5. 禁煙車での喫煙、ペットの同乗等はご遠慮ください。\n6. 返却予定日を過ぎる場合は、事前に必ずご連絡ください。\n\n上記の内容に同意のうえ、ご署名ください。\n（本文はサンプルです。実際の規約文に差し替えてください。）';
 
-  var SHOP=null, SHOPINFO={}, LOANS=[], curLoan=null, amtType='', signData='';
+  var SHOP=null, SHOPINFO={}, LOANS=[], curLoan=null, amtType='', signData='', carriedSign=false;
 
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   document.getElementById('termsBox').textContent=TERMS;
@@ -231,6 +231,7 @@
       return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w"><img src="assets/vehicles/'+(x.fig_type||'hatchback')+'/'+v[0]+'.png">'+marks+'</div></div>';
     }).join('')+'</div>';
     var sigImg=signData?'<img src="'+signData+'">':'';
+    var signNote=carriedSign?'上記同意の上で、入庫チェックシートの署名を反映して利用します。':'上記内容・利用規約に同意し、車両をお借りします。';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr"><div>貸出日：'+esc(val('lend_date')||'____/__/__')+'</div><div>'+shopLines+'</div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
@@ -245,7 +246,7 @@
       '<tr><th>装備</th><td colspan="3">'+esc(eqText(x.equip))+'</td></tr></table>'+
       '<div class="p-sec">代車の状態（傷）</div>'+figs+
       '<div class="p-sec">利用規約</div><div class="pterms">'+esc(TERMS)+'</div>'+
-      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">上記内容・利用規約に同意し、車両をお借りします。<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>';
+      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">'+signNote+'<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>';
     document.getElementById('printArea').innerHTML=html;
   }
   document.getElementById('pdfBtn').onclick=function(){
@@ -283,7 +284,7 @@
       if(hoRaw){var ho=JSON.parse(hoRaw);sessionStorage.removeItem('cs_loan_handoff');
         setVal('c_name',ho.name);setVal('c_tel',ho.tel);setVal('c_veh',ho.vehicle);setVal('c_due',ho.due);
         var today=new Date();setVal('lend_date',today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2));
-        if(ho.sign){signData=ho.sign;document.getElementById('carriedImg').src=ho.sign;document.getElementById('signCarried').style.display='';document.getElementById('signStartBtn').style.display='none';}
+        if(ho.sign){signData=ho.sign;carriedSign=true;document.getElementById('carriedImg').src=ho.sign;document.getElementById('signCarried').style.display='';document.getElementById('signStartBtn').style.display='none';}
         var m=document.getElementById('msg');m.textContent='入庫'+(ho.kind==='business'?'（業者）':'')+'シートから引き継ぎました。代車を選んでPDF出力できます。';m.className='msg ok';
       }
     }catch(e){}

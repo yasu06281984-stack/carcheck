@@ -193,11 +193,7 @@
       return '<tr><td class="c">' + esc(r.code) + '</td><td>' + vlab + '</td><td>' + T.w + '</td><td>' + esc(r.part) + '</td><td>' + sz + '</td><td>' + esc(r.note) + '</td><td>' + esc(r.repair) + '</td></tr>';
     }).join('') || '<tr><td colspan="7">記録なし</td></tr>';
     var photoSec = photos.length ? ('<div class="p-sec">入庫時画像</div><div class="p-photos">' + photos.map(function (s, i) { return '<div class="p-photo"><img src="' + s + '" alt=""><div class="p-pcap">画像 ' + (i + 1) + '</div></div>'; }).join('') + '</div>') : '';
-    var signSec = '';
-    if (d.sheetType === 'intake') {
-      var signImg = sign ? '<img class="p-sigimg" src="' + sign + '">' : '<div class="p-sigline"></div>';
-      signSec = '<div class="p-sec">確認・お客様署名</div><div class="p-sign"><div class="p-signnote">上記の内容を確認しました。</div><div class="p-signrow"><div class="p-sigbox">' + signImg + '<div class="p-sigcap">お客様署名' + (c.name ? '：' + esc(c.name) + ' 様' : '') + '</div></div></div></div>';
-    }
+    var signSec = ''; // 確認プレビューでは署名欄を表示しない（この時点では未署名）
     var shop = d.shop || {};
     var shopLines = '';
     if (shop.company) shopLines += '<div class="p-shopco">' + esc(shop.company) + '</div>';
@@ -221,7 +217,7 @@
     var name = (wiz.type === 'business') ? (d.bizName || c.name || '') : (c.name || '');
     var handoff = {
       kind: wiz.type, name: name, tel: c.tel || '', vehicle: d.vehicleName || '',
-      due: (wiz.type === 'business') ? (d.bizDue || '') : (d.intakeDate || ''),
+      due: (wiz.type === 'business') ? (d.bizDue || '') : '',
       sign: (wiz.type === 'intake') ? (d.sign || window.csSignature || '') : ''
     };
     try { sessionStorage.setItem('cs_loan_handoff', JSON.stringify(handoff)); } catch (e) {}
