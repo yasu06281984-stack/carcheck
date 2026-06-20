@@ -15,16 +15,19 @@
   .brand b{letter-spacing:.06em}.brand small{display:block;font-size:.62rem;letter-spacing:.18em;color:#9fb6cc}
   .who{font-size:.82rem;color:#cdd9e6;display:flex;align-items:center;gap:10px}
   .who a,.who button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;text-decoration:none}
-  .wrap{max-width:1000px;margin:0 auto;padding:20px 18px 80px}
+  .wrap{max-width:1040px;margin:0 auto;padding:20px 18px 80px}
   .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
   .tile{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px;position:relative;overflow:hidden}
   .tile .k{font-size:.72rem;color:var(--muted);font-weight:600}
   .tile .v{font-family:"SFMono-Regular",monospace;font-size:1.7rem;font-weight:700;margin-top:2px}
   .tile .bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
   .tile.w .bar{background:var(--muted)}.tile.in .bar{background:var(--brand)}.tile.out .bar{background:var(--purple)}.tile.done .bar{background:var(--green)}.tile.loan .bar{background:var(--amber)}
-  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-  .tabs{display:flex;gap:4px;flex-wrap:wrap}
-  .tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;font-size:.85rem;font-weight:600;color:var(--muted);border-radius:999px;cursor:pointer}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .vtabs{display:flex;gap:4px}
+  .vtabs button{border:1px solid var(--line);background:#fff;padding:8px 14px;font-size:.85rem;font-weight:700;color:var(--muted);border-radius:9px;cursor:pointer}
+  .vtabs button.on{color:#fff;background:var(--brand-deep);border-color:var(--brand-deep)}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+  .tabs button{border:1px solid var(--line);background:#fff;padding:7px 12px;font-size:.83rem;font-weight:600;color:var(--muted);border-radius:999px;cursor:pointer}
   .tabs button.on{color:#fff;background:var(--brand);border-color:var(--brand)}
   .primary{background:var(--brand);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer}
   .jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
@@ -37,19 +40,41 @@
   .job .prog i{display:block;height:100%;background:var(--green)}
   .sp{font-size:.64rem;font-weight:700;padding:2px 9px;border-radius:999px;position:absolute;top:13px;right:13px}
   .sp.waiting{background:var(--surface2);color:var(--muted)}.sp.in{background:var(--brand-soft);color:var(--brand)}.sp.out{background:#efe4fa;color:var(--purple)}.sp.done{background:var(--green-soft);color:#1d6d49}
+  .bizbadge{display:inline-block;font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:5px;background:#e7eef5;color:var(--brand);margin-right:5px;vertical-align:middle}
   .chip{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--amber-soft);color:#9a5800;margin-top:8px}
   .empty{color:var(--muted);font-size:.86rem;padding:20px;text-align:center}
+  .catsec{margin-bottom:16px}
+  .cathead{font-size:.82rem;font-weight:700;color:var(--brand);margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--brand-soft)}
+  /* calendar */
+  .calbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .calbar .nav{display:flex;gap:4px}
+  .calbar .nav button,.modetog button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--ink)}
+  .modetog button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .callabel{font-weight:700;font-size:1rem;min-width:130px}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .dow{font-size:.7rem;font-weight:700;color:var(--muted);text-align:center;padding:4px 0}
+  .dow.sun{color:var(--red)}.dow.sat{color:var(--brand)}
+  .cell{background:var(--surface);border:1px solid var(--line);border-radius:9px;min-height:84px;padding:5px;overflow:hidden}
+  .cell.off{background:var(--surface2);opacity:.6}
+  .cell.today{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+  .cell .dn{font-size:.72rem;font-weight:700;color:var(--muted)}
+  .calchip{font-size:.66rem;font-weight:600;color:#fff;border-radius:5px;padding:2px 5px;margin-top:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .calchip.waiting{background:#90a0ae}.calchip.in{background:var(--brand)}.calchip.out{background:var(--purple)}.calchip.done{background:var(--green)}
+  .weekcol .cell{min-height:120px}
   /* drawer */
   .ov{position:fixed;inset:0;background:rgba(15,25,35,.45);display:none;z-index:40}
   .ov.on{display:block}
   .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--paper);z-index:50;transform:translateX(100%);transition:transform .22s;overflow-y:auto;box-shadow:-8px 0 24px rgba(0,0,0,.2)}
   .drawer.on{transform:translateX(0)}
-  .dhead{background:var(--brand-deep);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+  .dhead{background:var(--brand-deep);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2}
   .dhead b{font-size:1rem}
   .dhead button{background:rgba(255,255,255,.15);color:#fff;border:0;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:1rem}
   .dbody{padding:16px}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
   .card-l{font-size:.7rem;letter-spacing:.1em;font-weight:700;color:var(--muted);margin-bottom:10px}
+  .kindtog{display:flex;gap:6px;margin-bottom:12px}
+  .kindtog button{flex:1;border:1px solid var(--line);background:#fff;padding:9px;border-radius:9px;font-weight:700;font-size:.88rem;color:var(--muted);cursor:pointer}
+  .kindtog button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .field label{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:4px}
   .field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:.92rem;font-family:inherit;background:#fff}
@@ -58,8 +83,7 @@
   .stage:last-child{border-bottom:0}
   .stage .slbl{font-size:.82rem;font-weight:600}
   .stage .sin{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .stage input[type=date]{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px}
-  .stage input[type=time]{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px}
+  .stage input[type=date],.stage input[type=time]{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px}
   .stage select{padding:6px 7px;font-size:.8rem;border:1px solid var(--line);border-radius:7px;background:#fff;max-width:120px}
   .stage .ck{display:flex;align-items:center;gap:4px;font-size:.74rem;color:var(--muted)}
   .row-btns{display:flex;gap:8px;margin-top:6px}
@@ -69,7 +93,8 @@
   .small{font-size:.78rem;color:var(--muted)}
   .pick{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;background:#fff}
   .pick button{font-size:.78rem;padding:5px 10px}
-  @media(max-width:760px){.tiles{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+  .hide{display:none!important}
+  @media(max-width:760px){.tiles{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.cell{min-height:66px}.calchip{font-size:.6rem}}
 </style>
 </head>
 <body>
@@ -81,31 +106,54 @@
 <div class="wrap">
   <div class="tiles" id="tiles"></div>
   <div class="toolbar">
-    <div class="tabs" id="statusTabs">
-      <button class="on" data-s="all">すべて</button>
-      <button data-s="waiting">入庫待ち</button>
-      <button data-s="in">入庫中</button>
-      <button data-s="out">外注中</button>
-      <button data-s="done">納車済</button>
+    <div class="vtabs" id="viewTabs">
+      <button class="on" data-v="list">リスト</button>
+      <button data-v="cal">カレンダー</button>
+      <button data-v="cat">車種別</button>
     </div>
     <button class="primary" id="addJob">＋ 入庫を追加</button>
   </div>
-  <div class="jobs" id="jobList"></div>
+  <div class="tabs" id="statusTabs">
+    <button class="on" data-s="all">すべて</button>
+    <button data-s="waiting">入庫待ち</button>
+    <button data-s="in">入庫中</button>
+    <button data-s="out">外注中</button>
+    <button data-s="done">納車済</button>
+  </div>
+
+  <div id="listView"><div class="jobs" id="jobList"></div></div>
+
+  <div id="calView" class="hide">
+    <div class="calbar">
+      <div class="nav"><button id="calPrev">◀</button><button id="calToday">今日</button><button id="calNext">▶</button></div>
+      <div class="callabel" id="calLabel"></div>
+      <div class="modetog" style="margin-left:auto;display:flex;gap:4px"><button data-m="month" class="on">月</button><button data-m="week">週</button></div>
+    </div>
+    <div class="small" style="margin-bottom:8px">※ 案件は「納車予定日（なければ入庫日）」の日付に表示されます。色は状態（灰=入庫待ち／青=入庫中／紫=外注中／緑=納車済）。</div>
+    <div id="calBody"></div>
+  </div>
+
+  <div id="catView" class="hide"></div>
 </div>
 
 <div class="ov" id="ov"></div>
 <div class="drawer" id="drawer">
   <div class="dhead"><b id="dTitle">入庫案件</b><button id="dClose">×</button></div>
   <div class="dbody">
-    <div class="card" id="fromSheetCard">
-      <div class="card-l">受付シートから読み込む</div>
-      <button class="ghost" id="loadSheetBtn" style="font-size:.85rem;padding:8px 14px">受付シート一覧を表示</button>
-      <div id="sheetPick" style="margin-top:8px"></div>
+    <div class="card">
+      <div class="kindtog" id="kindTog"><button data-kind="customer" class="on">お客様</button><button data-kind="vendor">業者</button></div>
+      <div class="card-l" id="srcTitle">受付シートから読み込む</div>
+      <div id="srcCustomer">
+        <button class="ghost" id="loadSheetBtn" style="font-size:.85rem;padding:8px 14px">受付シート一覧を表示</button>
+        <div id="sheetPick" style="margin-top:8px"></div>
+      </div>
+      <div id="srcVendor" class="hide"><div class="small">業者受付シートは準備中です。下で業者名を選んで手動で追加できます。</div></div>
     </div>
     <div class="card">
       <div class="card-l">基本情報</div>
       <div class="grid2">
-        <div class="field"><label>お客様名</label><input id="j_customer"></div>
+        <div class="field" id="f_customer"><label>お客様名</label><input id="j_customer"></div>
+        <div class="field hide" id="f_biz"><label>業者名</label><select id="j_biz"></select></div>
         <div class="field"><label>ナンバー</label><input id="j_number"></div>
         <div class="field"><label>車種名</label><input id="j_vehicle"></div>
         <div class="field"><label>イラスト種別</label><select id="j_fig"></select></div>
@@ -113,7 +161,7 @@
         <div class="field"><label>納車予定日</label><input id="j_due" type="date"></div>
         <div class="field"><label>状態</label><select id="j_status"></select></div>
         <div class="field"><label>貸出代車</label><select id="j_loan"></select></div>
-        <div class="field" style="grid-column:1/-1"><label>外注先</label><select id="j_vendor"></select></div>
+        <div class="field" style="grid-column:1/-1"><label>外注先</label><select id="j_out"></select></div>
       </div>
     </div>
     <div class="card">
@@ -140,47 +188,102 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
   function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+  function show(id,on){var e=document.getElementById(id);if(e)e.classList.toggle('hide',!on);}
 
   var FIGS=[['hatchback','ハッチバック'],['sedan','セダン'],['suv','SUV'],['minivan','ミニバン'],['onebox','ワンボックス']];
   var FIGMAP={};FIGS.forEach(function(f){FIGMAP[f[0]]=f[1];});
   var STATUS=[['waiting','入庫待ち'],['in','入庫中'],['out','外注中'],['done','納車済']];
   var STATUSMAP={};STATUS.forEach(function(s){STATUSMAP[s[0]]=s[1];});
   var STAGES=[['bara','脱着ばらし'],['ban','鈑金'],['prep','塗装準備'],['paint','塗装'],['polish','磨き仕上げ'],['seibi','整備'],['hoken','保険修理'],['out_req','外注依頼'],['out_ret','外注戻り'],['deliver','納車']];
+  var DOW=['日','月','火','水','木','金','土'];
 
-  var SHOP=null, ROLE=null, JOBS=[], LOANS=[], STAFFS=[], VENDORS=[], curFilter='all', editId=null;
+  var SHOP=null, JOBS=[], LOANS=[], STAFFS=[], OUTSRC=[], BIZ=[], curFilter='all', editId=null, curKind='customer';
+  var VIEW='list', calMode='month', calRef=new Date();
 
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   document.querySelectorAll('#statusTabs button').forEach(function(b){b.onclick=function(){
     document.querySelectorAll('#statusTabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
-    curFilter=b.getAttribute('data-s');renderJobs();
+    curFilter=b.getAttribute('data-s');renderView();
   };});
+  document.querySelectorAll('#viewTabs button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('#viewTabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    VIEW=b.getAttribute('data-v');
+    show('listView',VIEW==='list');show('calView',VIEW==='cal');show('catView',VIEW==='cat');
+    renderView();
+  };});
+  document.querySelectorAll('.modetog button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('.modetog button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    calMode=b.getAttribute('data-m');renderCalendar();
+  };});
+  document.getElementById('calPrev').onclick=function(){shiftCal(-1);};
+  document.getElementById('calNext').onclick=function(){shiftCal(1);};
+  document.getElementById('calToday').onclick=function(){calRef=new Date();renderCalendar();};
+  function shiftCal(d){if(calMode==='month')calRef.setMonth(calRef.getMonth()+d);else calRef.setDate(calRef.getDate()+d*7);renderCalendar();}
 
   function staffOptions(sel){return '<option value="">（未割当）</option>'+STAFFS.map(function(n){return '<option'+(n===sel?' selected':'')+'>'+esc(n)+'</option>';}).join('');}
+  function filtered(){return JOBS.filter(function(j){return curFilter==='all'||j.status===curFilter;});}
+  function jobDate(j){return j.due_date||j.intake_date||'';}
+  function fmtYMD(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+  function progOf(j){var used=0,done=0;STAGES.forEach(function(s){var st=(j.stages||{})[s[0]];if(st&&(st.date||st.staff||st.done)){used++;if(st.done)done++;}});return used?Math.round(done/used*100):0;}
 
   function tilesRender(){
     var c={waiting:0,in:0,out:0,done:0,loan:0};
     JOBS.forEach(function(j){if(c[j.status]!=null)c[j.status]++;if(j.loan_car_id&&j.status!=='done')c.loan++;});
-    var t=document.getElementById('tiles');
     function tl(cls,k,v){return '<div class="tile '+cls+'"><span class="bar"></span><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';}
-    t.innerHTML=tl('w','入庫待ち',c.waiting)+tl('in','入庫中',c.in)+tl('out','外注中',c.out)+tl('done','納車済',c.done)+tl('loan','代車合計',LOANS.length)+tl('loan','貸出中',c.loan);
+    document.getElementById('tiles').innerHTML=tl('w','入庫待ち',c.waiting)+tl('in','入庫中',c.in)+tl('out','外注中',c.out)+tl('done','納車済',c.done)+tl('loan','代車合計',LOANS.length)+tl('loan','貸出中',c.loan);
   }
-  function progOf(j){var used=0,done=0;STAGES.forEach(function(s){var st=(j.stages||{})[s[0]];if(st&&(st.date||st.staff||st.done)){used++;if(st.done)done++;}});return used?Math.round(done/used*100):0;}
-  function renderJobs(){
-    var box=document.getElementById('jobList');
-    var list=JOBS.filter(function(j){return curFilter==='all'||j.status===curFilter;});
+  function jobCardHtml(j){
+    var loan=LOANS.filter(function(l){return l.id===j.loan_car_id;})[0];var pr=progOf(j);
+    return '<div class="job" data-id="'+j.id+'"><span class="sp '+j.status+'">'+STATUSMAP[j.status]+'</span>'+
+      '<div class="cust">'+(j.kind==='vendor'?'<span class="bizbadge">業者</span>':'')+esc(j.customer||'（無名）')+(j.kind==='vendor'?'':' 様')+'</div>'+
+      '<div class="veh">'+esc(j.vehicle||FIGMAP[j.fig_type]||'')+(j.number?'　'+esc(j.number):'')+'</div>'+
+      '<div class="meta">入庫 '+esc(j.intake_date||'—')+' ／ 納車予定 '+esc(j.due_date||'—')+'</div>'+
+      (loan?'<span class="chip">代車：'+esc(loan.car)+'</span>':'')+
+      '<div class="prog"><i style="width:'+pr+'%"></i></div></div>';
+  }
+  function bindJobs(scope){scope.querySelectorAll('.job').forEach(function(el){el.onclick=function(){openJob(el.getAttribute('data-id'));};});}
+
+  function renderList(){
+    var box=document.getElementById('jobList');var list=filtered();
     if(!list.length){box.innerHTML='<div class="empty">該当する案件はありません。「＋ 入庫を追加」から登録できます。</div>';return;}
-    box.innerHTML=list.map(function(j){
-      var loan=LOANS.filter(function(l){return l.id===j.loan_car_id;})[0];
-      var pr=progOf(j);
-      return '<div class="job" data-id="'+j.id+'"><span class="sp '+j.status+'">'+STATUSMAP[j.status]+'</span>'+
-        '<div class="cust">'+esc(j.customer||'（無名）')+' 様</div>'+
-        '<div class="veh">'+esc(j.vehicle||FIGMAP[j.fig_type]||'')+(j.number?'　'+esc(j.number):'')+'</div>'+
-        '<div class="meta">入庫 '+esc(j.intake_date||'—')+' ／ 納車予定 '+esc(j.due_date||'—')+'</div>'+
-        (loan?'<span class="chip">代車：'+esc(loan.car)+'</span>':'')+
-        '<div class="prog"><i style="width:'+pr+'%"></i></div></div>';
-    }).join('');
-    box.querySelectorAll('.job').forEach(function(el){el.onclick=function(){openJob(el.getAttribute('data-id'));};});
+    box.innerHTML=list.map(jobCardHtml).join('');bindJobs(box);
   }
+  function renderCat(){
+    var host=document.getElementById('catView');var list=filtered();
+    if(!list.length){host.innerHTML='<div class="empty">該当する案件はありません。</div>';return;}
+    host.innerHTML=FIGS.map(function(f){
+      var rows=list.filter(function(j){return (j.fig_type||'hatchback')===f[0];});
+      if(!rows.length)return '';
+      return '<div class="catsec"><div class="cathead">'+f[1]+'（'+rows.length+'）</div><div class="jobs">'+rows.map(jobCardHtml).join('')+'</div></div>';
+    }).join('')||'<div class="empty">該当する案件はありません。</div>';
+    bindJobs(host);
+  }
+  function renderCalendar(){
+    var list=filtered();var byDay={};list.forEach(function(j){var d=jobDate(j);if(d){(byDay[d]=byDay[d]||[]).push(j);}});
+    var label=document.getElementById('calLabel');var body=document.getElementById('calBody');
+    var start,days;
+    if(calMode==='month'){
+      var first=new Date(calRef.getFullYear(),calRef.getMonth(),1);
+      label.textContent=calRef.getFullYear()+'年 '+(calRef.getMonth()+1)+'月';
+      start=new Date(first);start.setDate(1-first.getDay());days=42;
+    }else{
+      start=new Date(calRef);start.setDate(calRef.getDate()-calRef.getDay());
+      var end=new Date(start);end.setDate(start.getDate()+6);
+      label.textContent=(start.getMonth()+1)+'/'+start.getDate()+' 〜 '+(end.getMonth()+1)+'/'+end.getDate();days=7;
+    }
+    var todayY=fmtYMD(new Date());var curM=calRef.getMonth();
+    var h='<div class="calgrid">'+DOW.map(function(d,i){return '<div class="dow '+(i===0?'sun':i===6?'sat':'')+'">'+d+'</div>';}).join('')+'</div>';
+    h+='<div class="calgrid '+(calMode==='week'?'weekcol':'')+'">';
+    for(var i=0;i<days;i++){
+      var dt=new Date(start);dt.setDate(start.getDate()+i);var ymd=fmtYMD(dt);
+      var off=(calMode==='month'&&dt.getMonth()!==curM);
+      var chips=(byDay[ymd]||[]).map(function(j){return '<div class="calchip '+j.status+'" data-id="'+j.id+'">'+(j.kind==='vendor'?'[業]':'')+esc(j.customer||'無名')+'</div>';}).join('');
+      h+='<div class="cell'+(off?' off':'')+(ymd===todayY?' today':'')+'"><div class="dn">'+dt.getDate()+'</div>'+chips+'</div>';
+    }
+    h+='</div>';body.innerHTML=h;
+    body.querySelectorAll('.calchip').forEach(function(c){c.onclick=function(){openJob(c.getAttribute('data-id'));};});
+  }
+  function renderView(){ if(VIEW==='list')renderList(); else if(VIEW==='cal')renderCalendar(); else renderCat(); }
 
   function buildSelectors(){
     document.getElementById('j_fig').innerHTML=FIGS.map(function(f){return '<option value="'+f[0]+'">'+f[1]+'</option>';}).join('');
@@ -188,7 +291,8 @@
   }
   function fillRefSelectors(){
     document.getElementById('j_loan').innerHTML='<option value="">（なし）</option>'+LOANS.map(function(l){return '<option value="'+l.id+'">'+esc(l.car)+(l.number?'（'+esc(l.number)+'）':'')+'</option>';}).join('');
-    document.getElementById('j_vendor').innerHTML='<option value="">（なし）</option>'+VENDORS.map(function(v){return '<option>'+esc(v.name)+'</option>';}).join('');
+    document.getElementById('j_out').innerHTML='<option value="">（なし）</option>'+OUTSRC.map(function(v){return '<option>'+esc(v.name)+'</option>';}).join('');
+    document.getElementById('j_biz').innerHTML='<option value="">選択してください</option>'+BIZ.map(function(v){return '<option>'+esc(v.name)+'</option>';}).join('');
   }
   function renderStages(stages){
     stages=stages||{};
@@ -205,51 +309,63 @@
     var out={};
     document.querySelectorAll('#stageList .stage').forEach(function(row){
       var k=row.getAttribute('data-k');
-      var d=row.querySelector('.sdate').value, t=row.querySelector('.stime').value, s=row.querySelector('.sstaff').value, done=row.querySelector('.sdone').checked;
+      var d=row.querySelector('.sdate').value,t=row.querySelector('.stime').value,s=row.querySelector('.sstaff').value,done=row.querySelector('.sdone').checked;
       if(d||t||s||done)out[k]={date:d||'',time:t||'',staff:s||'',done:done};
     });
     return out;
   }
 
+  function setKind(k){
+    curKind=k;
+    document.querySelectorAll('#kindTog button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-kind')===k);});
+    show('f_customer',k==='customer');show('f_biz',k==='vendor');
+    show('srcCustomer',k==='customer');show('srcVendor',k==='vendor');
+    document.getElementById('srcTitle').textContent=(k==='vendor'?'業者から追加':'受付シートから読み込む');
+  }
+  document.querySelectorAll('#kindTog button').forEach(function(b){b.onclick=function(){setKind(b.getAttribute('data-kind'));};});
+
   function openDrawer(){document.getElementById('ov').classList.add('on');document.getElementById('drawer').classList.add('on');}
-  function closeDrawer(){document.getElementById('ov').classList.remove('on');document.getElementById('drawer').classList.remove('on');document.getElementById('sheetPick').innerHTML='';}
+  function closeDrawer(){document.getElementById('ov').classList.remove('on');document.getElementById('drawer').classList.remove('on');document.getElementById('sheetPick').innerHTML='';window._srcSheet=null;}
   document.getElementById('ov').onclick=closeDrawer;
   document.getElementById('dClose').onclick=closeDrawer;
   document.getElementById('j_close2').onclick=closeDrawer;
 
   function fillJob(j){
-    setVal('j_customer',j.customer);setVal('j_number',j.number);setVal('j_vehicle',j.vehicle);
+    setKind(j.kind||'customer');
+    if(j.kind==='vendor'){document.getElementById('j_biz').value=j.customer||'';}else{setVal('j_customer',j.customer);}
+    setVal('j_number',j.number);setVal('j_vehicle',j.vehicle);
     document.getElementById('j_fig').value=j.fig_type||'hatchback';
     setVal('j_intake',j.intake_date);setVal('j_due',j.due_date);
     document.getElementById('j_status').value=j.status||'waiting';
     document.getElementById('j_loan').value=j.loan_car_id||'';
-    document.getElementById('j_vendor').value=(j.outsource&&j.outsource.vendor)||'';
+    document.getElementById('j_out').value=(j.outsource&&j.outsource.vendor)||'';
     setVal('j_note',j.note);renderStages(j.stages);
   }
-  function newJob(){editId=null;document.getElementById('dTitle').textContent='入庫を追加';document.getElementById('j_del').style.display='none';document.getElementById('fromSheetCard').style.display='block';
-    fillJob({status:'waiting',fig_type:'hatchback',stages:{}});var m=document.getElementById('j_msg');m.textContent='';m.className='msg';openDrawer();}
+  function newJob(){editId=null;document.getElementById('dTitle').textContent='入庫を追加';document.getElementById('j_del').style.display='none';
+    fillJob({status:'waiting',fig_type:'hatchback',stages:{},kind:'customer'});var m=document.getElementById('j_msg');m.textContent='';m.className='msg';openDrawer();}
   function openJob(id){var j=JOBS.filter(function(x){return x.id===id;})[0];if(!j)return;editId=id;
-    document.getElementById('dTitle').textContent='入庫案件';document.getElementById('j_del').style.display='inline-block';document.getElementById('fromSheetCard').style.display='none';
+    document.getElementById('dTitle').textContent=(j.kind==='vendor'?'業者入庫案件':'入庫案件');document.getElementById('j_del').style.display='inline-block';
     fillJob(j);var m=document.getElementById('j_msg');m.textContent='';m.className='msg';openDrawer();}
   document.getElementById('addJob').onclick=newJob;
 
   document.getElementById('j_save').onclick=async function(){
     var m=document.getElementById('j_msg');m.textContent='';m.className='msg';
-    var cust=val('j_customer');if(!cust){m.textContent='お客様名を入力してください。';m.className='msg err';return;}
-    var row={shop_id:SHOP,customer:cust,number:val('j_number'),vehicle:val('j_vehicle'),fig_type:document.getElementById('j_fig').value,
+    var name=curKind==='vendor'?document.getElementById('j_biz').value:val('j_customer');
+    if(!name){m.textContent=(curKind==='vendor'?'業者名を選択してください。':'お客様名を入力してください。');m.className='msg err';return;}
+    var row={shop_id:SHOP,kind:curKind,customer:name,number:val('j_number'),vehicle:val('j_vehicle'),fig_type:document.getElementById('j_fig').value,
       intake_date:val('j_intake')||null,due_date:val('j_due')||null,status:document.getElementById('j_status').value,
-      loan_car_id:document.getElementById('j_loan').value||null,outsource:{vendor:document.getElementById('j_vendor').value||''},
+      loan_car_id:document.getElementById('j_loan').value||null,outsource:{vendor:document.getElementById('j_out').value||''},
       stages:collectStages(),note:val('j_note')};
-    if(window._srcSheet){row.source_sheet_id=window._srcSheet;}
+    if(window._srcSheet)row.source_sheet_id=window._srcSheet;
     this.disabled=true;this.textContent='保存中…';
     var r=editId?await sb.from('jobs').update(row).eq('id',editId):await sb.from('jobs').insert(row);
     this.disabled=false;this.textContent='保存';
     if(r.error){m.textContent='保存できませんでした：'+r.error.message;m.className='msg err';return;}
-    window._srcSheet=null;closeDrawer();await loadAll();
+    closeDrawer();await loadJobs();
   };
   document.getElementById('j_del').onclick=async function(){
     if(!editId||!confirm('この案件を削除しますか？'))return;
-    await sb.from('jobs').delete().eq('id',editId);closeDrawer();await loadAll();
+    await sb.from('jobs').delete().eq('id',editId);closeDrawer();await loadJobs();
   };
 
   document.getElementById('loadSheetBtn').onclick=async function(){
@@ -262,15 +378,14 @@
       return '<div class="pick"><div>'+esc(nm)+' 様　<span class="small">'+esc(veh)+'</span></div><button class="ghost" data-sid="'+x.id+'">読み込む</button></div>';}).join('');
     box.querySelectorAll('[data-sid]').forEach(function(b){b.onclick=function(){
       var x=rows.filter(function(r){return r.id===b.getAttribute('data-sid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
-      setVal('j_customer',c.name||'');setVal('j_vehicle',d.vehicleName||FIGMAP[d.v]||'');document.getElementById('j_fig').value=d.v||'hatchback';
+      setKind('customer');setVal('j_customer',c.name||'');setVal('j_vehicle',d.vehicleName||FIGMAP[d.v]||'');document.getElementById('j_fig').value=d.v||'hatchback';
       setVal('j_number',c.number||'');window._srcSheet=x.id;box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
     };});
   };
 
-  async function loadAll(){
+  async function loadJobs(){
     var jr=await sb.from('jobs').select('*').eq('shop_id',SHOP).order('created_at',{ascending:false});
-    JOBS=(jr.data)||[];
-    tilesRender();renderJobs();
+    JOBS=(jr.data)||[];tilesRender();renderView();
   }
 
   (async function(){
@@ -279,18 +394,17 @@
     var uid=s.data.session.user.id;
     var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
     if(!p.data||!p.data.shop_id){location.replace('home.html');return;}
-    SHOP=p.data.shop_id;ROLE=p.data.role;
+    SHOP=p.data.shop_id;
     document.getElementById('whoName').textContent=(p.data.name||'')+' さん';
     var sh=await sb.from('shops').select('name').eq('id',SHOP).single();
     if(sh.data)document.getElementById('shopName').textContent=sh.data.name||'工場スケジュール';
     var st=await sb.from('profiles').select('name,role').eq('shop_id',SHOP);
     STAFFS=((st.data)||[]).filter(function(x){return x.name;}).map(function(x){return x.name;});
-    var lc=await sb.from('loan_cars').select('id,car,number').eq('shop_id',SHOP).order('created_at');
-    LOANS=(lc.data)||[];
-    var vn=await sb.from('outsourcers').select('name').eq('shop_id',SHOP).order('created_at');
-    VENDORS=(vn.data)||[];
+    var lc=await sb.from('loan_cars').select('id,car,number').eq('shop_id',SHOP).order('created_at');LOANS=(lc.data)||[];
+    var os=await sb.from('outsourcers').select('name').eq('shop_id',SHOP).order('created_at');OUTSRC=(os.data)||[];
+    var bz=await sb.from('vendors').select('name').eq('shop_id',SHOP).order('created_at');BIZ=(bz.data)||[];
     buildSelectors();fillRefSelectors();
-    await loadAll();
+    await loadJobs();
   })();
 </script>
 </body>
