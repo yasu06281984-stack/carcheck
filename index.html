@@ -326,8 +326,9 @@
           <p class="muted">車検証の「使用者の本拠の位置」が自動入力されます。</p>
         </div>
         <div class="field"><label for="cust_reqaddr">ご依頼者様の住所 <span class="opt">（任意）</span></label>
+          <div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" id="req_zip" inputmode="numeric" placeholder="郵便番号（7桁）" style="flex:1"><button type="button" class="btn ghost" id="reqZipBtn" style="padding:8px 12px;font-size:.85rem;white-space:nowrap">住所検索</button></div>
           <input type="text" id="cust_reqaddr" placeholder="上記と異なる場合に入力">
-          <p class="muted">入力された場合、PDF等の住所はこちらが使われます。</p>
+          <p class="muted">郵便番号で住所をある程度自動入力できます（番地は追記してください）。入力された場合、PDF等の住所はこちらが使われます。</p>
         </div>
         <div class="field"><label for="cust_mail">メールアドレス <span class="opt">（任意）</span></label>
           <input type="email" id="cust_mail" autocomplete="email" placeholder="例：taro@example.com">
@@ -445,9 +446,9 @@
       <div id="wizPreview" class="p-area"></div>
 
       <div id="intakeOnly">
-        <div class="field" style="margin-top:18px"><label for="intake_date">入庫予定日 <span class="opt">（任意）</span></label>
+        <div class="field" style="margin-top:18px"><label for="intake_date">入庫日</label>
           <input type="date" id="intake_date">
-          <p class="muted">現段階で入庫が決まっている場合は、ご記入ください。</p>
+          <p class="muted">入庫日を入力してください。</p>
         </div>
         <h3 style="margin-top:18px">貴重品・お忘れ物チェック</h3>
         <p class="muted">車内の貴重品・お忘れ物がないかご確認ください。</p>
@@ -484,14 +485,15 @@
       <div id="dbMsg" class="muted" style="margin-top:10px"></div>
 
       <div id="loanPrompt" style="display:none;margin-top:18px;border:2px solid #E8810C;background:#FCEFD9;border-radius:12px;padding:16px">
-        <div style="font-weight:800;font-size:1.05rem;color:#9a5800">🚗 代車を貸し出しますか？</div>
-        <div style="font-size:.85rem;color:#7a5a20;margin-top:4px">代車を利用される場合は、代車貸出シートを作成します。お客様情報（入庫の場合は署名も）をこのまま引き継ぎ、再入力の手間を省きます。</div>
+        <div style="font-weight:800;font-size:1.05rem;color:#9a5800">🚗 代車を出しますか？</div>
+        <div style="font-size:.85rem;color:#7a5a20;margin-top:4px">「はい」を選ぶと、お客様情報・署名を引き継いで代車貸出シートへ進みます。完了後に受付・代車のPDF／QRをまとめて表示します。「いいえ」を選ぶと、このまま受付のPDF／QRを表示します。</div>
         <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-          <button type="button" id="loanYesBtn" style="background:#E8810C;color:#fff;border:0;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem">はい、代車貸出シートを作成する</button>
-          <button type="button" id="loanNoBtn" style="background:#fff;color:#9a5800;border:1px solid #E8810C;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer">いいえ</button>
+          <button type="button" id="loanYesBtn" style="background:#E8810C;color:#fff;border:0;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem">はい（代車を出す）</button>
+          <button type="button" id="loanNoBtn" style="background:#fff;color:#9a5800;border:1px solid #E8810C;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer">いいえ（代車なし）</button>
         </div>
       </div>
 
+      <div id="outputs" style="display:none">
       <h3 style="margin-top:18px">PDFの出力</h3>
       <p class="muted">印刷パターンを選んでPDF保存・印刷できます。</p>
       <div class="choice">
@@ -505,6 +507,7 @@
       <p class="muted">お客様がスキャンすると、この受付票を表示・PDF保存できます。</p>
       <button type="button" class="btn ghost" id="finalShare" style="padding:10px 14px">共有QRを作成</button>
       <div id="finalShareOut" style="margin-top:12px"></div>
+      </div>
 
       <div style="margin-top:20px"><button type="button" class="btn" id="finishBtn" style="width:100%">新しい受付を開始</button></div>
     </section>

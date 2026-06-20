@@ -117,6 +117,7 @@
     <div id="signCarried" style="display:none">
       <p class="small" style="margin-top:0">上記同意の上で、入庫チェックシートの署名を反映して利用します。</p>
       <img id="carriedImg" style="max-height:90px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;display:block">
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.9rem"><input type="checkbox" id="agreeChk"> 上記に同意します（お客様確認）</label>
       <div style="margin-top:8px"><button class="ghost" id="resignBtn">署名し直す</button></div>
     </div>
     <button class="ghost" id="signStartBtn">署名する</button>
@@ -228,7 +229,7 @@
   function showSignArea(){document.getElementById('signStartBtn').style.display='none';document.getElementById('signCarried').style.display='none';document.getElementById('signArea').style.display='';setTimeout(resizeSign,60);}
   initSignPad();
   document.getElementById('signStartBtn').onclick=showSignArea;
-  document.getElementById('resignBtn').onclick=function(){signData='';showSignArea();};
+  document.getElementById('resignBtn').onclick=function(){signData='';carriedSign=false;showSignArea();};
   window.addEventListener('resize',resizeSign);
 
   function amountLabel(){if(!amtType)return '';if(amtType==='free')return '無料';if(amtType==='insurance')return '保険利用';return AMT[amtType]+'　'+(val('amt')?'¥'+val('amt'):'');}
@@ -242,7 +243,8 @@
       return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w"><img src="assets/vehicles/'+(x.fig_type||'hatchback')+'/'+v[0]+'.png">'+marks+'</div></div>';
     }).join('')+'</div>';
     var sigImg=signData?'<img src="'+signData+'">':'';
-    var signNote=carriedSign?'上記同意の上で、入庫チェックシートの署名を反映して利用します。':'上記内容・利用規約に同意し、車両をお借りします。';
+    var agreed=document.getElementById('agreeChk')&&document.getElementById('agreeChk').checked;
+    var signNote=carriedSign?('上記同意の上で、入庫チェックシートの署名を反映して利用します。'+(agreed?'（同意確認済み）':'')):'上記内容・利用規約に同意し、車両をお借りします。';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr"><div>貸出日：'+esc(val('lend_date')||'____/__/__')+'</div><div>'+shopLines+'</div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
@@ -285,6 +287,7 @@
     var msg=document.getElementById('msg');msg.textContent='';msg.className='msg';
     if(!curLoan){msg.textContent='先に代車を選択してください。';msg.className='msg err';return;}
     if(!val('c_name')){msg.textContent='お客様名を入力してください。';msg.className='msg err';return;}
+    if(carriedSign && !document.getElementById('agreeChk').checked){msg.textContent='入庫時の署名を利用する場合は「上記に同意します」にチェックを入れるか、署名し直してください。';msg.className='msg err';return;}
     var row={shop_id:SHOP,loan_car_id:curLoan.id,customer:val('c_name'),cust_vehicle:val('c_veh'),cust_tel:val('c_tel'),
       amount_type:amtType||null,amount:val('amt')||null,lend_date:val('lend_date')||null,return_date:val('return_date')||null,
       sign:signData||null,snapshot:{car:curLoan.car,number:curLoan.number,shaken:curLoan.shaken,fig_type:curLoan.fig_type,equip:curLoan.equip,age:curLoan.age,fuel:curLoan.fuel,damage:curLoan.damage}};

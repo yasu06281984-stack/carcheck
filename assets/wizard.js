@@ -273,15 +273,20 @@
   }
   window.wizardOnSign = function () { var m = $('signDoneMsg'); if (m) m.hidden = false; };
   function onEnterStep5() {
-    wizardSave();
-    var lp = $('loanPrompt');
-    if (lp) lp.style.display = (wiz.type === 'intake' || wiz.type === 'business') ? '' : 'none';
+    var lp = $('loanPrompt'); if (lp) lp.style.display = 'none';
+    var out = $('outputs'); if (out) out.style.display = 'none';
+    wizardSave(afterSaveStep5);
   }
+  function afterSaveStep5() {
+    if (wiz.type === 'intake' || wiz.type === 'business') { var lp = $('loanPrompt'); if (lp) lp.style.display = ''; }
+    else { var out = $('outputs'); if (out) out.style.display = ''; }
+  }
+  function showOutputs() { var lp = $('loanPrompt'); if (lp) lp.style.display = 'none'; var out = $('outputs'); if (out) out.style.display = ''; }
 
   /* ---------------- 保存・共有 ---------------- */
   function makeQR(text) { if (typeof qrcode === 'undefined') return ''; try { var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createDataURL(5, 8); } catch (e) { return ''; } }
   function localNo() { var n = new Date(); var p = (wiz.type === 'estimate') ? 'E' : 'I'; return p + n.getFullYear() + ('0' + (n.getMonth() + 1)).slice(-2) + ('0' + n.getDate()).slice(-2) + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(); }
-  function wizardSave() {
+  function wizardSave(cb) {
     var no = $('saveNo'), db = $('dbMsg');
     if (no) no.textContent = '保存中…';
     var payload = previewData();
@@ -295,6 +300,7 @@
         window.csShareURL = base + 'view.html?id=' + d.id; window.csShareQR = makeQR(window.csShareURL);
         if (db) db.innerHTML = '<span style="color:#1f6b2a">✓ データベースへ反映されました。</span><br>「' + esc(wiz.staff || '当店') + '」会社様の管理ページ内でも、この受付情報を閲覧できます。';
         saveDraft();
+        if (cb) cb();
       })
       .catch(function () {
         if (!wiz.savedNo) wiz.savedNo = localNo();
@@ -302,6 +308,7 @@
         window.csShareURL = (location.href.split('#')[0]); window.csShareQR = makeQR(window.csShareURL);
         if (db) db.innerHTML = '<span class="muted">※ 保存サーバー未接続のため、ローカルの保存番号を表示しています。公開（Supabase設定＋デプロイ）後に、データベース反映と管理ページ閲覧が有効になります。</span>';
         saveDraft();
+        if (cb) cb();
       });
   }
   function showFinalShare() {
@@ -362,6 +369,7 @@
       if (wiz.type === 'business') { if (!val('biz_name')) { alert('業者名を選択してください。'); return false; } }
       else { if (!wiz.consent) { alert('車検証の撮影可否を選択してください。'); return false; } }
     }
+    if (n === 4 && wiz.type === 'intake') { if (!val('intake_date')) { alert('入庫日を入力してください。'); return false; } }
     return true;
   }
 
@@ -425,7 +433,18 @@
     if ($('finalShare')) $('finalShare').addEventListener('click', showFinalShare);
     if ($('finishBtn')) $('finishBtn').addEventListener('click', function () { clearDraft(); location.reload(); });
     if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', goLoanSheet);
-    if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', function () { var lp = $('loanPrompt'); if (lp) lp.style.display = 'none'; });
+    if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', showOutputs);
+    if ($('reqZipBtn')) $('reqZipBtn').addEventListener('click', function () {
+      var z = (val('req_zip') || '').replace(/[^0-9]/g, '');
+      if (z.length !== 7) { alert('郵便番号は7桁の数字で入力してください。'); return; }
+      var btn = this; btn.disabled = true; btn.textContent = '検索中…';
+      fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode=' + z).then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (j.results && j.results[0]) { var a = j.results[0]; setVal('cust_reqaddr', (a.address1 || '') + (a.address2 || '') + (a.address3 || '')); }
+          else { alert('該当する住所が見つかりませんでした。手入力してください。'); }
+        }).catch(function () { alert('住所の自動取得に失敗しました。手入力してください。'); })
+        .then(function () { btn.disabled = false; btn.textContent = '住所検索'; });
+    });
 
     document.addEventListener('input', function () { if (wiz.started) window.wizardOnChange(); });
     document.addEventListener('change', function () { if (wiz.started) window.wizardOnChange(); });
