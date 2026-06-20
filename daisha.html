@@ -271,7 +271,9 @@
 
   function showFinal(){
     var box=document.getElementById('intakeShare');
-    if(intakeId){
+    if(window.top!==window.self){
+      box.innerHTML='受付チェックシートのPDF・QRは、受付完了画面に表示されています。';
+    } else if(intakeId){
       var base=location.origin+location.pathname.replace(/[^/]*$/,'');
       var url=base+'view.html?id='+encodeURIComponent(intakeId);
       var qr=makeQR(url);

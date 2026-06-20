@@ -212,7 +212,7 @@
   }
   function renderPreview() { var el = $('wizPreview'); if (el) el.innerHTML = renderSheet(previewData()); }
 
-  function goLoanSheet() {
+  function storeLoanHandoff() {
     var d = previewData(); var c = d.cust || {};
     var name = (wiz.type === 'business') ? (d.bizName || c.name || '') : (c.name || '');
     var handoff = {
@@ -222,7 +222,16 @@
       intakeId: wiz.savedNo || ''
     };
     try { sessionStorage.setItem('cs_loan_handoff', JSON.stringify(handoff)); } catch (e) {}
-    location.href = 'daisha.html';
+  }
+  function openLoanOverlay() {
+    storeLoanHandoff();
+    var f = $('loanFrame'); if (f) f.src = 'daisha.html';
+    var ov = $('loanOverlay'); if (ov) ov.style.display = '';
+  }
+  function chooseLoanYes() {
+    showOutputs();
+    var la = $('loanArea'); if (la) la.style.display = '';
+    openLoanOverlay();
   }
 
   /* ---------------- ステップ遷移 ---------------- */
@@ -432,8 +441,14 @@
     qa('.step[data-step="5"] [data-pdf]').forEach(function (b) { b.addEventListener('click', function () { setMeta(); if (window.csAPI) window.csAPI.print(b.getAttribute('data-pdf')); }); });
     if ($('finalShare')) $('finalShare').addEventListener('click', showFinalShare);
     if ($('finishBtn')) $('finishBtn').addEventListener('click', function () { clearDraft(); location.reload(); });
-    if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', goLoanSheet);
+    if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', chooseLoanYes);
     if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', showOutputs);
+    if ($('openLoanBtn')) $('openLoanBtn').addEventListener('click', openLoanOverlay);
+    if ($('closeLoanBtn')) $('closeLoanBtn').addEventListener('click', function () {
+      var ov = $('loanOverlay'); if (ov) ov.style.display = 'none';
+      var f = $('loanFrame'); if (f) f.src = 'about:blank';
+      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを再表示・PDF';
+    });
     if ($('reqZipBtn')) $('reqZipBtn').addEventListener('click', function () {
       var z = (val('req_zip') || '').replace(/[^0-9]/g, '');
       if (z.length !== 7) { alert('郵便番号は7桁の数字で入力してください。'); return; }
