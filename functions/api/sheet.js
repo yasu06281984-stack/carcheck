@@ -1,4 +1,4 @@
-// GET /api/sheet?id=xxxx
+// GET /api/sheet?id=xxxx  -- 保存済みの受付シートデータを返す
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
 
 function sbHeaders(key, extra) {
@@ -18,14 +18,11 @@ export async function onRequestGet({ request, env }) {
     const r = await fetch(base + '/rest/v1/sheets?id=eq.' + encodeURIComponent(id) + '&select=data', {
       headers: sbHeaders(env.SUPABASE_SERVICE_KEY)
     });
-    if (!r.ok) {
-      const t = await r.text();
-      return new Response(JSON.stringify({ error: 'db', status: r.status, detail: (t || '').slice(0, 400), keyhint: (env.SUPABASE_SERVICE_KEY || '').slice(0, 10) }), { status: 200, headers: CORS });
-    }
+    if (!r.ok) return new Response(JSON.stringify({ error: 'db' }), { status: 500, headers: CORS });
     const rows = await r.json();
     if (!rows.length) return new Response(JSON.stringify({ error: 'not_found' }), { status: 404, headers: CORS });
     return new Response(JSON.stringify(rows[0].data), { headers: CORS });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: CORS });
+    return new Response(JSON.stringify({ error: 'server' }), { status: 500, headers: CORS });
   }
 }
