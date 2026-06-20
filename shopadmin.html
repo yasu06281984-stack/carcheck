@@ -39,6 +39,13 @@
   .msg{font-size:.84rem;margin-top:10px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
   .small{font-size:.76rem;color:var(--muted)}
   .add{display:flex;gap:10px}.add input{flex:1}
+  .hours{display:flex;flex-direction:column;gap:8px}
+  .hrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hlbl{width:42px;font-size:.85rem;color:var(--muted);font-weight:700}
+  .hrow input[type=time]{padding:8px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:.9rem}
+  .hrow input:disabled{background:var(--surface2);color:#aaa}
+  .cl{display:flex;align-items:center;gap:5px;font-size:.82rem;color:var(--muted)}
+  .hprev{font-size:.8rem;color:var(--brand);font-weight:600;background:var(--brand-soft);border-radius:8px;padding:7px 10px;margin-top:8px}
   .hide{display:none!important}
   @media(max-width:680px){.form{grid-template-columns:1fr}}
 </style>
@@ -63,9 +70,18 @@
       <div class="form-col">
         <div class="field"><label>店舗名</label><input id="sh_name"></div>
         <div class="field"><label>会社名</label><input id="sh_company"></div>
-        <div class="field"><label>住所</label><input id="sh_address"></div>
+        <div class="field"><label>郵便番号</label><div class="add"><input id="sh_postal" placeholder="1000001" inputmode="numeric"><button class="primary" id="sh_zip" style="margin-top:0;white-space:nowrap">住所を自動入力</button></div></div>
+        <div class="field"><label>住所（番地・建物は追記してください）</label><input id="sh_address"></div>
         <div class="field"><label>電話番号</label><input id="sh_tel"></div>
-        <div class="field"><label>営業時間</label><input id="sh_hours"></div>
+        <div class="field"><label>営業時間</label>
+          <div class="hours">
+            <div class="hrow"><span class="hlbl">平日</span><input type="time" id="h_wd_o"> 〜 <input type="time" id="h_wd_c"></div>
+            <div class="hrow"><span class="hlbl">土曜</span><label class="cl"><input type="checkbox" id="h_sat_x">定休</label><input type="time" id="h_sat_o"> 〜 <input type="time" id="h_sat_c"></div>
+            <div class="hrow"><span class="hlbl">日曜</span><label class="cl"><input type="checkbox" id="h_sun_x">定休</label><input type="time" id="h_sun_o"> 〜 <input type="time" id="h_sun_c"></div>
+            <div class="hrow"><span class="hlbl">祝日</span><label class="cl"><input type="checkbox" id="h_hol_x">定休</label><input type="time" id="h_hol_o"> 〜 <input type="time" id="h_hol_c"></div>
+          </div>
+          <div class="hprev" id="h_prev">—</div>
+        </div>
         <div class="field"><label>ホームページURL</label><input id="sh_url"></div>
       </div>
       <button class="primary" id="sh_save">保存</button>
@@ -78,12 +94,13 @@
     <div class="card">
       <div class="card-l">スタッフを招待</div>
       <div class="form">
-        <div class="field"><label>お名前（姓 名）</label><input id="st_name" placeholder="田中 健"></div>
-        <div class="field"><label>メールアドレス</label><input id="st_email" type="email" placeholder="staff@example.com"></div>
+        <div class="field"><label>姓</label><input id="st_sei" placeholder="田中"></div>
+        <div class="field"><label>名</label><input id="st_mei" placeholder="健"></div>
+        <div class="field" style="grid-column:1/-1"><label>メールアドレス</label><input id="st_email" type="email" placeholder="staff@example.com"></div>
       </div>
       <button class="primary" id="st_invite">招待を登録</button>
       <div class="msg" id="st_msg"></div>
-      <div class="small" style="margin-top:6px">登録後、この方が新規登録ページ（/signup.html）でこのメールで登録すると、この店舗のスタッフになります。</div>
+      <div class="small" style="margin-top:6px">登録後、この方が新規登録ページ（/signup.html）でこのメールで登録すると、この店舗のスタッフになります。バッジは「姓1＋名1」で表示されます。</div>
     </div>
     <div class="card"><div class="card-l">招待中（未登録）</div><div id="stInviteList" class="small">読み込み中…</div></div>
   </div>
@@ -109,6 +126,8 @@
   var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   function badge(name){if(!name)return '—';var n=name.trim();if(/\s/.test(n)){var p=n.split(/\s+/);return (p[0]||'').slice(0,1)+(p[1]||'').slice(0,1);}return n.slice(0,2);}
+  function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+  function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
   var SHOP=null;
 
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
@@ -118,20 +137,50 @@
   };});
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
 
-  function setVal(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
-  function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+  // ---- 営業時間 ----
+  function hhmm(t){return t?t.replace(/^0/,''):t;}
+  function getHours(){
+    function g(k){return {o:val('h_'+k+'_o'),c:val('h_'+k+'_c'),x:document.getElementById('h_'+k+'_x').checked};}
+    return {wd:{o:val('h_wd_o'),c:val('h_wd_c')},sat:g('sat'),sun:g('sun'),hol:g('hol')};
+  }
+  function buildHoursText(d){
+    var p=[];if(d.wd.o&&d.wd.c)p.push('平日 '+hhmm(d.wd.o)+'〜'+hhmm(d.wd.c));
+    [['土',d.sat],['日',d.sun],['祝',d.hol]].forEach(function(e){var x=e[1];if(x.x)p.push(e[0]+' 定休');else if(x.o&&x.c)p.push(e[0]+' '+hhmm(x.o)+'〜'+hhmm(x.c));});
+    return p.join(' / ');
+  }
+  function syncDisabled(){['sat','sun','hol'].forEach(function(k){var c=document.getElementById('h_'+k+'_x').checked;document.getElementById('h_'+k+'_o').disabled=c;document.getElementById('h_'+k+'_c').disabled=c;});}
+  function updatePrev(){var t=buildHoursText(getHours());document.getElementById('h_prev').textContent=t||'—';}
+  function setHours(d){if(d){setVal('h_wd_o',d.wd&&d.wd.o);setVal('h_wd_c',d.wd&&d.wd.c);
+    ['sat','sun','hol'].forEach(function(k){var x=d[k]||{};setVal('h_'+k+'_o',x.o);setVal('h_'+k+'_c',x.c);document.getElementById('h_'+k+'_x').checked=!!x.x;});}
+    syncDisabled();updatePrev();}
+  document.querySelectorAll('.hours input').forEach(function(i){i.addEventListener('change',function(){syncDisabled();updatePrev();});});
+
+  // ---- 郵便番号→住所 ----
+  document.getElementById('sh_zip').onclick=async function(){
+    var msg=document.getElementById('sh_msg');msg.textContent='';msg.className='msg';
+    var z=val('sh_postal').replace(/[^0-9]/g,'');
+    if(z.length!==7){msg.textContent='郵便番号は7桁の数字で入力してください。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='検索中…';
+    try{
+      var r=await fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode='+z);
+      var j=await r.json();
+      if(j.results&&j.results[0]){var a=j.results[0];setVal('sh_address',(a.address1||'')+(a.address2||'')+(a.address3||''));msg.textContent='住所を入力しました。番地・建物を追記してください。';msg.className='msg ok';}
+      else{msg.textContent='該当する住所が見つかりませんでした。手入力してください。';msg.className='msg err';}
+    }catch(e){msg.textContent='住所の自動取得に失敗しました。手入力してください。';msg.className='msg err';}
+    this.disabled=false;this.textContent='住所を自動入力';
+  };
 
   async function loadShop(){
     var r=await sb.from('shops').select('*').eq('id',SHOP).single();
-    if(r.error||!r.data)return;
-    var s=r.data;
-    setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_address',s.address);
-    setVal('sh_tel',s.tel);setVal('sh_hours',s.hours);setVal('sh_url',s.url);
+    if(r.error||!r.data)return;var s=r.data;
+    setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_postal',s.postal);setVal('sh_address',s.address);
+    setVal('sh_tel',s.tel);setVal('sh_url',s.url);setHours(s.hours_data);
   }
   document.getElementById('sh_save').onclick=async function(){
     var msg=document.getElementById('sh_msg');msg.textContent='';msg.className='msg';
     this.disabled=true;this.textContent='保存中…';
-    var r=await sb.from('shops').update({name:val('sh_name'),company:val('sh_company'),address:val('sh_address'),tel:val('sh_tel'),hours:val('sh_hours'),url:val('sh_url')}).eq('id',SHOP);
+    var hd=getHours();
+    var r=await sb.from('shops').update({name:val('sh_name'),company:val('sh_company'),postal:val('sh_postal'),address:val('sh_address'),tel:val('sh_tel'),url:val('sh_url'),hours:buildHoursText(hd),hours_data:hd}).eq('id',SHOP);
     this.disabled=false;this.textContent='保存';
     if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
     msg.textContent='保存しました。';msg.className='msg ok';
@@ -150,8 +199,7 @@
   async function loadStInvites(){
     var r=await sb.from('invites').select('email,name').eq('shop_id',SHOP).eq('role','staff');
     if(r.error){document.getElementById('stInviteList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
-    var rows=r.data||[];
-    if(!rows.length){document.getElementById('stInviteList').innerHTML='招待中のものはありません。';return;}
+    var rows=r.data||[];if(!rows.length){document.getElementById('stInviteList').innerHTML='招待中のものはありません。';return;}
     var h='<table><tbody>';rows.forEach(function(v){h+='<tr><td>'+esc(v.name||'')+'</td><td class="small">'+esc(v.email)+'</td><td class="ops"><button class="lnk" data-del="'+esc(v.email)+'">取消</button></td></tr>';});
     document.getElementById('stInviteList').innerHTML=h+'</tbody></table>';
     document.querySelectorAll('#stInviteList [data-del]').forEach(function(b){b.onclick=async function(){await sb.from('invites').delete().eq('email',b.getAttribute('data-del'));loadStInvites();};});
@@ -159,19 +207,19 @@
   document.getElementById('st_invite').onclick=async function(){
     var msg=document.getElementById('st_msg');msg.textContent='';msg.className='msg';
     var email=val('st_email');if(!email){msg.textContent='メールアドレスを入力してください。';msg.className='msg err';return;}
+    var nm=(val('st_sei')+' '+val('st_mei')).trim();
     this.disabled=true;this.textContent='登録中…';
-    var r=await sb.from('invites').upsert({email:email,name:val('st_name')||null,role:'staff',shop_id:SHOP});
+    var r=await sb.from('invites').upsert({email:email,name:nm||null,role:'staff',shop_id:SHOP});
     this.disabled=false;this.textContent='招待を登録';
     if(r.error){msg.textContent='登録できませんでした：'+r.error.message;msg.className='msg err';return;}
-    msg.textContent='招待を登録しました。';msg.className='msg ok';setVal('st_email','');setVal('st_name','');loadStInvites();
+    msg.textContent='招待を登録しました。';msg.className='msg ok';setVal('st_email','');setVal('st_sei','');setVal('st_mei','');loadStInvites();
   };
 
   function listMaster(table,listId){
     return sb.from(table).select('id,name').eq('shop_id',SHOP).order('created_at').then(function(r){
       var el=document.getElementById(listId);
       if(r.error){el.innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
-      var rows=r.data||[];
-      if(!rows.length){el.innerHTML='まだ登録がありません。';return;}
+      var rows=r.data||[];if(!rows.length){el.innerHTML='まだ登録がありません。';return;}
       var h='<table><tbody>';rows.forEach(function(x){h+='<tr><td>'+esc(x.name)+'</td><td class="ops"><button class="lnk" data-id="'+x.id+'">削除</button></td></tr>';});
       el.innerHTML=h+'</tbody></table>';
       el.querySelectorAll('[data-id]').forEach(function(b){b.onclick=async function(){await sb.from(table).delete().eq('id',b.getAttribute('data-id'));listMaster(table,listId);};});
