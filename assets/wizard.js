@@ -218,7 +218,8 @@
     var handoff = {
       kind: wiz.type, name: name, tel: c.tel || '', vehicle: d.vehicleName || '',
       due: (wiz.type === 'business') ? (d.bizDue || '') : '',
-      sign: (wiz.type === 'intake') ? (d.sign || window.csSignature || '') : ''
+      sign: (wiz.type === 'intake') ? (d.sign || window.csSignature || '') : '',
+      intakeId: wiz.savedNo || ''
     };
     try { sessionStorage.setItem('cs_loan_handoff', JSON.stringify(handoff)); } catch (e) {}
     location.href = 'daisha.html';

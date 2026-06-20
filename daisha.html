@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>代車貸出シート — CARCHECK</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/qrcode.js"></script>
 <style>
   :root{--paper:#EBEEF2;--surface:#fff;--surface2:#F6F8FA;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--brand:#1F4E74;--brand-deep:#143A57;--brand-soft:#E7EEF5;--amber:#E8810C;--green:#2E9E6B;--green-soft:#E2F2EA;--red:#C8443B;--purple:#7A3DB8}
   *{box-sizing:border-box}
@@ -131,6 +132,15 @@
     <button class="ghost" id="pdfBtn">PDF出力</button>
   </div>
   <div class="msg" id="msg"></div>
+
+  <div class="card" id="finalPanel" style="display:none;margin-top:14px;border:2px solid var(--brand)">
+    <div class="card-l">最終確認（受付＋代車）</div>
+    <div style="font-weight:700;margin-bottom:6px">① 受付チェックシート</div>
+    <div id="intakeShare" class="small">—</div>
+    <div style="font-weight:700;margin:16px 0 6px">② 代車貸出シート</div>
+    <button class="ghost" id="pdfBtn2">代車貸出シートのPDFを出力</button>
+    <div class="small" style="margin-top:8px">※ 受付チェックシートのPDFは、上のQRまたは「受付シートを表示」から、お客様の画面で保存できます。</div>
+  </div>
 </div>
 
 <div id="printArea"></div>
@@ -150,7 +160,8 @@
   var FUELMAP={};
   var TERMS='【代車貸出 利用規約（サンプル）】\n\n1. 貸出車両は当店の所有物です。丁寧な運転と適切な管理をお願いします。\n2. 走行中の事故・違反・駐車違反等は、原則として借受人の責任となります。\n3. 返却時は貸出時と同等の状態（燃料・清掃・装備）でのご返却をお願いします。\n4. 車両に新たな傷・汚損・破損が生じた場合は、別途修理費等をご負担いただくことがあります。\n5. 禁煙車での喫煙、ペットの同乗等はご遠慮ください。\n6. 返却予定日を過ぎる場合は、事前に必ずご連絡ください。\n\n上記の内容に同意のうえ、ご署名ください。\n（本文はサンプルです。実際の規約文に差し替えてください。）';
 
-  var SHOP=null, SHOPINFO={}, LOANS=[], curLoan=null, amtType='', signData='', carriedSign=false;
+  var SHOP=null, SHOPINFO={}, LOANS=[], curLoan=null, amtType='', signData='', carriedSign=false, intakeId='';
+  function makeQR(text){ if(typeof qrcode==='undefined')return ''; try{var q=qrcode(0,'M');q.addData(text);q.make();return q.createDataURL(5,8);}catch(e){return '';} }
 
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   document.getElementById('termsBox').textContent=TERMS;
@@ -249,10 +260,26 @@
       '<div class="psign"><div style="flex:0 0 auto;font-size:11px">'+signNote+'<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>';
     document.getElementById('printArea').innerHTML=html;
   }
-  document.getElementById('pdfBtn').onclick=function(){
-    if(!curLoan){document.getElementById('msg').textContent='先に代車を選択してください。';document.getElementById('msg').className='msg err';return;}
+  function doLoanPrint(){
+    if(!curLoan){var m=document.getElementById('msg');m.textContent='先に代車を選択してください。';m.className='msg err';return;}
     buildPrint();setTimeout(function(){window.print();},150);
-  };
+  }
+  document.getElementById('pdfBtn').onclick=doLoanPrint;
+  document.getElementById('pdfBtn2').onclick=doLoanPrint;
+
+  function showFinal(){
+    var box=document.getElementById('intakeShare');
+    if(intakeId){
+      var base=location.origin+location.pathname.replace(/[^/]*$/,'');
+      var url=base+'view.html?id='+encodeURIComponent(intakeId);
+      var qr=makeQR(url);
+      box.innerHTML=(qr?'<img src="'+qr+'" style="width:120px;height:120px;border:1px solid var(--line);image-rendering:pixelated">':'')+
+        '<div style="margin-top:8px"><a href="'+url+'" target="_blank" style="display:inline-block;background:#fff;color:var(--brand);border:1px solid var(--line);padding:9px 14px;border-radius:9px;font-weight:700;text-decoration:none">受付シートを表示・PDF</a></div>';
+    } else {
+      box.innerHTML='この画面を単独で開いたため、受付シートの共有情報はありません。';
+    }
+    var fp=document.getElementById('finalPanel');fp.style.display='';fp.scrollIntoView({behavior:'smooth'});
+  }
 
   document.getElementById('saveBtn').onclick=async function(){
     var msg=document.getElementById('msg');msg.textContent='';msg.className='msg';
@@ -265,7 +292,8 @@
     var r=await sb.from('loan_sheets').insert(row);
     this.disabled=false;this.textContent='保存';
     if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
-    msg.textContent='保存しました。PDF出力もできます。';msg.className='msg ok';
+    msg.textContent='保存しました。下の最終確認から、受付・代車のPDF／QRを出せます。';msg.className='msg ok';
+    showFinal();
   };
 
   (async function(){
@@ -282,6 +310,7 @@
     try{
       var hoRaw=sessionStorage.getItem('cs_loan_handoff');
       if(hoRaw){var ho=JSON.parse(hoRaw);sessionStorage.removeItem('cs_loan_handoff');
+        intakeId=ho.intakeId||'';
         setVal('c_name',ho.name);setVal('c_tel',ho.tel);setVal('c_veh',ho.vehicle);setVal('c_due',ho.due);
         var today=new Date();setVal('lend_date',today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2));
         if(ho.sign){signData=ho.sign;carriedSign=true;document.getElementById('carriedImg').src=ho.sign;document.getElementById('signCarried').style.display='';document.getElementById('signStartBtn').style.display='none';}
