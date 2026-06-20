@@ -19,6 +19,7 @@
 
   /* ---------------- スタッフ ---------------- */
   function loadStaff() {
+    if (window.csStaffList && window.csStaffList.length) return window.csStaffList.slice();
     var raw = ''; try { raw = localStorage.getItem(STAFF) || ''; } catch (e) {}
     return raw ? raw.split('\n').map(function (s) { return s.trim(); }).filter(Boolean) : ['スタッフ1', 'スタッフ2'];
   }
@@ -32,7 +33,19 @@
   }
   function setStaffDisp() { var d = $('staffNameDisp'); if (d) d.textContent = wiz.staff || '—'; }
 
-  function loadShop() { try { return JSON.parse(localStorage.getItem(SHOPK) || '{}') || {}; } catch (e) { return {}; } }
+  function applyShopUI() {
+    var brand = document.querySelector('.site-head .brand');
+    if (brand) {
+      var nm = window.csShopName || (window.csShopDB && window.csShopDB.company) || 'AUTO SHOP';
+      var co = (window.csShopDB && window.csShopDB.company) || '';
+      brand.innerHTML = esc(nm) + '<small>' + (co ? esc(co) + '｜' : '') + '受付チェックシート</small>';
+    }
+    var who = $('siteWho');
+    if (who && window.csAuth) who.textContent = (window.csAuth.name || 'スタッフ') + ' さん';
+    fillStaffSelect();
+  }
+
+  function loadShop() { if (window.csShopDB) return window.csShopDB; try { return JSON.parse(localStorage.getItem(SHOPK) || '{}') || {}; } catch (e) { return {}; } }
   function saveShop(o) { try { localStorage.setItem(SHOPK, JSON.stringify(o)); } catch (e) {} window.csShop = o; }
   function fillShopEditor() { var s = loadShop(); setVal('shop_company', s.company); setVal('shop_address', s.address); setVal('shop_tel', s.tel); setVal('shop_hours', s.hours); setVal('shop_url', s.url); }
   function readShopEditor() { return { company: val('shop_company'), address: val('shop_address'), tel: val('shop_tel'), hours: val('shop_hours'), url: val('shop_url') }; }
@@ -319,6 +332,8 @@
 
   function init() {
     buildIndicator(); fillStaffSelect();
+    if ($('siteLogout')) $('siteLogout').addEventListener('click', function () { if (window.csLogout) window.csLogout(); });
+    if (window.csAuthReady && window.csAuthReady.then) window.csAuthReady.then(function () { applyShopUI(); });
 
     qa('#typeCards .type-card').forEach(function (b) {
       b.addEventListener('click', function () { wiz.type = b.getAttribute('data-type'); applyType(); checkReady(); saveDraft(); });

@@ -20,7 +20,16 @@
     if (prof.shop_id) {
       var sh = await sb.from('shops').select('name,company,address,tel,hours,url').eq('id', prof.shop_id).single();
       if (sh && sh.data) {
-        window.csShop = { company: sh.data.company, address: sh.data.address, tel: sh.data.tel, hours: sh.data.hours, url: sh.data.url };
+        window.csShopName = sh.data.name || '';
+        window.csShopDB = { company: sh.data.company || '', address: sh.data.address || '', tel: sh.data.tel || '', hours: sh.data.hours || '', url: sh.data.url || '' };
+        window.csShop = window.csShopDB;
+      }
+      var st = await sb.from('profiles').select('name,role').eq('shop_id', prof.shop_id);
+      if (st && st.data) {
+        window.csStaffList = st.data
+          .filter(function (x) { return x.name; })
+          .sort(function (a, b) { return (a.role === 'shop_admin' ? 0 : 1) - (b.role === 'shop_admin' ? 0 : 1); })
+          .map(function (x) { return x.name; });
       }
     }
     return window.csAuth;

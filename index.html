@@ -159,8 +159,12 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="site-head">
-    <div class="brand">AUTO SHOP NAME<small>○○自動車（屋号をここに）｜受付チェックシート</small></div>
+  <div class="site-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+    <div class="brand">AUTO SHOP NAME<small>受付チェックシート</small></div>
+    <div style="text-align:right;white-space:nowrap">
+      <span id="siteWho" style="font-size:.8rem;color:#cfe0f0"></span>
+      <button type="button" id="siteLogout" style="display:block;margin-top:6px;margin-left:auto;background:rgba(255,255,255,.16);color:#fff;border:0;padding:6px 12px;border-radius:8px;font-size:.78rem;cursor:pointer">ログアウト</button>
+    </div>
   </div>
 
   <!-- ===================== 開始画面 ===================== -->
@@ -184,7 +188,7 @@
 
     <div class="field"><label for="wizStaff">担当スタッフ</label>
       <select id="wizStaff"><option value="">選択してください</option></select>
-      <div style="margin-top:8px"><button type="button" class="btn ghost" id="wizStaffEdit" style="padding:8px 12px;font-size:.85rem">スタッフを編集（管理）</button></div>
+      <div style="margin-top:8px;display:none"><button type="button" class="btn ghost" id="wizStaffEdit" style="padding:8px 12px;font-size:.85rem">スタッフを編集（管理）</button></div>
       <div id="staffEditor" hidden style="margin-top:8px">
         <label class="muted">スタッフ名を1行に1人ずつ入力</label>
         <textarea id="staffList" style="width:100%;height:110px;border:1px solid #c1ccd8;border-radius:9px;padding:10px;font-family:inherit;box-sizing:border-box"></textarea>
@@ -193,7 +197,7 @@
       </div>
     </div>
 
-    <div class="field"><label>店舗情報（管理）</label>
+    <div class="field" style="display:none"><label>店舗情報（管理）</label>
       <button type="button" class="btn ghost" id="shopEdit" style="padding:8px 12px;font-size:.85rem">店舗情報を編集</button>
       <div id="shopEditor" hidden style="margin-top:8px">
         <div class="field" style="margin-top:6px"><label class="muted">会社名</label><input type="text" id="shop_company" placeholder="○○自動車株式会社"></div>
