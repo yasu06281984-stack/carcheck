@@ -6,7 +6,7 @@
   var VIEWLBL = { front: '正面', rear: '後方', left: '左側面', right: '右側面', roof: 'ルーフ' };
   var VEHLBL = { hatchback: 'ハッチバック', sedan: 'セダン', suv: 'SUV', minivan: 'ミニバン', onebox: 'ワンボックス' };
   var VIEWS = ['front', 'rear', 'left', 'right', 'roof'];
-  var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート' };
+  var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート', business: '業者受付チェックシート' };
 
   var TERMS = '【利用規約（サンプル）】\n\n本規約は、お客様の車両の点検・整備・修理および見積りに関する受付に適用されます。\n\n1. 受付内容の確認\n本シートに記載の車両状態・損傷箇所・修理希望は、受付時点の確認内容です。作業中に追加の不具合が判明した場合は、別途ご連絡のうえ対応します。\n\n2. 車両のお預かり\n当店は善良な管理者の注意をもって車両を管理します。天災・盗難その他当店の責によらない事由による損害については責任を負いかねる場合があります。\n\n3. 貴重品について\n車内の貴重品・現金・ETCカード等は、必ずお客様ご自身でお持ち帰りください。車内に残された物品の紛失・破損について当店は責任を負いません。\n\n4. 見積り・費用\nお見積りは概算です。部品価格・作業内容の変更により金額が変動する場合があります。作業開始前にご確認・ご同意をいただきます。\n\n5. 個人情報の取り扱い\nご記入いただいた情報は、本件の受付・整備・連絡・見積りの目的にのみ利用します。\n\n6. 撮影データ\n車検証・車両の撮影画像は、受付および見積りの目的で利用します。\n\n以上の内容にご同意のうえ、ご署名ください。\n（この規約文はサンプルです。実際の文面に差し替えてください。）\n';
 
@@ -113,24 +113,41 @@
     var oth = $('payOther'); if (oth) oth.style.display = (v === 'その他') ? '' : 'none';
     if (!silent) saveDraft();
   }
+  function populateBizSelect() {
+    var sel = $('biz_name'); if (!sel) return;
+    var cur = sel.value, arr = window.csVendors || [];
+    sel.innerHTML = '<option value="">選択してください</option>';
+    arr.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+    if (arr.indexOf(cur) >= 0) sel.value = cur;
+  }
   function applyType() {
     qa('#typeCards .type-card').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-type') === wiz.type); });
     if ($('wizTypeLabel')) $('wizTypeLabel').textContent = TYPELBL[wiz.type] || '';
     var io = $('intakeOnly'); if (io) io.style.display = (wiz.type === 'intake') ? '' : 'none';
+    var biz = (wiz.type === 'business');
+    qa('.bizOnly').forEach(function (e) { e.style.display = biz ? '' : 'none'; });
+    qa('.custOnly').forEach(function (e) { e.style.display = biz ? 'none' : ''; });
+    var cb = $('custBlock'); if (cb) cb.style.display = biz ? 'none' : '';
+    if (biz) { if ($('vehDetail')) $('vehDetail').hidden = false; populateBizSelect(); }
+    else { if ($('vehDetail')) $('vehDetail').hidden = !wiz.consent; }
   }
 
   /* ---------------- プレビュー描画 ---------------- */
   function payText() { return (wiz.payMethod === 'その他') ? ('その他：' + val('payOther')) : wiz.payMethod; }
   function setMeta() {
     window.csShop = loadShop();
-    window.csMeta = { staff: wiz.staff, sheetType: wiz.type, daisha: wiz.daisha, pay: payText(), estDate: fmtDate(val('est_date')), intakeDate: fmtDate(val('intake_date')), vehicleName: val('cust_vehicle'), shop: window.csShop };
+    if (wiz.type === 'business') { var cn = $('cust_name'); if (cn) cn.value = val('biz_name'); }
+    window.csMeta = { staff: wiz.staff, sheetType: wiz.type, daisha: wiz.daisha, pay: payText(), estDate: fmtDate(val('est_date')), intakeDate: fmtDate(val('intake_date')), vehicleName: val('cust_vehicle'), shop: window.csShop,
+      bizName: val('biz_name'), number: val('biz_number'), bizIntake: fmtDate(val('biz_intake')), bizDue: fmtDate(val('biz_due')) };
   }
   function previewData() {
+    if (wiz.type === 'business') { var cn = $('cust_name'); if (cn) cn.value = val('biz_name'); }
     var base = window.csAPI ? window.csAPI.getPayload() : { v: 'hatchback', cust: {}, records: [], sign: '', photos: [] };
     setMeta();
     base.staff = wiz.staff; base.sheetType = wiz.type; base.daisha = wiz.daisha; base.pay = payText();
     base.estDate = fmtDate(val('est_date')); base.intakeDate = fmtDate(val('intake_date'));
     base.vehicleName = val('cust_vehicle'); base.shop = loadShop();
+    base.bizName = val('biz_name'); base.number = val('biz_number'); base.bizIntake = fmtDate(val('biz_intake')); base.bizDue = fmtDate(val('biz_due'));
     base.valuables = qa('#valuables input:checked').map(function (c) { return c.getAttribute('data-val'); });
     return base;
   }
@@ -139,16 +156,28 @@
     var dir = 'assets/vehicles/' + v;
     var colorCell = c.colorname ? ((c.color ? '<span class="p-swatch" style="background:' + esc(c.color) + '"></span>' : '') + esc(c.colorname)) : '';
     var vehName = d.vehicleName || VEHLBL[v] || v;
-    var info = '<table class="p-cust"><tr><th>シート種別</th><td>' + (TYPELBL[d.sheetType] || '') + '</td><th>車種</th><td>' + esc(vehName) + '</td></tr>' +
-      '<tr><th>代車</th><td>' + (d.daisha === 'yes' ? 'あり' : d.daisha === 'no' ? 'なし' : '') + '</td><th>支払い方法</th><td>' + esc(d.pay) + '</td></tr>' +
-      '<tr><th>見積もり日</th><td>' + esc(d.estDate) + '</td><th>入庫予定日</th><td>' + esc(d.intakeDate) + '</td></tr></table>';
-    var cust = '<table class="p-cust">' +
-      '<tr><th>お客様名</th><td>' + (c.name ? esc(c.name) + ' 様' : '') + '</td><th>電話番号</th><td>' + esc(c.tel) + '</td></tr>' +
-      '<tr><th>住所</th><td colspan="3">' + esc(c.addr) + '</td></tr>' +
-      '<tr><th>車台番号</th><td>' + esc(c.vin) + '</td><th>初年度登録</th><td>' + esc(c.year) + '</td></tr>' +
-      '<tr><th>型式指定番号</th><td>' + esc(c.model) + '</td><th>類別区分番号</th><td>' + esc(c.cls) + '</td></tr>' +
-      '<tr><th>原動機の型式</th><td>' + esc(c.engine) + '</td><th>走行距離</th><td>' + (c.mileage ? esc(c.mileage) + ' km' : '') + '</td></tr>' +
-      '<tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr></table>';
+    var isBiz = d.sheetType === 'business';
+    var info, cust, custHeading;
+    if (isBiz) {
+      info = '<table class="p-cust"><tr><th>シート種別</th><td>' + (TYPELBL[d.sheetType] || '') + '</td><th>車種</th><td>' + esc(vehName) + '</td></tr>' +
+        '<tr><th>業者名</th><td>' + esc(d.bizName) + '</td><th>ナンバー</th><td>' + esc(d.number) + '</td></tr>' +
+        '<tr><th>入庫日</th><td>' + esc(d.bizIntake) + '</td><th>納車予定日</th><td>' + esc(d.bizDue) + '</td></tr></table>';
+      cust = '<table class="p-cust"><tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr>' +
+        '<tr><th>走行距離</th><td colspan="3">' + (c.mileage ? esc(c.mileage) + ' km' : '') + '</td></tr></table>';
+      custHeading = '車両情報';
+    } else {
+      info = '<table class="p-cust"><tr><th>シート種別</th><td>' + (TYPELBL[d.sheetType] || '') + '</td><th>車種</th><td>' + esc(vehName) + '</td></tr>' +
+        '<tr><th>代車</th><td>' + (d.daisha === 'yes' ? 'あり' : d.daisha === 'no' ? 'なし' : '') + '</td><th>支払い方法</th><td>' + esc(d.pay) + '</td></tr>' +
+        '<tr><th>見積もり日</th><td>' + esc(d.estDate) + '</td><th>入庫予定日</th><td>' + esc(d.intakeDate) + '</td></tr></table>';
+      cust = '<table class="p-cust">' +
+        '<tr><th>お客様名</th><td>' + (c.name ? esc(c.name) + ' 様' : '') + '</td><th>電話番号</th><td>' + esc(c.tel) + '</td></tr>' +
+        '<tr><th>住所</th><td colspan="3">' + esc(c.addr) + '</td></tr>' +
+        '<tr><th>車台番号</th><td>' + esc(c.vin) + '</td><th>初年度登録</th><td>' + esc(c.year) + '</td></tr>' +
+        '<tr><th>型式指定番号</th><td>' + esc(c.model) + '</td><th>類別区分番号</th><td>' + esc(c.cls) + '</td></tr>' +
+        '<tr><th>原動機の型式</th><td>' + esc(c.engine) + '</td><th>走行距離</th><td>' + (c.mileage ? esc(c.mileage) + ' km' : '') + '</td></tr>' +
+        '<tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr></table>';
+      custHeading = 'お客様情報';
+    }
     function viewBlock(vk) {
       var ms = recs.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         var col = TOOL[r.tool] ? TOOL[r.tool].c : '#888';
@@ -178,8 +207,8 @@
     if (shop.hours) shopLines += '<div>営業：' + esc(shop.hours) + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
-      '<div class="p-hdr2"><div class="p-custname">お客様名：' + (c.name ? esc(c.name) + ' 様' : '') + '</div><div class="p-shop">' + shopLines + '</div></div>';
-    return head + '<div class="p-sec">受付情報</div>' + info + '<div class="p-sec">お客様情報</div>' + cust +
+      '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
+    return head + '<div class="p-sec">受付情報</div>' + info + '<div class="p-sec">' + custHeading + '</div>' + cust +
       '<div class="p-sec">損傷チェック図</div>' + figs +
       '<div class="p-sec">入力チェック欄一覧</div><table class="p-lst"><thead><tr><th>番号</th><th>ビュー</th><th>種別</th><th>部位</th><th>サイズ</th><th>備考</th><th>修理内容</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="p-legend">A＝傷／B＝凹み／X＝その他／Op＝エアロパーツ となります。</div>' +

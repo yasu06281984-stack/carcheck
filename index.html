@@ -184,6 +184,7 @@
       <div class="type-cards" id="typeCards">
         <button type="button" class="type-card" data-type="intake">入庫受付チェックシート<span class="d">入庫が決まったお客様。署名・貴重品チェックあり。</span></button>
         <button type="button" class="type-card" data-type="estimate">見積もり依頼チェックシート<span class="d">見積りのみ。署名・貴重品チェックなし。</span></button>
+        <button type="button" class="type-card" data-type="business">業者受付チェックシート<span class="d">業者からの入庫。お客様情報・署名は省略。</span></button>
       </div>
     </div>
 
@@ -252,6 +253,7 @@
         <div class="banner info" style="margin-top:0">担当スタッフ名：<b id="staffNameDisp">—</b></div>
       </div>
 
+      <div class="custOnly">
       <h3>② 車両情報（車検証）</h3>
       <p class="muted">車検証を撮影する場合は、スタッフへ車検証をご提示ください。</p>
       <div class="banner info">スタッフからご案内：「車検証データが車検有効期限の確認とお見積りで必要になります。撮影してもよろしいでしょうか？」</div>
@@ -259,8 +261,19 @@
         <button type="button" data-consent="yes">はい（スタッフが撮影）</button>
         <button type="button" data-consent="no">いいえ（手入力で依頼）</button>
       </div>
+      </div>
 
       <div id="vehDetail" hidden>
+        <div class="bizOnly" style="display:none">
+          <h3>① 業者情報</h3>
+          <div class="field"><label for="biz_name">業者名</label><select id="biz_name"><option value="">選択してください</option></select></div>
+          <div class="two">
+            <div class="field"><label for="biz_number">ナンバー</label><input type="text" id="biz_number" placeholder="品川 580 あ 12-34"></div>
+            <div class="field"><label for="biz_intake">入庫日</label><input type="date" id="biz_intake"></div>
+          </div>
+          <div class="field"><label for="biz_due">納車予定日</label><input type="date" id="biz_due"></div>
+        </div>
+        <div id="custBlock">
         <div id="manualNote" hidden class="banner warn">撮影なしのため、お客様に各項目を手入力でご入力いただいてください。</div>
         <div class="scan-wrap">
           <div class="scanner">
@@ -340,6 +353,7 @@
           <input type="text" id="payOther" placeholder="その他の内容を入力" style="margin-top:8px;display:none">
         </div>
 
+        </div>
         <h3>③ その他車両情報</h3>
         <div class="field"><label for="cust_vehicle">車種</label><input type="text" id="cust_vehicle" placeholder="例：アルファード／プリウス／ハイエース など"></div>
         <div class="two">

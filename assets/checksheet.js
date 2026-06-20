@@ -331,7 +331,8 @@
     var nm = CC.name;
     var MT = window.csMeta || null;
     var SHOP = window.csShop || (MT && MT.shop) || {};
-    var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート' };
+    var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート', business: '業者受付チェックシート' };
+    var isBiz = !!(MT && MT.sheetType === 'business');
     var title = (MT && TYPELBL[MT.sheetType]) || '車両損傷チェックシート';
     var vehName = (MT && MT.vehicleName) || VEH[state.type].label;
     var staffName = (MT && MT.staff) || '';
@@ -343,7 +344,7 @@
     if (SHOP.hours) shopLines += '<div>営業：' + SHOP.hours + '</div>';
     if (SHOP.url) shopLines += '<div>' + SHOP.url + '</div>';
     var head = '<div class="p-title">' + title + '</div>' +
-      '<div class="p-hdr2"><div class="p-custname">お客様名：' + (nm ? nm + ' 様' : '') + '</div>' +
+      '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + ((MT && MT.bizName) || '') : 'お客様名：' + (nm ? nm + ' 様' : '')) + '</div>' +
       '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '</div></div></div>';
     var colorCell = CC.colorname ? ((CC.color ? '<span class="p-swatch" style="background:' + CC.color + '"></span>' : '') + CC.colorname) : '';
     var cust = '<table class="p-cust">' +
@@ -355,7 +356,13 @@
       '<tr><th>カラー番号</th><td>' + CC.colorno + '</td><th>カラー</th><td>' + colorCell + '</td></tr>' +
       '</table>';
     var metaSec = '';
-    if (MT) {
+    if (isBiz) {
+      metaSec = '<div class="p-sec">受付情報</div><table class="p-cust">' +
+        '<tr><th>シート種別</th><td>' + (TYPELBL[MT.sheetType] || '') + '</td><th>車種</th><td>' + vehName + '</td></tr>' +
+        '<tr><th>業者名</th><td>' + ((MT.bizName) || '') + '</td><th>ナンバー</th><td>' + ((MT.number) || '') + '</td></tr>' +
+        '<tr><th>入庫日</th><td>' + ((MT.bizIntake) || '') + '</td><th>納車予定日</th><td>' + ((MT.bizDue) || '') + '</td></tr>' +
+        '</table>';
+    } else if (MT) {
       metaSec = '<div class="p-sec">受付情報</div><table class="p-cust">' +
         '<tr><th>シート種別</th><td>' + (TYPELBL[MT.sheetType] || '') + '</td><th>車種</th><td>' + vehName + '</td></tr>' +
         '<tr><th>代車</th><td>' + (MT.daisha === 'yes' ? 'あり' : MT.daisha === 'no' ? 'なし' : '') + '</td><th>支払い方法</th><td>' + (MT.pay || '') + '</td></tr>' +
@@ -364,6 +371,9 @@
     } else {
       metaSec = '<div class="p-sec">受付情報</div><table class="p-cust"><tr><th>車種</th><td colspan="3">' + vehName + '</td></tr></table>';
     }
+    var bizCust = '<table class="p-cust">' +
+      '<tr><th>カラー番号</th><td>' + CC.colorno + '</td><th>カラー</th><td>' + colorCell + '</td></tr>' +
+      '<tr><th>走行距離</th><td colspan="3">' + (CC.mileage ? CC.mileage + ' km' : '') + '</td></tr></table>';
     function viewBlock(vk) {
       var ms = state.records.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         return '<span class="p-mk" style="left:' + r.x + '%;top:' + r.y + '%;background:' + TOOL[r.tool].color + '">' + r.code + '</span>';
@@ -381,7 +391,7 @@
     }).join('') || '<tr><td colspan="7">記録なし</td></tr>';
     var rep = state.records.filter(function (r) { return r.repair; });
     var reprows = rep.map(function (r) { return '<tr><td class="c">' + r.code + '</td><td>' + (r.part || '') + '</td><td>' + r.repair + '</td></tr>'; }).join('') || '<tr><td colspan="3">修理希望の指定なし</td></tr>';
-    var custSec = metaSec + '<div class="p-sec">お客様情報</div>' + cust;
+    var custSec = metaSec + '<div class="p-sec">' + (isBiz ? '車両情報' : 'お客様情報') + '</div>' + (isBiz ? bizCust : cust);
     var figSec = '<div class="p-sec">損傷チェック図</div>' + figs;
     var figSecBig = '<div class="p-sec">損傷チェック図</div>' + figsHtml(true);
     var tables = '<div class="p-sec">入力チェック欄一覧</div>' +

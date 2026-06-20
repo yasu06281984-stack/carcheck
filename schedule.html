@@ -147,7 +147,10 @@
         <button class="ghost" id="loadSheetBtn" style="font-size:.85rem;padding:8px 14px">受付シート一覧を表示</button>
         <div id="sheetPick" style="margin-top:8px"></div>
       </div>
-      <div id="srcVendor" class="hide"><div class="small">業者受付シートは準備中です。下で業者名を選んで手動で追加できます。</div></div>
+      <div id="srcVendor" class="hide">
+        <button class="ghost" id="loadBizSheetBtn" style="font-size:.85rem;padding:8px 14px">業者受付シート一覧を表示</button>
+        <div id="bizSheetPick" style="margin-top:8px"></div>
+      </div>
     </div>
     <div class="card">
       <div class="card-l">基本情報</div>
@@ -380,6 +383,23 @@
       var x=rows.filter(function(r){return r.id===b.getAttribute('data-sid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
       setKind('customer');setVal('j_customer',c.name||'');setVal('j_vehicle',d.vehicleName||FIGMAP[d.v]||'');document.getElementById('j_fig').value=d.v||'hatchback';
       setVal('j_number',c.number||'');window._srcSheet=x.id;box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
+    };});
+  };
+
+  document.getElementById('loadBizSheetBtn').onclick=async function(){
+    var box=document.getElementById('bizSheetPick');box.innerHTML='読み込み中…';
+    var r=await sb.from('sheets').select('id,created_at,data').eq('shop_id',SHOP).order('created_at',{ascending:false}).limit(30);
+    if(r.error){box.innerHTML='<span class="small" style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var rows=(r.data||[]).filter(function(x){var d=x.data||{};return d.sheetType==='business';});
+    if(!rows.length){box.innerHTML='<span class="small">業者受付シートがありません。</span>';return;}
+    box.innerHTML=rows.map(function(x){var d=x.data||{};var c=d.cust||{};var nm=d.bizName||c.name||'（業者名なし）';var veh=d.vehicleName||FIGMAP[d.v]||'';
+      return '<div class="pick"><div>'+esc(nm)+'　<span class="small">'+esc(veh)+(d.number?' / '+esc(d.number):'')+'</span></div><button class="ghost" data-bsid="'+x.id+'">読み込む</button></div>';}).join('');
+    box.querySelectorAll('[data-bsid]').forEach(function(b){b.onclick=function(){
+      var x=rows.filter(function(r){return r.id===b.getAttribute('data-bsid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
+      setKind('vendor');var nm=d.bizName||c.name||'';var sel=document.getElementById('j_biz');
+      if(nm&&Array.prototype.slice.call(sel.options).every(function(o){return o.value!==nm;})){var op=document.createElement('option');op.value=nm;op.textContent=nm;sel.appendChild(op);}
+      sel.value=nm;setVal('j_vehicle',d.vehicleName||FIGMAP[d.v]||'');document.getElementById('j_fig').value=d.v||'hatchback';setVal('j_number',d.number||c.number||'');
+      window._srcSheet=x.id;box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
     };});
   };
 

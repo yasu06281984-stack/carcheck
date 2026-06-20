@@ -31,6 +31,8 @@
           .sort(function (a, b) { return (a.role === 'shop_admin' ? 0 : 1) - (b.role === 'shop_admin' ? 0 : 1); })
           .map(function (x) { return x.name; });
       }
+      var vn = await sb.from('vendors').select('name').eq('shop_id', prof.shop_id).order('created_at');
+      if (vn && vn.data) window.csVendors = vn.data.map(function (x) { return x.name; });
     }
     return window.csAuth;
   })();
