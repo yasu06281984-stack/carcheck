@@ -51,24 +51,30 @@
     body > .topbar,body > .wrap{display:none!important}
     #printArea{display:block;padding:0;color:#111}
     #printArea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .p-title{text-align:center;font-size:19px;font-weight:800;color:#143A57;padding:7px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:10px;letter-spacing:.06em}
-    .p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}
-    .p-sec{color:#143A57;font-size:13px;font-weight:800;padding:4px 0 4px 10px;margin:12px 0 6px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}
-    table.pt{width:100%;border-collapse:collapse;font-size:12px}
-    table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}
-    table.pt th{background:#eef2f6;color:#143A57;width:22%}
+    .p-title{text-align:center;font-size:22px;font-weight:800;color:#143A57;padding:9px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}
+    .p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 4px}
+    .p-custname{font-size:17px;font-weight:700;color:#111}
+    .p-shop{font-size:12px;color:#333;text-align:right;line-height:1.6}
+    .p-shopco{font-weight:700;font-size:13.5px;color:#143A57}
+    .p-sec{color:#143A57;font-size:15px;font-weight:800;padding:5px 0 5px 11px;margin:16px 0 7px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}
+    table.pt{width:100%;border-collapse:collapse;font-size:14px}
+    table.pt th,table.pt td{border:1px solid #999;padding:7px 9px;text-align:left}
+    table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}
     .pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}
-    .pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}
+    .pfig{border:1px solid #143A57;border-radius:6px;padding:5px;position:relative}
+    .pfig .l{font-size:12px;text-align:center;color:#143A57;font-weight:700}
     .pfig .w{position:relative}.pfig img{width:100%;display:block}
-    .pmk{position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}
-    .pterms{font-size:9px;white-space:pre-wrap;line-height:1.5;border:1px solid #ccc;padding:6px;border-radius:4px}
-    .psign{display:flex;gap:14px;align-items:flex-end;margin-top:8px}
-    .psign .box{flex:1;border:1px solid #999;border-radius:6px;min-height:80px;display:flex;align-items:center;justify-content:center}
-    .psign img{max-height:78px}
-    .pqr{margin-top:10px;text-align:center}
-    .pqr img{width:96px;height:96px;image-rendering:pixelated}
-    .pqr div{font-size:9px;color:#444;margin-top:2px}
+    .pmk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}
+    .pterms{font-size:11px;white-space:pre-wrap;line-height:1.55;border:1px solid #ccc;padding:8px;border-radius:4px}
+    .p-signnote{font-size:13px;margin:0 0 8px;line-height:1.5}
+    .p-signrow{display:flex;align-items:flex-end;gap:16px}
+    .p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:90px;padding:6px 10px;display:flex;flex-direction:column;justify-content:flex-end}
+    .p-sigimg{max-height:82px;max-width:100%;object-fit:contain;align-self:flex-start}
+    .p-sigline{height:62px}
+    .p-sigcap{font-size:11px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}
+    .p-sigqr{text-align:center;margin-left:8px}
+    .p-sigqr img{width:104px;height:104px;image-rendering:pixelated}
+    .p-sigqr div{font-size:11px;color:#444;margin-top:3px}
   }
 </style>
 </head>
@@ -119,7 +125,7 @@
   <div class="card">
     <div class="card-l">お客様署名</div>
     <div id="signCarried" style="display:none">
-      <p class="small" style="margin-top:0">上記同意の上で、入庫チェックシートの署名を反映して利用します。</p>
+      <p class="small" style="margin-top:0">上記内容を確認・承諾のうえ、本代車の貸し出しを受けることに同意します。</p>
       <img id="carriedImg" style="max-height:90px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;display:block">
       <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.9rem"><input type="checkbox" id="agreeChk"> 上記に同意します（お客様確認）</label>
       <div style="margin-top:8px"><button class="ghost" id="resignBtn">署名し直す</button></div>
@@ -264,20 +270,25 @@
 
   function buildSheetInner(){
     var x=curLoan||{};
-    var shopLines='';if(SHOPINFO.company)shopLines+='<div><b>'+esc(SHOPINFO.company)+'</b></div>';
-    if(SHOPINFO.tel)shopLines+='<div>TEL：'+esc(SHOPINFO.tel)+'</div>';if(SHOPINFO.address)shopLines+='<div>'+esc(SHOPINFO.address)+'</div>';
+    var shopLines='';
+    if(SHOPINFO.company)shopLines+='<div class="p-shopco">'+esc(SHOPINFO.company)+'</div>';
+    if(SHOPINFO.address)shopLines+='<div>'+esc(SHOPINFO.address)+'</div>';
+    if(SHOPINFO.tel)shopLines+='<div>TEL：'+esc(SHOPINFO.tel)+'</div>';
+    if(SHOPINFO.hours)shopLines+='<div>営業：'+esc(SHOPINFO.hours)+'</div>';
+    if(SHOPINFO.url)shopLines+='<div>'+esc(SHOPINFO.url)+'</div>';
     var figs='<div class="pfigs">'+VIEWS.map(function(v){
       var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
       return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w"><img src="assets/vehicles/'+(x.fig_type||'hatchback')+'/'+v[0]+'.png">'+marks+'</div></div>';
     }).join('')+'</div>';
-    var sigImg=signData?'<img src="'+signData+'">':'';
+    var sigTag=signData?'<img class="p-sigimg" src="'+signData+'">':'<div class="p-sigline"></div>';
     var agreed=document.getElementById('agreeChk')&&document.getElementById('agreeChk').checked;
-    var signNote=carriedSign?('上記同意の上で、入庫チェックシートの署名を反映して利用します。'+(agreed?'（同意確認済み）':'')):'上記内容・利用規約に同意し、車両をお借りします。';
+    var signNote='上記内容を確認・承諾のうえ、本代車の貸し出しを受けることに同意します。'+(carriedSign&&agreed?'（同意確認済み）':'');
     var qrUrl=intakeId?(location.origin+'/view.html?id='+encodeURIComponent(intakeId)):'';
     var qrI=qrUrl?makeQR(qrUrl):'';
-    var qrSec=qrI?'<div class="pqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
+    var sigQr=qrI?'<div class="p-sigqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
-      '<div class="p-hdr"><div>貸出日：'+esc(val('lend_date')||'____/__/__')+'</div><div>'+shopLines+'</div></div>'+
+      '<div class="p-hdr2"><div class="p-custname">お客様名：'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</div>'+
+      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'</div></div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
       '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
       '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
@@ -290,7 +301,9 @@
       '<tr><th>装備</th><td colspan="3">'+esc(eqText(x.equip))+'</td></tr></table>'+
       '<div class="p-sec">代車の状態（傷）</div>'+figs+
       '<div class="p-sec">利用規約</div><div class="pterms">'+esc(TERMS)+'</div>'+
-      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">'+signNote+'<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>'+qrSec;
+      '<div class="p-sec">確認・お客様署名</div>'+
+      '<div class="p-signnote">'+signNote+'</div>'+
+      '<div class="p-signrow"><div class="p-sigbox">'+sigTag+'<div class="p-sigcap">お客様署名'+(val('c_name')?'：'+esc(val('c_name'))+' 様':'')+'</div></div>'+sigQr+'</div>';
     return html;
   }
   function buildPrint(){ document.getElementById('printArea').innerHTML=buildSheetInner(); }
@@ -298,22 +311,28 @@
     var css='<style>'+
       'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-      '.p-title{text-align:center;font-size:19px;font-weight:800;color:#143A57;padding:7px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:10px;letter-spacing:.06em}'+
-      '.p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}'+
-      '.p-sec{color:#143A57;font-size:13px;font-weight:800;padding:4px 0 4px 10px;margin:12px 0 6px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
-      'table.pt{width:100%;border-collapse:collapse;font-size:12px}'+
-      'table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}'+
-      'table.pt th{background:#eef2f6;color:#143A57;width:22%}'+
+      '.p-title{text-align:center;font-size:22px;font-weight:800;color:#143A57;padding:9px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}'+
+      '.p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 4px}'+
+      '.p-custname{font-size:17px;font-weight:700;color:#111}'+
+      '.p-shop{font-size:12px;color:#333;text-align:right;line-height:1.6}'+
+      '.p-shopco{font-weight:700;font-size:13.5px;color:#143A57}'+
+      '.p-sec{color:#143A57;font-size:15px;font-weight:800;padding:5px 0 5px 11px;margin:16px 0 7px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
+      'table.pt{width:100%;border-collapse:collapse;font-size:14px}'+
+      'table.pt th,table.pt td{border:1px solid #999;padding:7px 9px;text-align:left}'+
+      'table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}'+
       '.pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}'+
-      '.pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}'+
-      '.pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}'+
+      '.pfig{border:1px solid #143A57;border-radius:6px;padding:5px;position:relative}'+
+      '.pfig .l{font-size:12px;text-align:center;color:#143A57;font-weight:700}'+
       '.pfig .w{position:relative}.pfig img{width:100%;display:block}'+
-      '.pmk{position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}'+
-      '.pterms{font-size:9px;white-space:pre-wrap;line-height:1.5;border:1px solid #ccc;padding:6px;border-radius:4px}'+
-      '.psign{display:flex;gap:14px;align-items:flex-end;margin-top:8px}'+
-      '.psign .box{flex:1;border:1px solid #999;border-radius:6px;min-height:80px;display:flex;align-items:center;justify-content:center}'+
-      '.psign img{max-height:78px}'+
-      '.pqr{margin-top:10px;text-align:center}.pqr img{width:96px;height:96px;image-rendering:pixelated}.pqr div{font-size:9px;color:#444;margin-top:2px}@page{margin:12mm}'+
+      '.pmk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}'+
+      '.pterms{font-size:11px;white-space:pre-wrap;line-height:1.55;border:1px solid #ccc;padding:8px;border-radius:4px}'+
+      '.p-signnote{font-size:13px;margin:0 0 8px;line-height:1.5}'+
+      '.p-signrow{display:flex;align-items:flex-end;gap:16px}'+
+      '.p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:90px;padding:6px 10px;display:flex;flex-direction:column;justify-content:flex-end}'+
+      '.p-sigimg{max-height:82px;max-width:100%;object-fit:contain;align-self:flex-start}'+
+      '.p-sigline{height:62px}'+
+      '.p-sigcap{font-size:11px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}'+
+      '.p-sigqr{text-align:center;margin-left:8px}.p-sigqr img{width:104px;height:104px;image-rendering:pixelated}.p-sigqr div{font-size:11px;color:#444;margin-top:3px}@page{margin:12mm}'+
       '</style>';
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><base href="'+location.origin+'/"><title>代車貸出シート</title>'+css+'</head><body>'+buildSheetInner()+'</body></html>';
   }
@@ -371,7 +390,7 @@
     var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
     if(!p.data||!p.data.shop_id){location.replace('home.html');return;}
     SHOP=p.data.shop_id;document.getElementById('whoName').textContent=(p.data.name||'')+' さん';
-    var sh=await sb.from('shops').select('name,company,address,tel').eq('id',SHOP).single();
+    var sh=await sb.from('shops').select('name,company,address,tel,hours,url').eq('id',SHOP).single();
     if(sh.data){SHOPINFO=sh.data;document.getElementById('shopName').textContent=sh.data.name||'代車貸出シート';}
     var lc=await sb.from('loan_cars').select('*').eq('shop_id',SHOP).order('created_at');LOANS=(lc.data)||[];
     document.getElementById('loanSel').innerHTML='<option value="">登録済みの代車から選択</option>'+LOANS.map(function(l){return '<option value="'+l.id+'">'+esc(l.car)+(l.number?'（'+esc(l.number)+'）':'')+'</option>';}).join('');

@@ -418,6 +418,12 @@
     } else if (qrImg) {
       signSec = '<div class="p-sec">共有</div><div class="p-qrbox"><img src="' + qrImg + '"><div class="c">お客様がスキャンすると、この受付票を表示・PDF保存できます。</div></div>';
     }
+    if (isIntake) {
+      var vals = [];
+      try { vals = Array.prototype.map.call(document.querySelectorAll('#valuables input:checked'), function (c) { return c.getAttribute('data-val'); }); } catch (e) {}
+      var vitems = vals.length ? '<div class="p-vals">' + vals.map(function (v) { return '<span class="p-valitem">✓ ' + v + '</span>'; }).join('') + '</div>' : '<div class="p-valnone">（チェック項目なし）</div>';
+      signSec = '<div class="p-sec">貴重品・お忘れ物チェック</div><div class="p-valnote">下記、車内の貴重品・忘れ物がない事を確認しました。</div>' + vitems + signSec;
+    }
     var html;
     if (mode === 'sheet') {
       html = head + custSec + figSec + tables + signSec;

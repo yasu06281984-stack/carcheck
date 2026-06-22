@@ -204,11 +204,17 @@
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
+    var valSec = '';
+    if (d.sheetType === 'intake') {
+      var vlist = d.valuables || [];
+      var vitems = vlist.length ? '<div class="p-vals">' + vlist.map(function (v) { return '<span class="p-valitem">✓ ' + esc(v) + '</span>'; }).join('') + '</div>' : '<div class="p-valnone">（チェック項目なし）</div>';
+      valSec = '<div class="p-sec">貴重品・お忘れ物チェック</div><div class="p-valnote">下記、車内の貴重品・忘れ物がない事を確認しました。</div>' + vitems;
+    }
     return head + '<div class="p-sec">受付情報</div>' + info + '<div class="p-sec">' + custHeading + '</div>' + cust +
       '<div class="p-sec">損傷チェック図</div>' + figs +
       '<div class="p-sec">入力チェック欄一覧</div><table class="p-lst"><thead><tr><th>番号</th><th>ビュー</th><th>種別</th><th>部位</th><th>サイズ</th><th>備考</th><th>修理内容</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="p-legend">A＝傷／B＝凹み／X＝その他／Op＝エアロパーツ となります。</div>' +
-      signSec + photoSec;
+      valSec + signSec + photoSec;
   }
   function renderPreview() { var el = $('wizPreview'); if (el) el.innerHTML = renderSheet(previewData()); }
 
@@ -402,7 +408,11 @@
       if (wiz.type === 'business') { if (!val('biz_name')) { alert('業者名を選択してください。'); return false; } }
       else { if (!wiz.consent) { alert('車検証の撮影可否を選択してください。'); return false; } }
     }
-    if (n === 4 && wiz.type === 'intake') { if (!val('intake_date')) { alert('入庫日を入力してください。'); return false; } }
+    if (n === 4 && wiz.type === 'intake') {
+      if (!val('intake_date')) { alert('入庫日を入力してください。'); return false; }
+      var miss = qa('#valuables input[data-req="1"]').filter(function (c) { return !c.checked; });
+      if (miss.length) { alert('貴重品・お忘れ物チェックの必須項目（現金・貴重品／ETCカード／スマホ・電子機器）を確認してチェックしてください。'); return false; }
+    }
     return true;
   }
 
