@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/auth.js"></script>
+<script src="assets/auth.js?v=9"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>受付チェックシート</title>
@@ -94,7 +94,7 @@
   .p-qr{text-align:center;margin-left:10px}
   .p-qr img{width:84px;height:84px;display:block;image-rendering:pixelated}
   .p-qrcap{font-size:8px;color:#444;margin-top:1px}
-  .p-sec{font-size:13px;color:#fff;font-weight:700;margin:14px 0 6px;padding:5px 11px;background:#1f4e74;border-left:5px solid #E8810C;border-radius:5px;letter-spacing:.02em}
+  .p-sec{font-size:13px;color:#1f4e74;font-weight:800;margin:14px 0 6px;padding:4px 0 4px 10px;border-left:6px solid #E8810C;border-bottom:2px solid #1f4e74;background:#f3f7fb;letter-spacing:.02em}
   .p-area table{border-collapse:collapse;width:100%}
   #cs-print-area table{border-collapse:collapse;width:100%}
   .p-cust{font-size:11px;margin-top:2px}
@@ -102,8 +102,8 @@
   .p-cust th{background:#eaf1f8;color:#1f4e74;width:88px;white-space:nowrap;font-weight:700}
   .p-figs{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px;align-items:flex-start}
   .p-cell{flex:0 0 calc(33.333% - 5px);min-width:0}
-  .p-vt{font-size:10px;background:#1f4e74;color:#fff;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;border-radius:4px 4px 0 0}
-  .p-fig{position:relative;border:1px solid #ccc;border-top:0}
+  .p-vt{font-size:10px;color:#1f4e74;background:#eaf1f8;border:1px solid #1f4e74;border-bottom:0;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;border-radius:4px 4px 0 0}
+  .p-fig{position:relative;border:1px solid #1f4e74;border-top:0}
   .p-fig img{width:100%;display:block}
   .p-ly{position:absolute;inset:0}
   .p-mk{position:absolute;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
@@ -124,7 +124,7 @@
   .p-lst{font-size:10.5px;margin-top:2px}
   .p-lst th,.p-lst td{border:1px solid #aab;padding:3px 6px;text-align:left}
   .p-lst td.c{text-align:center;white-space:nowrap}
-  .p-lst th{background:#1f4e74;color:#fff;font-weight:600}
+  .p-lst th{background:#eaf1f8;color:#1f4e74;font-weight:700;border:1px solid #9fb6cf}
   .p-lst tbody tr:nth-child(even){background:#f5f8fb}
   .p-area{background:#fff;border:1px solid #e1e7ee;border-radius:8px;padding:12px 14px}
   .p-cell,.p-cust,.p-lst{break-inside:avoid}
@@ -136,7 +136,7 @@
   #cs-print-area .p-cust{font-size:11.5px}
   #cs-print-area .p-lst{font-size:11px}
   .wiz-steps .st{cursor:pointer}
-  .p-title{text-align:center;font-size:18px;color:#fff;background:#1f4e74;margin:0 0 10px;padding:9px 8px;border-radius:8px;font-weight:700;letter-spacing:.05em}
+  .p-title{text-align:center;font-size:19px;color:#1f4e74;font-weight:800;margin:0 0 10px;padding:7px 0;border-top:3px solid #1f4e74;border-bottom:3px solid #E8810C;letter-spacing:.06em}
   .p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 2px}
   .p-custname{font-size:15px;font-weight:700}
   .p-shop{font-size:10px;color:#333;text-align:right;line-height:1.55}
@@ -451,7 +451,7 @@
       <div id="wizPreview" class="p-area"></div>
 
       <div id="intakeOnly">
-        <div class="field" style="margin-top:18px"><label for="intake_date">入庫日</label>
+        <div class="field" style="margin-top:18px"><label for="intake_date">入庫日 <span style="color:#c0392b;font-weight:700">（必須）</span></label>
           <input type="date" id="intake_date">
           <p class="muted">入庫日を入力してください。</p>
         </div>
@@ -538,9 +538,9 @@
 <div id="cs-print-area"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="assets/ocr.js" defer></script>
-<script src="assets/qrcode.js" defer></script>
-<script src="assets/checksheet.js" defer></script>
+<script src="assets/ocr.js?v=9" defer></script>
+<script src="assets/qrcode.js?v=9" defer></script>
+<script src="assets/checksheet.js?v=9" defer></script>
 <script>
 /* ---- カラー見本 ---- */
 (function () {
@@ -686,6 +686,6 @@
   setTimeout(function () { fit(false); }, 80);
 })();
 </script>
-<script src="assets/wizard.js" defer></script>
+<script src="assets/wizard.js?v=9" defer></script>
 </body>
 </html>

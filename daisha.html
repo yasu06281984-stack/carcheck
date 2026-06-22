@@ -51,12 +51,12 @@
     body > .topbar,body > .wrap{display:none!important}
     #printArea{display:block;padding:0;color:#111}
     #printArea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .p-title{text-align:center;font-size:18px;font-weight:700;color:#fff;background:#143A57;padding:9px 8px;border-radius:8px;margin-bottom:10px;letter-spacing:.05em}
+    .p-title{text-align:center;font-size:19px;font-weight:800;color:#143A57;padding:7px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:10px;letter-spacing:.06em}
     .p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}
-    .p-sec{background:#143A57;color:#fff;font-size:12.5px;font-weight:700;padding:5px 11px;margin:12px 0 6px;border-left:5px solid #E8810C;border-radius:5px}
+    .p-sec{color:#143A57;font-size:13px;font-weight:800;padding:4px 0 4px 10px;margin:12px 0 6px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}
     table.pt{width:100%;border-collapse:collapse;font-size:12px}
     table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}
-    table.pt th{background:#eef2f6;width:22%}
+    table.pt th{background:#eef2f6;color:#143A57;width:22%}
     .pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}
     .pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}
@@ -226,16 +226,19 @@
   document.getElementById('loadIntakeBtn').onclick=async function(){
     var box=document.getElementById('intakePick');box.innerHTML='読み込み中…';
     var r=await sb.from('sheets').select('id,created_at,data').eq('shop_id',SHOP).order('created_at',{ascending:false}).limit(30);
-    if(r.error){box.innerHTML='<span class="small" style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    var closeBtn='<div style="margin-top:8px"><button class="ghost" id="intakePickClose">閉じる</button></div>';
+    function bindClose(){var c=document.getElementById('intakePickClose');if(c)c.onclick=function(){box.innerHTML='';};}
+    if(r.error){box.innerHTML='<span class="small" style="color:#C8443B">'+esc(r.error.message)+'</span>'+closeBtn;bindClose();return;}
     var rows=(r.data||[]).filter(function(x){var d=x.data||{};return d.sheetType==='intake';});
-    if(!rows.length){box.innerHTML='<span class="small">入庫受付シートがありません。</span>';return;}
+    if(!rows.length){box.innerHTML='<span class="small">参照できる入庫受付シートがありません。</span>'+closeBtn;bindClose();return;}
     box.innerHTML=rows.map(function(x){var d=x.data||{};var c=d.cust||{};var dai=(d.daisha==='yes')?'（代車あり）':'';
-      return '<div class="pick"><div>'+esc(c.name||'（無名）')+' 様 <span class="small">'+esc(d.vehicleName||'')+' '+dai+'</span></div><button class="ghost" data-iid="'+x.id+'">読み込む</button></div>';}).join('');
+      return '<div class="pick"><div>'+esc(c.name||'（無名）')+' 様 <span class="small">'+esc(d.vehicleName||'')+' '+dai+'</span></div><button class="ghost" data-iid="'+x.id+'">読み込む</button></div>';}).join('')+closeBtn;
     box.querySelectorAll('[data-iid]').forEach(function(b){b.onclick=function(){
       var x=rows.filter(function(r){return r.id===b.getAttribute('data-iid');})[0];if(!x)return;var d=x.data||{};var c=d.cust||{};
       setVal('c_name',c.name||'');setVal('c_tel',c.tel||'');setVal('c_veh',d.vehicleName||'');setVal('c_due',d.intakeDate||'');
-      box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>';
+      box.innerHTML='<span class="small" style="color:#1d6d49">読み込みました。</span>'+closeBtn;bindClose();
     };});
+    bindClose();
   };
 
   /* signature pad */
@@ -295,12 +298,12 @@
     var css='<style>'+
       'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-      '.p-title{text-align:center;font-size:18px;font-weight:700;color:#fff;background:#143A57;padding:9px 8px;border-radius:8px;margin-bottom:10px;letter-spacing:.05em}'+
+      '.p-title{text-align:center;font-size:19px;font-weight:800;color:#143A57;padding:7px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:10px;letter-spacing:.06em}'+
       '.p-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}'+
-      '.p-sec{background:#143A57;color:#fff;font-size:12.5px;font-weight:700;padding:5px 11px;margin:12px 0 6px;border-left:5px solid #E8810C;border-radius:5px}'+
+      '.p-sec{color:#143A57;font-size:13px;font-weight:800;padding:4px 0 4px 10px;margin:12px 0 6px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
       'table.pt{width:100%;border-collapse:collapse;font-size:12px}'+
       'table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}'+
-      'table.pt th{background:#eef2f6;width:22%}'+
+      'table.pt th{background:#eef2f6;color:#143A57;width:22%}'+
       '.pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}'+
       '.pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}'+
       '.pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}'+
