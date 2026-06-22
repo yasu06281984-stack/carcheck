@@ -337,11 +337,11 @@
     var vehName = (MT && MT.vehicleName) || VEH[state.type].label;
     var staffName = (MT && MT.staff) || '';
     var shopLines = '';
-    if (SHOP.company) shopLines += '<div class="p-shopco">' + SHOP.company + '</div>';
-    if (staffName) shopLines += '<div>担当：' + staffName + '</div>';
+    if (SHOP.company) shopLines += '<div class="p-shopco">' + SHOP.company + (staffName ? '　（担当：' + staffName + '）' : '') + '</div>';
+    else if (staffName) shopLines += '<div>担当：' + staffName + '</div>';
     if (SHOP.address) shopLines += '<div>' + SHOP.address + '</div>';
-    if (SHOP.tel) shopLines += '<div>TEL：' + SHOP.tel + '</div>';
-    if (SHOP.hours) shopLines += '<div>営業：' + SHOP.hours + '</div>';
+    var _tl = []; if (SHOP.tel) _tl.push('TEL：' + SHOP.tel); if (SHOP.hours) _tl.push('営業：' + SHOP.hours);
+    if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (SHOP.url) shopLines += '<div>' + SHOP.url + '</div>';
     var head = '<div class="p-title">' + title + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + ((MT && MT.bizName) || '') : 'お客様名：' + (nm ? nm + ' 様' : '')) + '</div>' +
@@ -374,14 +374,22 @@
     var bizCust = '<table class="p-cust">' +
       '<tr><th>カラー番号</th><td>' + CC.colorno + '</td><th>カラー</th><td>' + colorCell + '</td></tr>' +
       '<tr><th>走行距離</th><td colspan="3">' + (CC.mileage ? CC.mileage + ' km' : '') + '</td></tr></table>';
-    function viewBlock(vk) {
+    function figInner(vk) {
       var ms = state.records.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         return '<span class="p-mk" style="left:' + r.x + '%;top:' + r.y + '%;background:' + TOOL[r.tool].color + '">' + r.code + '</span>';
       }).join('');
-      return '<div class="p-cell"><div class="p-vt">' + VIEWLBL[vk] + '</div>' +
-        '<div class="p-fig"><img src="' + VEH[state.type].dir + '/' + vk + '.png"><div class="p-ly">' + ms + '</div></div></div>';
+      var img = '<img src="' + VEH[state.type].dir + '/' + vk + '.png"><div class="p-ly">' + ms + '</div>';
+      if (vk === 'roof') img = '<div class="roofrot">' + img + '</div>';
+      return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
     }
-    function figsHtml(big) { return '<div class="p-figs' + (big ? ' big' : '') + '">' + viewBlock('front') + viewBlock('rear') + viewBlock('left') + viewBlock('right') + viewBlock('roof') + '</div>'; }
+    function figsHtml(big) {
+      return '<div class="p-figs' + (big ? ' big' : '') + '">' +
+        '<div class="p-cell">' + figInner('front') + '</div>' +
+        '<div class="p-cell">' + figInner('rear') + '</div>' +
+        '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +
+        '<div class="p-cell pf-roof">' + figInner('roof') + '</div>' +
+        '</div>';
+    }
     var figs = figsHtml(false);
     var rows = state.records.map(function (r) {
       var T = TOOL[r.tool];
@@ -441,7 +449,7 @@
     area.innerHTML = html;
     var imgs = Array.prototype.slice.call(area.querySelectorAll('img'));
     var left = imgs.length, done = false;
-    function go() { if (done) return; done = true; window.print(); }
+    function go() { if (done) return; done = true; var _t = document.title; document.title = ' '; window.print(); setTimeout(function () { document.title = _t; }, 1500); }
     if (!left) { go(); return; }
     imgs.forEach(function (im) {
       if (im.complete) { if (--left === 0) go(); }

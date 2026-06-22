@@ -178,14 +178,21 @@
         '<tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr></table>';
       custHeading = 'お客様情報';
     }
-    function viewBlock(vk) {
+    function figInner(vk) {
       var ms = recs.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         var col = TOOL[r.tool] ? TOOL[r.tool].c : '#888';
         return '<span class="p-mk" style="left:' + r.x + '%;top:' + r.y + '%;background:' + col + '">' + esc(r.code) + '</span>';
       }).join('');
-      return '<div class="p-cell"><div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig"><img src="' + dir + '/' + vk + '.png" alt=""><div class="p-ly">' + ms + '</div></div></div>';
+      var img = '<img src="' + dir + '/' + vk + '.png" alt=""><div class="p-ly">' + ms + '</div>';
+      if (vk === 'roof') img = '<div class="roofrot">' + img + '</div>';
+      return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
     }
-    var figs = '<div class="p-figs">' + VIEWS.map(viewBlock).join('') + '</div>';
+    var figs = '<div class="p-figs">' +
+      '<div class="p-cell">' + figInner('front') + '</div>' +
+      '<div class="p-cell">' + figInner('rear') + '</div>' +
+      '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +
+      '<div class="p-cell pf-roof">' + figInner('roof') + '</div>' +
+      '</div>';
     var rows = recs.map(function (r) {
       var T = TOOL[r.tool] || { w: '' };
       var sz = (r.tool === 'X' || r.tool === 'Op') ? '—' : (r.size ? ((r.tool === 'A' ? '長さ' : '直径') + '約' + esc(r.size) + 'cm') : '—');
@@ -196,12 +203,13 @@
     var signSec = ''; // 確認プレビューでは署名欄を表示しない（この時点では未署名）
     var shop = d.shop || {};
     var shopLines = '';
-    if (shop.company) shopLines += '<div class="p-shopco">' + esc(shop.company) + '</div>';
-    if (d.staff) shopLines += '<div>担当：' + esc(d.staff) + '</div>';
+    if (shop.company) shopLines += '<div class="p-shopco">' + esc(shop.company) + (d.staff ? '　（担当：' + esc(d.staff) + '）' : '') + '</div>';
+    else if (d.staff) shopLines += '<div>担当：' + esc(d.staff) + '</div>';
     if (shop.address) shopLines += '<div>' + esc(shop.address) + '</div>';
-    if (shop.tel) shopLines += '<div>TEL：' + esc(shop.tel) + '</div>';
-    if (shop.hours) shopLines += '<div>営業：' + esc(shop.hours) + '</div>';
+    var _tl = []; if (shop.tel) _tl.push('TEL：' + esc(shop.tel)); if (shop.hours) _tl.push('営業：' + esc(shop.hours));
+    if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
+    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '</div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
     var valSec = '';
