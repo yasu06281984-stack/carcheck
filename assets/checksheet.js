@@ -419,7 +419,11 @@
       signSec = '<div class="p-sec">共有</div><div class="p-qrbox"><img src="' + qrImg + '"><div class="c">お客様がスキャンすると、この受付票を表示・PDF保存できます。</div></div>';
     }
     var html;
-    if (mode === 'none') {
+    if (mode === 'sheet') {
+      html = head + custSec + figSec + tables + signSec;
+    } else if (mode === 'sheetphotos') {
+      html = head + custSec + figSec + tables + signSec + (photos.length ? '<div class="p-break"></div><div class="p-sec">入庫時画像</div><div class="p-photos">' + photos.map(function (src, i) { return '<div class="p-photo"><img src="' + src + '"><div class="p-pcap">入庫時画像 ' + (i + 1) + '</div></div>'; }).join('') + '</div>' : '');
+    } else if (mode === 'none') {
       html = head + custSec + tables + signSec;
     } else if (mode === 'separate') {
       html = head + custSec + tables + signSec + '<div class="p-break"></div>' + figSec + photoSec(photos);

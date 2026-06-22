@@ -253,7 +253,7 @@
       var b = $('loanPdfBtn'); if (b) b.style.display = '';
       var ov = $('loanOverlay'); if (ov) ov.style.display = 'none';
       var f = $('loanFrame'); if (f) f.src = 'about:blank';
-      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを修正する';
+      var ob = $('openLoanBtn'); if (ob) ob.textContent = '代車貸出シートを再表示・修正';
       var out = $('outputs'); if (out) out.style.display = '';
     }
   });
@@ -407,7 +407,9 @@
   }
 
   /* ---------------- 起動 ---------------- */
+  function clearLoanSession() { try { sessionStorage.removeItem('cs_loan_state'); sessionStorage.removeItem('cs_loan_handoff'); } catch (e) {} window.csLoanDoc = ''; }
   function startFlow() {
+    clearLoanSession();
     wiz.started = true;
     if ($('wizStart')) $('wizStart').style.display = 'none';
     if ($('wizFlow')) $('wizFlow').hidden = false;
@@ -464,7 +466,7 @@
 
     qa('.step[data-step="5"] [data-pdf]').forEach(function (b) { b.addEventListener('click', function () { setMeta(); if (window.csAPI) window.csAPI.print(b.getAttribute('data-pdf')); }); });
     if ($('finalShare')) $('finalShare').addEventListener('click', showFinalShare);
-    if ($('finishBtn')) $('finishBtn').addEventListener('click', function () { clearDraft(); location.reload(); });
+    if ($('finishBtn')) $('finishBtn').addEventListener('click', function () { clearLoanSession(); clearDraft(); location.reload(); });
     if ($('loanYesBtn')) $('loanYesBtn').addEventListener('click', chooseLoanYes);
     if ($('loanNoBtn')) $('loanNoBtn').addEventListener('click', showOutputs);
     if ($('openLoanBtn')) $('openLoanBtn').addEventListener('click', openLoanOverlay);

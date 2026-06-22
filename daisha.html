@@ -57,15 +57,18 @@
     table.pt{width:100%;border-collapse:collapse;font-size:12px}
     table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}
     table.pt th{background:#eef2f6;width:22%}
-    .pfigs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-    .pfig{border:1px solid #ccc;border-radius:6px;padding:4px;position:relative}
-    .pfig .l{font-size:9px;text-align:center;color:#555}
+    .pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}
+    .pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}
     .pfig .w{position:relative}.pfig img{width:100%;display:block}
-    .pmk{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:7px;display:grid;place-items:center;font-weight:700}
+    .pmk{position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}
     .pterms{font-size:9px;white-space:pre-wrap;line-height:1.5;border:1px solid #ccc;padding:6px;border-radius:4px}
     .psign{display:flex;gap:14px;align-items:flex-end;margin-top:8px}
     .psign .box{flex:1;border:1px solid #999;border-radius:6px;min-height:80px;display:flex;align-items:center;justify-content:center}
     .psign img{max-height:78px}
+    .pqr{margin-top:10px;text-align:center}
+    .pqr img{width:96px;height:96px;image-rendering:pixelated}
+    .pqr div{font-size:9px;color:#444;margin-top:2px}
   }
 </style>
 </head>
@@ -193,6 +196,27 @@
     if(x)showLoan(x);else{curLoan=null;document.getElementById('loanInfoCard').style.display='none';}
   };
 
+  function saveLoanState(){
+    try{sessionStorage.setItem('cs_loan_state',JSON.stringify({
+      carId:curLoan?curLoan.id:'',c_name:val('c_name'),c_tel:val('c_tel'),c_veh:val('c_veh'),c_due:val('c_due'),
+      lend_date:val('lend_date'),return_date:val('return_date'),amtType:amtType,amt:val('amt'),
+      signData:signData,carriedSign:carriedSign,agree:(document.getElementById('agreeChk')?document.getElementById('agreeChk').checked:false)
+    }));}catch(e){}
+  }
+  function restoreLoanState(){
+    var raw;try{raw=sessionStorage.getItem('cs_loan_state');}catch(e){}
+    if(!raw)return;var s;try{s=JSON.parse(raw);}catch(e){return;}
+    if(s.carId){var sel=document.getElementById('loanSel');sel.value=s.carId;var x=LOANS.filter(function(l){return l.id===s.carId;})[0];if(x)showLoan(x);}
+    setVal('c_name',s.c_name);setVal('c_tel',s.c_tel);setVal('c_veh',s.c_veh);setVal('c_due',s.c_due);
+    setVal('lend_date',s.lend_date);setVal('return_date',s.return_date);
+    if(s.amtType){var b=document.querySelector('#amtSeg button[data-a="'+s.amtType+'"]');if(b)b.click();setVal('amt',s.amt);}
+    if(s.signData){
+      signData=s.signData;
+      if(s.carriedSign){carriedSign=true;document.getElementById('carriedImg').src=s.signData;document.getElementById('signCarried').style.display='';document.getElementById('signStartBtn').style.display='none';if(s.agree&&document.getElementById('agreeChk'))document.getElementById('agreeChk').checked=true;}
+      else{showSignArea();setTimeout(function(){try{var img=new Image();img.onload=function(){signCtx.drawImage(img,0,0,signCv.width,signCv.height);};img.src=s.signData;document.getElementById('sign_status').textContent='署名済み';}catch(e){}},140);}
+    }
+  }
+
   document.querySelectorAll('#amtSeg button').forEach(function(b){b.onclick=function(){
     amtType=b.getAttribute('data-a');
     document.querySelectorAll('#amtSeg button').forEach(function(x){x.classList.toggle('on',x===b);});
@@ -246,6 +270,9 @@
     var sigImg=signData?'<img src="'+signData+'">':'';
     var agreed=document.getElementById('agreeChk')&&document.getElementById('agreeChk').checked;
     var signNote=carriedSign?('上記同意の上で、入庫チェックシートの署名を反映して利用します。'+(agreed?'（同意確認済み）':'')):'上記内容・利用規約に同意し、車両をお借りします。';
+    var qrUrl=intakeId?(location.origin+'/view.html?id='+encodeURIComponent(intakeId)):'';
+    var qrI=qrUrl?makeQR(qrUrl):'';
+    var qrSec=qrI?'<div class="pqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr"><div>貸出日：'+esc(val('lend_date')||'____/__/__')+'</div><div>'+shopLines+'</div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
@@ -260,7 +287,7 @@
       '<tr><th>装備</th><td colspan="3">'+esc(eqText(x.equip))+'</td></tr></table>'+
       '<div class="p-sec">代車の状態（傷）</div>'+figs+
       '<div class="p-sec">利用規約</div><div class="pterms">'+esc(TERMS)+'</div>'+
-      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">'+signNote+'<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>';
+      '<div class="psign"><div style="flex:0 0 auto;font-size:11px">'+signNote+'<br>お客様署名：</div><div class="box">'+sigImg+'</div></div>'+qrSec;
     return html;
   }
   function buildPrint(){ document.getElementById('printArea').innerHTML=buildSheetInner(); }
@@ -274,15 +301,16 @@
       'table.pt{width:100%;border-collapse:collapse;font-size:12px}'+
       'table.pt th,table.pt td{border:1px solid #999;padding:5px 7px;text-align:left}'+
       'table.pt th{background:#eef2f6;width:22%}'+
-      '.pfigs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}'+
-      '.pfig{border:1px solid #ccc;border-radius:6px;padding:4px;position:relative}'+
-      '.pfig .l{font-size:9px;text-align:center;color:#555}'+
+      '.pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}'+
+      '.pfig{border:1px solid #ccc;border-radius:6px;padding:5px;position:relative}'+
+      '.pfig .l{font-size:10px;text-align:center;color:#143A57;font-weight:600}'+
       '.pfig .w{position:relative}.pfig img{width:100%;display:block}'+
-      '.pmk{position:absolute;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:7px;display:grid;place-items:center;font-weight:700}'+
+      '.pmk{position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}'+
       '.pterms{font-size:9px;white-space:pre-wrap;line-height:1.5;border:1px solid #ccc;padding:6px;border-radius:4px}'+
       '.psign{display:flex;gap:14px;align-items:flex-end;margin-top:8px}'+
       '.psign .box{flex:1;border:1px solid #999;border-radius:6px;min-height:80px;display:flex;align-items:center;justify-content:center}'+
-      '.psign img{max-height:78px}@page{margin:12mm}'+
+      '.psign img{max-height:78px}'+
+      '.pqr{margin-top:10px;text-align:center}.pqr img{width:96px;height:96px;image-rendering:pixelated}.pqr div{font-size:9px;color:#444;margin-top:2px}@page{margin:12mm}'+
       '</style>';
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><base href="'+location.origin+'/"><title>代車貸出シート</title>'+css+'</head><body>'+buildSheetInner()+'</body></html>';
   }
@@ -323,6 +351,7 @@
     var r=await sb.from('loan_sheets').insert(row);
     this.disabled=false;this.textContent='完了';
     if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    saveLoanState();
     if(EMBED){
       try{window.parent.postMessage({type:'cs_loan_done',html:buildLoanDoc()},'*');}catch(e){}
       msg.textContent='完了しました。受付完了画面に「代車貸出シートのPDF」を追加しました。';msg.className='msg ok';
@@ -353,6 +382,7 @@
         var m=document.getElementById('msg');m.textContent='入庫'+(ho.kind==='business'?'（業者）':'')+'シートから引き継ぎました。代車を選んでPDF出力できます。';m.className='msg ok';
       }
     }catch(e){}
+    restoreLoanState();
   })();
 </script>
 </body>

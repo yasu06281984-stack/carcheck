@@ -100,13 +100,13 @@
   .p-cust{font-size:11px;margin-top:2px}
   .p-cust th,.p-cust td{border:1px solid #aab;padding:4px 7px;text-align:left;vertical-align:top}
   .p-cust th{background:#eef2f6;width:88px;white-space:nowrap;font-weight:600}
-  .p-figs{display:flex;flex-wrap:nowrap;gap:4px;margin-top:2px;align-items:flex-start}
-  .p-cell{flex:1 1 0;min-width:0}
-  .p-vt{font-size:8px;background:#1f4e74;color:#fff;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-figs{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px;align-items:flex-start}
+  .p-cell{flex:0 0 calc(33.333% - 5px);min-width:0}
+  .p-vt{font-size:10px;background:#1f4e74;color:#fff;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;border-radius:4px 4px 0 0}
   .p-fig{position:relative;border:1px solid #ccc;border-top:0}
   .p-fig img{width:100%;display:block}
   .p-ly{position:absolute;inset:0}
-  .p-mk{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff}
+  .p-mk{position:absolute;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .p-swatch{display:inline-block;width:16px;height:16px;border-radius:3px;border:1px solid #888;vertical-align:middle;margin-right:5px}
   .p-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
   .p-photo{width:calc(50% - 3px)}
@@ -496,19 +496,12 @@
 
       <div id="outputs" style="display:none">
       <h3 style="margin-top:18px">PDFの出力</h3>
-      <p class="muted">印刷パターンを選んでPDF保存・印刷できます。</p>
-      <div class="choice">
-        <button type="button" data-pdf="with2">PDF（写真2枚あり）</button>
-        <button type="button" data-pdf="none">PDF（写真なし）</button>
-        <button type="button" data-pdf="separate">PDF（写真は別紙）</button>
-        <button type="button" data-pdf="big">PDF（図を大きく・別ページ）</button>
-        <button type="button" id="loanPdfBtn" style="display:none;background:#E8810C;color:#fff;border:0;font-weight:700">代車貸出シートのPDF</button>
+      <p class="muted">印刷パターンを選んでPDF保存・印刷できます。QRコードはPDF内に印刷されます。</p>
+      <div class="choice" style="flex-direction:column;align-items:stretch;gap:8px">
+        <button type="button" data-pdf="sheet">PDF　チェックシート（イラストのみ）</button>
+        <button type="button" data-pdf="sheetphotos">PDF　チェックシート（写真登録印刷／写真は2ページ目）</button>
+        <button type="button" id="loanPdfBtn" style="display:none;background:#E8810C;color:#fff;border:0;font-weight:700">PDF　代車貸出シート</button>
       </div>
-
-      <h3 style="margin-top:18px">共有QR</h3>
-      <p class="muted">お客様がスキャンすると、この受付票を表示・PDF保存できます。</p>
-      <button type="button" class="btn ghost" id="finalShare" style="padding:10px 14px">共有QRを作成</button>
-      <div id="finalShareOut" style="margin-top:12px"></div>
       </div>
 
       <div id="loanArea" style="display:none;margin-top:20px;border-top:1px solid #e1e7ee;padding-top:16px">
