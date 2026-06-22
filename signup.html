@@ -26,6 +26,9 @@
   .msg{margin-top:12px;font-size:.85rem;text-align:center;min-height:1.2em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
   .note{margin-top:16px;font-size:.72rem;color:var(--muted);text-align:center}
   .note a{color:var(--brand)}
+  .agree{display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--muted);margin:2px 0 16px;line-height:1.5}
+  .agree input{margin-top:2px;width:16px;height:16px;flex:0 0 auto}
+  .agree a{color:var(--brand)}
 </style>
 </head>
 <body>
@@ -36,6 +39,7 @@
   <div class="f"><label for="email">メールアドレス</label><input id="email" type="email" autocomplete="username"></div>
   <div class="f"><label for="pw">パスワード（8文字以上）</label><input id="pw" type="password" autocomplete="new-password"></div>
   <div class="cf-turnstile" data-sitekey="0x4AAAAAADoIX0U2L82sEhxt" data-callback="onTok"></div>
+  <label class="agree"><input type="checkbox" id="agree"><span><a href="terms.html" target="_blank" rel="noopener">利用規約</a>と<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</span></label>
   <button id="go">登録する</button>
   <div id="msg" class="msg"></div>
   <div class="note">すでにアカウントをお持ちの方は <a href="login.html">ログイン</a></div>
@@ -51,6 +55,7 @@
     var email=document.getElementById('email').value.trim();
     var password=document.getElementById('pw').value;
     if(!email||password.length<8){msg.textContent='メールと8文字以上のパスワードを入力してください。';msg.className='msg err';return;}
+    if(!document.getElementById('agree').checked){msg.textContent='利用規約とプライバシーポリシーへの同意が必要です。';msg.className='msg err';return;}
     this.disabled=true;this.textContent='登録中…';
     var opts={};if(tok)opts.captchaToken=tok;
     var res=await sb.auth.signUp({email:email,password:password,options:opts});
