@@ -76,6 +76,7 @@
     <button data-t="shops">店舗</button>
     <button data-t="invite">招待</button>
     <button data-t="plans">プラン・機能</button>
+    <button data-t="ads">広告</button>
   </div>
 
   <div data-c="dash"><div class="tiles" id="tiles"></div></div>
@@ -113,6 +114,28 @@
 
   <div data-c="plans" class="hide">
     <div class="card"><div class="card-l">プラン定義と機能フラグ</div><div id="planTable" class="small">読み込み中…</div></div>
+  </div>
+
+  <div data-c="ads" class="hide">
+    <div class="card">
+      <div class="card-l">広告（店舗の管理ダッシュボードに表示／VIPは非表示）</div>
+      <label class="chk"><input type="checkbox" id="ad_enabled"> 広告を表示する</label>
+      <div class="field" style="margin-top:12px"><label>入力方式</label>
+        <select id="ad_mode"><option value="image">画像＋リンク</option><option value="code">広告コードを貼り付け</option></select>
+      </div>
+      <div id="ad_image_fields">
+        <div class="field"><label>画像URL</label><input id="ad_image" placeholder="https://example.com/banner.jpg"></div>
+        <div class="field"><label>リンク先URL（クリックで開く）</label><input id="ad_link" placeholder="https://example.com/"></div>
+      </div>
+      <div id="ad_code_fields" class="hide">
+        <div class="field"><label>広告コード（HTML）</label><textarea id="ad_codetext" style="width:100%;height:120px;border:1px solid var(--line);border-radius:9px;padding:10px;font-family:monospace;font-size:.85rem;box-sizing:border-box"></textarea></div>
+      </div>
+      <button class="primary" id="ad_save">保存する</button>
+      <div class="msg" id="ad_msg"></div>
+      <div class="card-l" style="margin-top:18px">プレビュー</div>
+      <div id="ad_preview" style="border:1px dashed var(--line);border-radius:10px;padding:12px;min-height:60px;background:#fff"></div>
+    </div>
+    <div class="small" style="color:var(--muted)">※ 広告は店舗の管理ダッシュボードに表示されます。受付ウィザード（お客様の前で開く画面）と印刷PDFには表示されません。VIPの店舗には表示されません。</div>
   </div>
 </div>
 
@@ -316,6 +339,53 @@
   }
   var rb=document.getElementById('recalc'); if(rb){rb.onclick=function(){refreshShops(rb);};}
 
+  // ---- 広告（ad_settings）----
+  function adRenderPreview(){
+    var mode=$v('ad_mode').value, box=$v('ad_preview');
+    if(mode==='image'){
+      var img=$v('ad_image').value.trim(), lnk=$v('ad_link').value.trim();
+      if(!img){box.innerHTML='<span class="small" style="color:#9aa">画像URLを入力するとプレビューが出ます</span>';return;}
+      var inner='<img src="'+esc(img)+'" style="max-width:100%;display:block;border-radius:8px">';
+      box.innerHTML=lnk?('<a href="'+esc(lnk)+'" target="_blank" rel="noopener">'+inner+'</a>'):inner;
+    }else{
+      var code=$v('ad_codetext').value;
+      if(!code.trim()){box.innerHTML='<span class="small" style="color:#9aa">広告コードを入力するとプレビューが出ます</span>';return;}
+      box.innerHTML='<iframe id="ad_pv_if" style="width:100%;border:0;min-height:120px" sandbox="allow-scripts allow-popups allow-same-origin"></iframe>';
+      $v('ad_pv_if').srcdoc='<!doctype html><meta charset="utf-8"><body style="margin:0">'+code+'</body>';
+    }
+  }
+  function adSyncMode(){
+    var code=$v('ad_mode').value==='code';
+    $v('ad_image_fields').classList.toggle('hide',code);
+    $v('ad_code_fields').classList.toggle('hide',!code);
+    adRenderPreview();
+  }
+  async function loadAds(){
+    var r=await sb.from('ad_settings').select('*').eq('id',1).single();
+    if(r.error){$v('ad_msg').textContent='広告テーブルが見つかりません。先に db-step3-ads.sql を Supabase で実行してください。';$v('ad_msg').className='msg err';return;}
+    var a=r.data||{};
+    $v('ad_enabled').checked=!!a.enabled;
+    $v('ad_mode').value=(a.mode==='code')?'code':'image';
+    $v('ad_image').value=a.image_url||'';
+    $v('ad_link').value=a.link_url||'';
+    $v('ad_codetext').value=a.code||'';
+    adSyncMode();
+  }
+  async function saveAds(){
+    var btn=$v('ad_save'),msg=$v('ad_msg');msg.textContent='';msg.className='msg';
+    var obj={id:1,enabled:$v('ad_enabled').checked,mode:$v('ad_mode').value,
+      image_url:$v('ad_image').value.trim()||null,link_url:$v('ad_link').value.trim()||null,
+      code:$v('ad_codetext').value||null,updated_at:new Date().toISOString()};
+    btn.disabled=true;btn.textContent='保存中…';
+    var r=await sb.from('ad_settings').upsert(obj);
+    btn.disabled=false;btn.textContent='保存する';
+    if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    msg.textContent='保存しました。';msg.className='msg ok';
+  }
+  $v('ad_mode').onchange=adSyncMode;
+  ['ad_image','ad_link','ad_codetext'].forEach(function(id){$v(id).addEventListener('input',adRenderPreview);});
+  $v('ad_save').onclick=saveAds;
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -323,7 +393,7 @@
     var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     if(!p.data||p.data.role!=='site_admin'){location.replace('home.html');return;}
     document.getElementById('whoName').textContent=(p.data.name||'運営')+' さん';
-    refreshShops();loadInvites();loadPlans();
+    refreshShops();loadInvites();loadPlans();loadAds();
   })();
 </script>
 </body>

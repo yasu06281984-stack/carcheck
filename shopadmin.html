@@ -72,6 +72,8 @@
     <button data-t="loan">代車登録</button>
   </div>
 
+  <div id="adZone" style="margin-bottom:14px"></div>
+
   <div data-c="shop">
     <div class="card">
       <div class="card-l">店舗情報（受付シートのPDFヘッダーに表示されます）</div>
@@ -207,11 +209,32 @@
     this.disabled=false;this.textContent='住所を自動入力';
   };
 
+  async function loadAd(plan, vipExp){
+    var zone=document.getElementById('adZone'); if(!zone)return;
+    zone.innerHTML='';
+    // VIP（有効期限内）は広告を出さない
+    var isVip=(plan==='vip')&&(!vipExp||new Date(vipExp)>new Date());
+    if(isVip)return;
+    var r=await sb.from('ad_settings').select('*').eq('id',1).single();
+    if(r.error||!r.data||!r.data.enabled)return;
+    var a=r.data, inner='';
+    if(a.mode==='code'&&a.code){
+      inner='<iframe style="width:100%;border:0;min-height:110px;display:block" sandbox="allow-scripts allow-popups allow-same-origin"></iframe>';
+    }else if(a.image_url){
+      var img='<img src="'+esc(a.image_url)+'" style="max-width:100%;display:block;border-radius:8px">';
+      inner=a.link_url?('<a href="'+esc(a.link_url)+'" target="_blank" rel="noopener">'+img+'</a>'):img;
+    }
+    if(!inner)return;
+    zone.innerHTML='<div style="border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px">'+
+      '<div style="font-size:.6rem;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px">広告</div>'+inner+'</div>';
+    if(a.mode==='code'&&a.code){var ifr=zone.querySelector('iframe');if(ifr)ifr.srcdoc='<!doctype html><meta charset="utf-8"><body style="margin:0">'+a.code+'</body>';}
+  }
   async function loadShop(){
     var r=await sb.from('shops').select('*').eq('id',SHOP).single();
     if(r.error||!r.data)return;var s=r.data;
     setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_postal',s.postal);setVal('sh_address',s.address);
     setVal('sh_tel',s.tel);setVal('sh_url',s.url);setHours(s.hours_data);
+    loadAd(s.plan,s.vip_expires_at);
   }
   document.getElementById('sh_save').onclick=async function(){
     var msg=document.getElementById('sh_msg');msg.textContent='';msg.className='msg';
