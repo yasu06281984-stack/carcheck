@@ -191,28 +191,22 @@
         '<tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr></table>';
       custHeading = 'お客様情報';
     }
-    function figInner(vk, sz) {
+    function figLabel(t) { return '<div class="p-vt" style="height:22px;line-height:14px;box-sizing:border-box;font-size:12px;color:#1f4e74;background:#eaf1f8;border:1px solid #1f4e74;border-bottom:0;text-align:center;font-weight:700;border-radius:4px 4px 0 0;white-space:nowrap;overflow:hidden">' + t + '</div>'; }
+    function figBox(vk) {
       var ms = recs.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         var col = TOOL[r.tool] ? TOOL[r.tool].c : '#888';
         return '<span class="p-mk" style="position:absolute;left:' + r.x + '%;top:' + r.y + '%;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;background:' + col + '">' + esc(r.code) + '</span>';
       }).join('');
-      var src = dir + '/' + vk + '.png';
-      var isRoof = vk === 'roof', isLR = (vk === 'left' || vk === 'right');
-      var h = isLR ? sz.L : sz.S;
-      var vt = '<div class="p-vt" style="height:24px;line-height:16px;box-sizing:border-box;font-size:13px;color:#1f4e74;background:#eaf1f8;border:1px solid #1f4e74;border-bottom:0;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;font-weight:700;border-radius:4px 4px 0 0">' + VIEWLBL[vk] + '</div>';
-      var boxStyle = 'position:relative;border:1px solid #1f4e74;border-top:0;overflow:hidden;box-sizing:border-box;height:' + ((isRoof ? sz.S : h) + 2) + 'px' + (isRoof ? (';width:' + sz.RW + 'px') : '');
-      var ly = '<div class="p-ly" style="position:absolute;inset:0">' + ms + '</div>';
-      var inner = isRoof
-        ? '<div class="roofrot" style="position:absolute;top:50%;left:50%;width:' + sz.S + 'px;transform:translate(-50%,-50%) rotate(90deg)"><img src="' + src + '" alt="" style="width:' + sz.S + 'px;height:auto;display:block">' + ly + '</div>'
-        : '<img src="' + src + '" alt="" style="height:' + h + 'px;width:auto;display:block">' + ly;
-      return vt + '<div class="p-fig" style="' + boxStyle + '">' + inner + '</div>';
+      return '<div class="p-fig" style="position:relative;border:1px solid #1f4e74;border-top:0;overflow:hidden"><img src="' + dir + '/' + vk + '.png" alt="" style="width:100%;height:auto;display:block"><div class="p-ly" style="position:absolute;inset:0">' + ms + '</div></div>';
     }
-    var figSz = figSizes(v), figCs = 'display:flex;flex-direction:column;min-width:0';
-    var figs = '<div class="p-figs" style="display:flex;align-items:flex-start;gap:4px;margin-top:6px">' +
-      '<div class="p-cell" style="' + figCs + '">' + figInner('front', figSz) + '</div>' +
-      '<div class="p-cell" style="' + figCs + '">' + figInner('rear', figSz) + '</div>' +
-      '<div class="p-cell pf-lr" style="' + figCs + '">' + figInner('left', figSz) + figInner('right', figSz) + '</div>' +
-      '<div class="p-cell pf-roof" style="' + figCs + '">' + figInner('roof', figSz) + '</div>' +
+    function figCol(g, inner) { return '<div style="display:flex;flex-direction:column;flex:' + g + ' 1 0;min-width:0">' + inner + '</div>'; }
+    var figD = FIGDIMS[v] || FIGDIMS.sedan;
+    var gF = Math.round(figD.f[0] / figD.f[1] * 100), gR = Math.round(figD.r[0] / figD.r[1] * 100), gL = Math.round(figD.l[0] / figD.l[1] / 2 * 100), gRoof = Math.round(figD.ro[0] / figD.ro[1] * 100);
+    var figs = '<div class="p-figs" style="display:flex;align-items:flex-end;gap:4px;width:100%;margin-top:6px">' +
+      figCol(gF, figLabel(VIEWLBL.front) + figBox('front')) +
+      figCol(gR, figLabel(VIEWLBL.rear) + figBox('rear')) +
+      figCol(gL, figLabel(VIEWLBL.left) + figBox('left') + figLabel(VIEWLBL.right) + figBox('right')) +
+      figCol(gRoof, figLabel(VIEWLBL.roof) + figBox('roof')) +
       '</div>';
     var rows = recs.map(function (r) {
       var T = TOOL[r.tool] || { w: '' };
@@ -230,7 +224,7 @@
     var _tl = []; if (shop.tel) _tl.push('TEL：' + esc(shop.tel)); if (shop.hours) _tl.push('営業：' + esc(shop.hours));
     if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
-    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v11</span></div>';
+    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v13</span></div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
     var valSec = '';
@@ -260,7 +254,7 @@
   }
   function openLoanOverlay() {
     storeLoanHandoff();
-    var f = $('loanFrame'); if (f) f.src = 'daisha.html?v=11';
+    var f = $('loanFrame'); if (f) f.src = 'daisha.html?v=13';
     var ov = $('loanOverlay'); if (ov) ov.style.display = '';
   }
   function chooseLoanYes() {

@@ -288,25 +288,20 @@
     if(_tl.length)shopLines+='<div>'+_tl.join('　／　')+'</div>';
     if(SHOPINFO.url)shopLines+='<div>'+esc(SHOPINFO.url)+'</div>';
     var ft=(x.fig_type||'hatchback');
-    var _sz=figSizes(ft);
-    function _fig(v){
-      var isRoof=v[0]==='roof', isLR=(v[0]==='left'||v[0]==='right'), h=isLR?_sz.L:_sz.S;
+    var _d=FIGDIMS[ft]||FIGDIMS.sedan;
+    function _lbl(t){return '<div class="l" style="height:22px;line-height:14px;box-sizing:border-box;font-size:12px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;white-space:nowrap;overflow:hidden">'+t+'</div>';}
+    function _box(v){
       var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="position:absolute;left:'+m.x+'%;top:'+m.y+'%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
-      var src='assets/vehicles/'+ft+'/'+v[0]+'.png';
-      var lbl='<div class="l" style="height:24px;line-height:16px;box-sizing:border-box;font-size:13px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;padding:3px 6px;white-space:nowrap;overflow:hidden">'+v[1]+'</div>';
-      var wStyle='position:relative;border:1px solid #143A57;border-top:0;overflow:hidden;box-sizing:border-box;height:'+((isRoof?_sz.S:h)+2)+'px'+(isRoof?(';width:'+_sz.RW+'px'):'');
-      var inner=isRoof
-        ? '<div class="roofrot" style="position:absolute;top:50%;left:50%;width:'+_sz.S+'px;transform:translate(-50%,-50%) rotate(90deg)"><img src="'+src+'" style="width:'+_sz.S+'px;height:auto;display:block">'+marks+'</div>'
-        : '<img src="'+src+'" style="height:'+h+'px;width:auto;display:block">'+marks;
-      return '<div class="pfig" style="position:relative">'+lbl+'<div class="w" style="'+wStyle+'">'+inner+'</div></div>';
+      return '<div class="w" style="position:relative;border:1px solid #143A57;border-top:0;overflow:hidden"><img src="assets/vehicles/'+ft+'/'+v[0]+'.png" style="width:100%;height:auto;display:block">'+marks+'</div>';
     }
+    function _col(g,inner){return '<div class="pfcol" style="display:flex;flex-direction:column;flex:'+g+' 1 0;min-width:0">'+inner+'</div>';}
     var _V={};VIEWS.forEach(function(v){_V[v[0]]=v;});
-    var _fc='display:flex;flex-direction:column';
-    var figs='<div class="pfigs" style="display:flex;align-items:flex-start;gap:4px">'+
-      '<div class="pfcol" style="'+_fc+'">'+_fig(_V.front)+'</div>'+
-      '<div class="pfcol" style="'+_fc+'">'+_fig(_V.rear)+'</div>'+
-      '<div class="pfcol lr" style="'+_fc+'">'+_fig(_V.left)+_fig(_V.right)+'</div>'+
-      '<div class="pfcol roof" style="'+_fc+'">'+_fig(_V.roof)+'</div>'+
+    var gF=Math.round(_d.f[0]/_d.f[1]*100),gR=Math.round(_d.r[0]/_d.r[1]*100),gL=Math.round(_d.l[0]/_d.l[1]/2*100),gRoof=Math.round(_d.ro[0]/_d.ro[1]*100);
+    var figs='<div class="pfigs" style="display:flex;align-items:flex-end;gap:4px;width:100%">'+
+      _col(gF,_lbl(_V.front[1])+_box(_V.front))+
+      _col(gR,_lbl(_V.rear[1])+_box(_V.rear))+
+      _col(gL,_lbl(_V.left[1])+_box(_V.left)+_lbl(_V.right[1])+_box(_V.right))+
+      _col(gRoof,_lbl(_V.roof[1])+_box(_V.roof))+
       '</div>';
     var sigTag=signData?'<img class="p-sigimg" src="'+signData+'">':'<div class="p-sigline"></div>';
     var agreed=document.getElementById('agreeChk')&&document.getElementById('agreeChk').checked;
@@ -316,7 +311,7 @@
     var sigQr=qrI?'<div class="p-sigqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr2"><div class="p-custname">お客様名：'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</div>'+
-      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v11</span></div></div></div>'+
+      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v13</span></div></div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
       '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
       '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
@@ -337,30 +332,30 @@
   function buildPrint(){ document.getElementById('printArea').innerHTML=buildSheetInner(); }
   function buildLoanDoc(){
     var css='<style>'+
-      'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+      'body{margin:0;padding:10px;font-size:11.5px;line-height:1.3;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-      '.p-title{text-align:center;font-size:26px;font-weight:800;color:#143A57;padding:11px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}'+
-      '.p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 4px}'+
-      '.p-custname{font-size:19px;font-weight:700;color:#111}'+
-      '.p-shop{font-size:13.5px;color:#333;text-align:right;line-height:1.6}'+
-      '.p-shopco{font-weight:700;font-size:15px;color:#143A57}'+
-      '.p-sec{color:#143A57;font-size:17px;font-weight:800;padding:6px 0 6px 12px;margin:18px 0 8px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
-      'table.pt{width:100%;border-collapse:collapse;font-size:16px}'+
-      'table.pt th,table.pt td{border:1px solid #999;padding:8px 11px;text-align:left}'+
+      '.p-title{text-align:center;font-size:16px;font-weight:800;color:#143A57;padding:4px 0;border-top:2px solid #143A57;border-bottom:2px solid #E8810C;margin-bottom:6px;letter-spacing:.05em}'+
+      '.p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:4px 0 2px}'+
+      '.p-custname{font-size:14px;font-weight:700;color:#111}'+
+      '.p-shop{font-size:10.5px;color:#333;text-align:right;line-height:1.4}'+
+      '.p-shopco{font-weight:700;font-size:13px;color:#143A57}'+
+      '.p-sec{color:#143A57;font-size:12px;font-weight:800;padding:2px 0 2px 8px;margin:6px 0 3px;border-left:5px solid #E8810C;border-bottom:1px solid #143A57;background:#f1f5f9}'+
+      'table.pt{width:100%;border-collapse:collapse;font-size:11px}'+
+      'table.pt th,table.pt td{border:1px solid #999;padding:3px 7px;text-align:left}'+
       'table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}'+
       '.pfigs{display:flex;align-items:flex-start;gap:4px}'+'.pfcol{display:flex;flex-direction:column}'+
       '.pfig{position:relative}'+
       '.pfig .l{height:24px;line-height:16px;box-sizing:border-box;font-size:13px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;padding:3px 6px;white-space:nowrap;overflow:hidden}'+
       '.pfig .w{position:relative;border:1px solid #143A57;border-top:0;height:calc(var(--fh,154px) + 2px);overflow:hidden;box-sizing:border-box}'+'.pfig .w img{height:var(--fh,154px);width:auto;display:block}'+'.pfcol.lr .pfig .w{height:calc((var(--fh,154px) - 26px)/2 + 2px)}'+'.pfcol.lr .pfig .w img{height:calc((var(--fh,154px) - 26px)/2)}'+'.pfcol.roof .pfig .w{width:var(--rw,74px)}'+'.pfcol.roof .roofrot{position:absolute;top:50%;left:50%;width:var(--fh,154px);transform:translate(-50%,-50%) rotate(90deg)}'+'.pfcol.roof .roofrot img{width:var(--fh,154px);height:auto;display:block}'+
       '.pmk{position:absolute;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}'+
-      '.pterms{font-size:13px;white-space:pre-wrap;line-height:1.6;border:1px solid #ccc;padding:9px;border-radius:4px}'+
-      '.p-signnote{font-size:15px;margin:0 0 9px;line-height:1.5}'+
-      '.p-signrow{display:flex;align-items:flex-end;gap:16px}'+
-      '.p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:90px;padding:6px 10px;display:flex;flex-direction:column;justify-content:flex-end}'+
-      '.p-sigimg{max-height:82px;max-width:100%;object-fit:contain;align-self:flex-start}'+
-      '.p-sigline{height:62px}'+
-      '.p-sigcap{font-size:12.5px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}'+
-      '.p-sigqr{text-align:center;margin-left:8px}.p-sigqr img{width:104px;height:104px;image-rendering:pixelated}.p-sigqr div{font-size:12.5px;color:#444;margin-top:3px}@page{margin:12mm}'+
+      '.pterms{font-size:10px;white-space:pre-wrap;line-height:1.45;border:1px solid #ccc;padding:6px;border-radius:4px}'+
+      '.p-signnote{font-size:11px;margin:0 0 4px;line-height:1.4}'+
+      '.p-signrow{display:flex;align-items:flex-end;gap:14px}'+
+      '.p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:44px;padding:3px 7px;display:flex;flex-direction:column;justify-content:flex-end}'+
+      '.p-sigimg{max-height:42px;max-width:100%;object-fit:contain;align-self:flex-start}'+
+      '.p-sigline{height:26px}'+
+      '.p-sigcap{font-size:10.5px;color:#555;border-top:1px solid #ccc;margin-top:3px;padding-top:2px}'+
+      '.p-sigqr{text-align:center;margin-left:8px}.p-sigqr img{width:78px;height:78px;image-rendering:pixelated}.p-sigqr div{font-size:10px;color:#444;margin-top:2px}@page{margin:8mm}'+
       '</style>';
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><base href="'+location.origin+'/"><title> </title>'+css+'</head><body>'+buildSheetInner()+'</body></html>';
   }

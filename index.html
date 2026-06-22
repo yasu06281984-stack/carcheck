@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/auth.js?v=11"></script>
+<script src="assets/auth.js?v=13"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>受付チェックシート</title>
@@ -161,12 +161,35 @@
   @media print{
     html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body{background:#fff;padding:0}
-    @page{margin:12mm}
+    @page{margin:8mm}
     .wrap,.wiz-nav{display:none !important}
     #loanOverlay,#loanPrintFrame,#loanArea{display:none !important}
     #cs-print-area{display:block !important;color:#111;padding:0;font-family:"Noto Sans JP",sans-serif}
     #cs-print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
+  /* ==== COMPACT: fit one A4 page at 100% (illustrations kept, text/spacing tightened) ==== */
+  #cs-print-area,#wizPreview{font-size:11.5px;line-height:1.28}
+  #cs-print-area{width:100%;box-sizing:border-box;overflow:hidden}
+  #cs-print-area *,#wizPreview *{max-width:100%}
+  #cs-print-area .p-figs,#wizPreview .p-figs{max-width:100%;margin-top:3px}
+  #cs-print-area .p-figs img,#wizPreview .p-figs img{max-width:none}
+  #cs-print-area .p-title,#wizPreview .p-title{font-size:16px;margin:0 0 5px;padding:4px 0;border-top-width:2px;border-bottom-width:2px;letter-spacing:.05em}
+  #cs-print-area .p-sec,#wizPreview .p-sec{font-size:12px;margin:5px 0 2px;padding:2px 0 2px 8px;border-left-width:5px;border-bottom-width:1px}
+  #cs-print-area .p-hdr2,#wizPreview .p-hdr2{margin:4px 0 2px}
+  #cs-print-area .p-custname,#wizPreview .p-custname{font-size:14px}
+  #cs-print-area .p-shop,#wizPreview .p-shop{font-size:10.5px;line-height:1.4}
+  #cs-print-area .p-cust,#cs-print-area .p-lst,#wizPreview .p-cust,#wizPreview .p-lst{font-size:11px;margin-top:2px}
+  #cs-print-area .p-cust th,#cs-print-area .p-cust td,#cs-print-area .p-lst th,#cs-print-area .p-lst td,#wizPreview .p-cust th,#wizPreview .p-cust td,#wizPreview .p-lst th,#wizPreview .p-lst td{padding:2px 6px}
+  #cs-print-area .p-cust th,#wizPreview .p-cust th{width:90px}
+  #cs-print-area .p-legend,#wizPreview .p-legend{font-size:10px;margin:2px 0 0}
+  #cs-print-area .p-signnote,#wizPreview .p-signnote{font-size:11px;margin-bottom:3px}
+  #cs-print-area .p-signrow,#wizPreview .p-signrow{gap:14px}
+  #cs-print-area .p-sigbox,#wizPreview .p-sigbox{min-height:40px;padding:2px 6px}
+  #cs-print-area .p-sigimg,#wizPreview .p-sigimg{max-height:42px}
+  #cs-print-area .p-sigline,#wizPreview .p-sigline{height:24px}
+  #cs-print-area .p-sigcap,#wizPreview .p-sigcap{font-size:10.5px;margin-top:3px;padding-top:2px}
+  #cs-print-area .p-sign,#wizPreview .p-sign{margin-top:3px}
+  #cs-print-area .p-vt,#wizPreview .p-vt{height:20px;font-size:11px;line-height:13px;padding:0}
 </style>
 </head>
 <body>
@@ -545,9 +568,9 @@
 <div id="cs-print-area"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="assets/ocr.js?v=11" defer></script>
-<script src="assets/qrcode.js?v=11" defer></script>
-<script src="assets/checksheet.js?v=11" defer></script>
+<script src="assets/ocr.js?v=13" defer></script>
+<script src="assets/qrcode.js?v=13" defer></script>
+<script src="assets/checksheet.js?v=13" defer></script>
 <script>
 /* ---- カラー見本 ---- */
 (function () {
@@ -693,6 +716,6 @@
   setTimeout(function () { fit(false); }, 80);
 })();
 </script>
-<script src="assets/wizard.js?v=11" defer></script>
+<script src="assets/wizard.js?v=13" defer></script>
 </body>
 </html>
