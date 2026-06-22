@@ -60,16 +60,18 @@
     table.pt{width:100%;border-collapse:collapse;font-size:16px}
     table.pt th,table.pt td{border:1px solid #999;padding:8px 11px;text-align:left}
     table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}
-    .pfigs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:auto auto;gap:7px}
-    .pfigs .pfig:nth-child(1){grid-column:1;grid-row:1 / span 2;display:flex;flex-direction:column;justify-content:center}
-    .pfigs .pfig:nth-child(2){grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;justify-content:center}
-    .pfigs .pfig:nth-child(3){grid-column:3;grid-row:1}
-    .pfigs .pfig:nth-child(4){grid-column:3;grid-row:2}
-    .pfigs .pfig:nth-child(5){grid-column:4;grid-row:1 / span 2;display:flex;flex-direction:column;justify-content:center}
-    .pfig{border:1px solid #143A57;border-radius:6px;padding:5px;position:relative}
-    .pfig .l{font-size:13.5px;text-align:center;color:#143A57;font-weight:700}
-    .pfig .w{position:relative}.pfig img{width:100%;display:block}
-    .pmk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}
+    .pfigs{display:flex;align-items:flex-start;gap:4px}
+    .pfcol{display:flex;flex-direction:column}
+    .pfig{position:relative}
+    .pfig .l{height:24px;line-height:16px;box-sizing:border-box;font-size:13px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;padding:3px 6px;white-space:nowrap;overflow:hidden}
+    .pfig .w{position:relative;border:1px solid #143A57;border-top:0;height:calc(var(--fh,154px) + 2px);overflow:hidden;box-sizing:border-box}
+    .pfig .w img{height:var(--fh,154px);width:auto;display:block}
+    .pfcol.lr .pfig .w{height:calc((var(--fh,154px) - 26px)/2 + 2px)}
+    .pfcol.lr .pfig .w img{height:calc((var(--fh,154px) - 26px)/2)}
+    .pfcol.roof .pfig .w{width:var(--rw,74px)}
+    .pfcol.roof .roofrot{position:absolute;top:50%;left:50%;width:var(--fh,154px);transform:translate(-50%,-50%) rotate(90deg)}
+    .pfcol.roof .roofrot img{width:var(--fh,154px);height:auto;display:block}
+    .pmk{position:absolute;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700}
     .pterms{font-size:13px;white-space:pre-wrap;line-height:1.6;border:1px solid #ccc;padding:9px;border-radius:4px}
     .p-signnote{font-size:15px;margin:0 0 9px;line-height:1.5}
     .p-signrow{display:flex;align-items:flex-end;gap:16px}
@@ -171,6 +173,8 @@
 
   var FIGS={hatchback:'ハッチバック',sedan:'セダン',suv:'SUV',minivan:'ミニバン',onebox:'ワンボックス'};
   var VIEWS=[['front','正面'],['rear','後方'],['left','左側面'],['right','右側面'],['roof','ルーフ']];
+  var FIGDIMS={hatchback:{f:[296,237],r:[292,240],l:[566,231],ro:[628,327]},minivan:{f:[282,261],r:[283,269],l:[549,259],ro:[781,345]},onebox:{f:[231,208],r:[228,208],l:[455,208],ro:[499,237]},sedan:{f:[301,228],r:[308,231],l:[652,228],ro:[650,304]},suv:{f:[253,211],r:[252,208],l:[544,209],ro:[628,283]}};
+  function figVars(type){var d=FIGDIMS[type]||FIGDIMS.sedan,gap=12,W=686;var ARf=d.f[0]/d.f[1],ARr=d.r[0]/d.r[1],ARl=d.l[0]/d.l[1],ROI=d.ro[1]/d.ro[0];var s=Math.round((W-gap+13*ARl)/(ARf+ARr+ROI+ARl/2));return '--fh:'+s+'px;--rw:'+Math.round(s*ROI)+'px';}
   var KINDS={kizu:{label:'キズ',color:'#E8810C'},heko:{label:'ヘコミ',color:'#C8443B'},ware:{label:'割れ・欠け',color:'#7A3DB8'},sabi:{label:'サビ',color:'#2E9E6B'}};
   var AMT={once:'1回',day:'1日',insurance:'保険利用',free:'無料'};
   var FUELMAP={};
@@ -290,7 +294,7 @@
       return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w">'+img+'</div></div>';
     }
     var _V={};VIEWS.forEach(function(v){_V[v[0]]=v;});
-    var figs='<div class="pfigs">'+
+    var figs='<div class="pfigs" style="'+figVars(ft)+'">'+
       '<div class="pfcol">'+_fig(_V.front)+'</div>'+
       '<div class="pfcol">'+_fig(_V.rear)+'</div>'+
       '<div class="pfcol lr">'+_fig(_V.left)+_fig(_V.right)+'</div>'+

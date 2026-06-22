@@ -6,6 +6,13 @@
   var VIEWLBL = { front: '正面', rear: '後方', left: '左側面', right: '右側面', roof: 'ルーフ' };
   var VEHLBL = { hatchback: 'ハッチバック', sedan: 'セダン', suv: 'SUV', minivan: 'ミニバン', onebox: 'ワンボックス' };
   var VIEWS = ['front', 'rear', 'left', 'right', 'roof'];
+  var FIGDIMS = { hatchback: { f: [296, 237], r: [292, 240], l: [566, 231], ro: [628, 327] }, minivan: { f: [282, 261], r: [283, 269], l: [549, 259], ro: [781, 345] }, onebox: { f: [231, 208], r: [228, 208], l: [455, 208], ro: [499, 237] }, sedan: { f: [301, 228], r: [308, 231], l: [652, 228], ro: [650, 304] }, suv: { f: [253, 211], r: [252, 208], l: [544, 209], ro: [628, 283] } };
+  function figVars(type) {
+    var d = FIGDIMS[type] || FIGDIMS.sedan, VTH = 24, gap = 12, W = 686;
+    var ARf = d.f[0] / d.f[1], ARr = d.r[0] / d.r[1], ARl = d.l[0] / d.l[1], ROI = d.ro[1] / d.ro[0];
+    var s = Math.round((W - gap + 13 * ARl) / (ARf + ARr + ROI + ARl / 2));
+    return '--fh:' + s + 'px;--rw:' + Math.round(s * ROI) + 'px';
+  }
   var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート', business: '業者受付チェックシート' };
 
   var TERMS = '【利用規約（サンプル）】\n\n本規約は、お客様の車両の点検・整備・修理および見積りに関する受付に適用されます。\n\n1. 受付内容の確認\n本シートに記載の車両状態・損傷箇所・修理希望は、受付時点の確認内容です。作業中に追加の不具合が判明した場合は、別途ご連絡のうえ対応します。\n\n2. 車両のお預かり\n当店は善良な管理者の注意をもって車両を管理します。天災・盗難その他当店の責によらない事由による損害については責任を負いかねる場合があります。\n\n3. 貴重品について\n車内の貴重品・現金・ETCカード等は、必ずお客様ご自身でお持ち帰りください。車内に残された物品の紛失・破損について当店は責任を負いません。\n\n4. 見積り・費用\nお見積りは概算です。部品価格・作業内容の変更により金額が変動する場合があります。作業開始前にご確認・ご同意をいただきます。\n\n5. 個人情報の取り扱い\nご記入いただいた情報は、本件の受付・整備・連絡・見積りの目的にのみ利用します。\n\n6. 撮影データ\n車検証・車両の撮影画像は、受付および見積りの目的で利用します。\n\n以上の内容にご同意のうえ、ご署名ください。\n（この規約文はサンプルです。実際の文面に差し替えてください。）\n';
@@ -187,7 +194,7 @@
       if (vk === 'roof') img = '<div class="roofrot">' + img + '</div>';
       return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
     }
-    var figs = '<div class="p-figs">' +
+    var figs = '<div class="p-figs" style="' + figVars(v) + '">' +
       '<div class="p-cell">' + figInner('front') + '</div>' +
       '<div class="p-cell">' + figInner('rear') + '</div>' +
       '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +

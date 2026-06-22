@@ -16,6 +16,13 @@
     { key: 'left', label: '左側面' }, { key: 'right', label: '右側面' }, { key: 'roof', label: 'ルーフ' }
   ];
   var VIEWLBL = { front: '正面', rear: '後方', left: '左側面', right: '右側面', roof: 'ルーフ' };
+  var FIGDIMS = { hatchback: { f: [296, 237], r: [292, 240], l: [566, 231], ro: [628, 327] }, minivan: { f: [282, 261], r: [283, 269], l: [549, 259], ro: [781, 345] }, onebox: { f: [231, 208], r: [228, 208], l: [455, 208], ro: [499, 237] }, sedan: { f: [301, 228], r: [308, 231], l: [652, 228], ro: [650, 304] }, suv: { f: [253, 211], r: [252, 208], l: [544, 209], ro: [628, 283] } };
+  function figVars(type) {
+    var d = FIGDIMS[type] || FIGDIMS.sedan, gap = 12, W = 686;
+    var ARf = d.f[0] / d.f[1], ARr = d.r[0] / d.r[1], ARl = d.l[0] / d.l[1], ROI = d.ro[1] / d.ro[0];
+    var s = Math.round((W - gap + 13 * ARl) / (ARf + ARr + ROI + ARl / 2));
+    return '--fh:' + s + 'px;--rw:' + Math.round(s * ROI) + 'px';
+  }
   var TOOL = {
     A: { color: '#E24B4A', word: '傷', size: '長さ' },
     B: { color: '#BA7517', word: '凹み', size: '直径' },
@@ -383,7 +390,7 @@
       return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
     }
     function figsHtml(big) {
-      return '<div class="p-figs' + (big ? ' big' : '') + '">' +
+      return '<div class="p-figs' + (big ? ' big' : '') + '" style="' + figVars(state.type) + '">' +
         '<div class="p-cell">' + figInner('front') + '</div>' +
         '<div class="p-cell">' + figInner('rear') + '</div>' +
         '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +
