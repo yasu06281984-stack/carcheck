@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/auth.js?v=14"></script>
+<script src="assets/auth.js?v=16"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>受付チェックシート</title>
@@ -420,11 +420,12 @@
         <input type="file" id="photoFront" accept="image/*" capture="environment" hidden>
         <div class="slot" id="slotFront" data-for="photoFront">タップして撮影 / 選択</div>
       </div>
-      <div class="field"><label>リア斜め45度写真 <span class="opt">（推奨）</span></label>
+      <div class="sec-note" id="photoFreeNote" style="display:none;color:#9a5800">無料プランで保存できる写真は「フロント1枚」のみです。リア・その他の写真はVIPプランでご利用いただけます。</div>
+      <div class="field" id="photoRearField"><label>リア斜め45度写真 <span class="opt">（推奨）</span></label>
         <input type="file" id="photoRear" accept="image/*" capture="environment" hidden>
         <div class="slot" id="slotRear" data-for="photoRear">タップして撮影 / 選択</div>
       </div>
-      <div class="field"><label>その他の写真 <span class="opt">（最大8枚・任意）</span></label>
+      <div class="field" id="photoOtherField"><label>その他の写真 <span class="opt">（最大8枚・任意）</span></label>
         <input type="file" id="photoOther" accept="image/*" multiple capture="environment">
         <div class="photo-grid" id="otherGrid"></div>
         <div class="photo-count" id="otherCount">0 / 8 枚</div>
@@ -570,9 +571,9 @@
 <div id="cs-print-area"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="assets/ocr.js?v=14" defer></script>
-<script src="assets/qrcode.js?v=14" defer></script>
-<script src="assets/checksheet.js?v=14" defer></script>
+<script src="assets/ocr.js?v=16" defer></script>
+<script src="assets/qrcode.js?v=16" defer></script>
+<script src="assets/checksheet.js?v=16" defer></script>
 <script>
 /* ---- カラー見本 ---- */
 (function () {
@@ -610,6 +611,7 @@
   window.csPhotoData = { front: null, rear: null, others: [] };
   window.csIntakePhotos = [];
   function sync() {
+    if (!window.csIsVip) { window.csPhotoData.rear = null; window.csPhotoData.others = []; }
     var a = [];
     if (window.csPhotoData.front) a.push(window.csPhotoData.front);
     if (window.csPhotoData.rear) a.push(window.csPhotoData.rear);
@@ -683,6 +685,20 @@
     renderSlot(document.getElementById('slotRear'), window.csPhotoData.rear, 'rear');
     renderOthers(); sync();
   };
+  function applyPhotoGate() {
+    var vip = !!window.csIsVip;
+    var rf = document.getElementById('photoRearField'), of = document.getElementById('photoOtherField'), nt = document.getElementById('photoFreeNote');
+    if (rf) rf.style.display = vip ? '' : 'none';
+    if (of) of.style.display = vip ? '' : 'none';
+    if (nt) nt.style.display = vip ? 'none' : '';
+    if (!vip) {
+      window.csPhotoData.rear = null; window.csPhotoData.others = [];
+      renderSlot(document.getElementById('slotRear'), null, 'rear');
+      renderOthers(); sync();
+    }
+  }
+  applyPhotoGate();
+  if (window.csAuthReady && window.csAuthReady.then) { window.csAuthReady.then(applyPhotoGate).catch(function () {}); }
   renderOthers();
 })();
 </script>
@@ -718,6 +734,6 @@
   setTimeout(function () { fit(false); }, 80);
 })();
 </script>
-<script src="assets/wizard.js?v=14" defer></script>
+<script src="assets/wizard.js?v=16" defer></script>
 </body>
 </html>

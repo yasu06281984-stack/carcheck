@@ -103,6 +103,7 @@
     <div class="card"><div class="card-l">スタッフ一覧</div><div id="staffList" class="small">読み込み中…</div></div>
     <div class="card">
       <div class="card-l">スタッフを招待</div>
+      <div class="small" id="st_cap" style="margin-bottom:10px;color:var(--brand);font-weight:600"></div>
       <div class="form">
         <div class="field"><label>姓</label><input id="st_sei" placeholder="田中"></div>
         <div class="field"><label>名</label><input id="st_mei" placeholder="健"></div>
@@ -168,6 +169,16 @@
   function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
   function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
   var SHOP=null;
+  var SHOP_PLAN='free', SHOP_VIPEXP=null, STAFF_N=0, STINV_N=0;
+  function isVipNow(){return (SHOP_PLAN==='vip')&&(!SHOP_VIPEXP||new Date(SHOP_VIPEXP)>new Date());}
+  function updateStaffGate(){
+    var capEl=document.getElementById('st_cap'), btn=document.getElementById('st_invite');
+    var total=STAFF_N+STINV_N;
+    if(isVipNow()){ if(capEl)capEl.textContent='VIPプラン：スタッフは無制限です。'; if(btn)btn.disabled=false; return; }
+    var remain=Math.max(0,2-total);
+    if(capEl)capEl.textContent='無料プラン：スタッフは2名まで（招待中を含む）。現在 '+total+' 名／残り '+remain+' 名。VIPで無制限になります。';
+    if(btn)btn.disabled=(total>=2);
+  }
 
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
@@ -234,7 +245,8 @@
     if(r.error||!r.data)return;var s=r.data;
     setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_postal',s.postal);setVal('sh_address',s.address);
     setVal('sh_tel',s.tel);setVal('sh_url',s.url);setHours(s.hours_data);
-    loadAd(s.plan,s.vip_expires_at);
+    SHOP_PLAN=s.plan||'free'; SHOP_VIPEXP=s.vip_expires_at||null;
+    loadAd(s.plan,s.vip_expires_at); updateStaffGate();
   }
   document.getElementById('sh_save').onclick=async function(){
     var msg=document.getElementById('sh_msg');msg.textContent='';msg.className='msg';
@@ -249,6 +261,7 @@
   async function loadStaff(){
     var r=await sb.from('profiles').select('name,email,role').eq('shop_id',SHOP);
     if(r.error){document.getElementById('staffList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    STAFF_N=(r.data||[]).filter(function(p){return p.role==='staff';}).length; updateStaffGate();
     var rows=(r.data||[]).sort(function(a,b){return (a.role==='shop_admin'?0:1)-(b.role==='shop_admin'?0:1);});
     if(!rows.length){document.getElementById('staffList').innerHTML='まだスタッフがいません。';return;}
     var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>メール</th><th>役割</th></tr></thead><tbody>';
@@ -259,6 +272,7 @@
   async function loadStInvites(){
     var r=await sb.from('invites').select('email,name').eq('shop_id',SHOP).eq('role','staff');
     if(r.error){document.getElementById('stInviteList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
+    STINV_N=(r.data||[]).length; updateStaffGate();
     var rows=r.data||[];if(!rows.length){document.getElementById('stInviteList').innerHTML='招待中のものはありません。';return;}
     var h='<table><tbody>';rows.forEach(function(v){h+='<tr><td>'+esc(v.name||'')+'</td><td class="small">'+esc(v.email)+'</td><td class="ops"><button class="lnk" data-del="'+esc(v.email)+'">取消</button></td></tr>';});
     document.getElementById('stInviteList').innerHTML=h+'</tbody></table>';
@@ -267,6 +281,7 @@
   document.getElementById('st_invite').onclick=async function(){
     var msg=document.getElementById('st_msg');msg.textContent='';msg.className='msg';
     var email=val('st_email');if(!email){msg.textContent='メールアドレスを入力してください。';msg.className='msg err';return;}
+    if(!isVipNow()&&(STAFF_N+STINV_N)>=2){msg.textContent='無料プランはスタッフ2名まで（招待中を含む）です。VIPにすると無制限になります。';msg.className='msg err';return;}
     var nm=(val('st_sei')+' '+val('st_mei')).trim();
     this.disabled=true;this.textContent='登録中…';
     var r=await sb.from('invites').upsert({email:email,name:nm||null,role:'staff',shop_id:SHOP});

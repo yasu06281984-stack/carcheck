@@ -18,11 +18,14 @@
     var prof = (p && p.data) || {};
     window.csAuth = { token: sess.access_token, shopId: prof.shop_id, name: prof.name, role: prof.role };
     if (prof.shop_id) {
-      var sh = await sb.from('shops').select('name,company,address,tel,hours,url').eq('id', prof.shop_id).single();
+      var sh = await sb.from('shops').select('name,company,address,tel,hours,url,plan,vip_expires_at').eq('id', prof.shop_id).single();
       if (sh && sh.data) {
         window.csShopName = sh.data.name || '';
         window.csShopDB = { company: sh.data.company || '', address: sh.data.address || '', tel: sh.data.tel || '', hours: sh.data.hours || '', url: sh.data.url || '' };
         window.csShop = window.csShopDB;
+        window.csPlan = sh.data.plan || 'free';
+        var _ve = sh.data.vip_expires_at;
+        window.csIsVip = (sh.data.plan === 'vip') && (!_ve || new Date(_ve) > new Date());
       }
       var st = await sb.from('profiles').select('name,role').eq('shop_id', prof.shop_id);
       if (st && st.data) {

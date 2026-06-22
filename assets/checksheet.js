@@ -352,7 +352,7 @@
     if (SHOP.url) shopLines += '<div>' + SHOP.url + '</div>';
     var head = '<div class="p-title">' + title + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + ((MT && MT.bizName) || '') : 'お客様名：' + (nm ? nm + ' 様' : '')) + '</div>' +
-      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v14</span></div></div></div>';
+      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v16</span></div></div></div>';
     var colorCell = CC.colorname ? ((CC.color ? '<span class="p-swatch" style="background:' + CC.color + '"></span>' : '') + CC.colorname) : '';
     var cust = '<table class="p-cust">' +
       '<tr><th>お客様名</th><td>' + (nm ? nm + ' 様' : '') + '</td><th>電話番号</th><td>' + CC.tel + '</td></tr>' +
@@ -424,7 +424,7 @@
     }
     var sig = window.csSignature || '';
     var isIntake = !MT || MT.sheetType === 'intake';
-    var qrImg = window.csShareQR || '';
+    var qrImg = window.csIsVip ? (window.csShareQR || '') : '';
     var signImg = sig ? '<img class="p-sigimg" src="' + sig + '">' : '<div class="p-sigline"></div>';
     var sigQr = qrImg ? '<div class="p-sigqr"><img src="' + qrImg + '"><div>スキャンで共有</div></div>' : '';
     var signSec = '';
