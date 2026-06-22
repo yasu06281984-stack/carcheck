@@ -81,7 +81,7 @@
   <div data-c="dash"><div class="tiles" id="tiles"></div></div>
 
   <div data-c="shops" class="hide">
-    <div class="card"><div class="card-l">店舗（テナント）一覧</div><div id="shopList" class="small">読み込み中…</div></div>
+    <div class="card"><div class="card-l" style="display:flex;justify-content:space-between;align-items:center">店舗（テナント）一覧 <button class="lnk2" id="recalc">容量を再集計</button></div><div id="shopList" class="small">読み込み中…</div></div>
     <div class="card">
       <div class="card-l">店舗を作成</div>
       <div class="form">
@@ -306,6 +306,16 @@
   $v('ov').onclick=function(e){if(e.target===$v('ov'))closeEditor();};
   document.querySelectorAll('[data-addm]').forEach(function(b){b.onclick=function(){addMonths(parseInt(b.getAttribute('data-addm'),10));};});
 
+  // ---- 容量の自動集計 ----
+  async function recalcStorage(){ try{ await sb.rpc('recalc_shop_storage'); }catch(e){} }
+  async function refreshShops(btn){
+    if(btn){btn.disabled=true;btn.textContent='集計中…';}
+    await recalcStorage();
+    await loadShops();
+    if(btn){btn.disabled=false;btn.textContent='容量を再集計';}
+  }
+  var rb=document.getElementById('recalc'); if(rb){rb.onclick=function(){refreshShops(rb);};}
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -313,7 +323,7 @@
     var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     if(!p.data||p.data.role!=='site_admin'){location.replace('home.html');return;}
     document.getElementById('whoName').textContent=(p.data.name||'運営')+' さん';
-    loadShops();loadInvites();loadPlans();
+    refreshShops();loadInvites();loadPlans();
   })();
 </script>
 </body>
