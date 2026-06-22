@@ -46,6 +46,22 @@
   .yes{color:var(--green);font-weight:700}.no{color:var(--muted)}
   .small{font-size:.76rem;color:var(--muted)}
   .hide{display:none!important}
+  .lnk2{border:1px solid var(--line);background:#fff;color:var(--brand);font-size:.78rem;font-weight:700;cursor:pointer;padding:5px 12px;border-radius:8px}
+  .bar2{height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;width:84px;display:inline-block;vertical-align:middle;border:1px solid var(--line)}
+  .bar2 i{display:block;height:100%;background:var(--brand)}
+  .cap{font-size:.72rem;color:var(--muted);margin-left:6px;vertical-align:middle;white-space:nowrap}
+  .overlay{position:fixed;inset:0;background:rgba(16,32,48,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:92vh;overflow:auto;padding:20px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 2px;color:var(--brand);font-size:1.05rem}
+  .modal .sub{font-size:.78rem;color:var(--muted);margin-bottom:14px}
+  .modal .field{margin-bottom:12px}
+  .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hint{font-size:.72rem;color:var(--muted);margin-top:4px}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 6px}
+  .quick button{border:1px solid var(--brand-soft);background:var(--brand-soft);color:var(--brand);font-size:.76rem;font-weight:700;border-radius:8px;padding:6px 10px;cursor:pointer}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+  .ghost{background:#fff;border:1px solid var(--line);color:var(--muted);padding:11px 18px;border-radius:10px;font-weight:700;cursor:pointer}
   @media(max-width:680px){.tiles{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr}}
 </style>
 </head>
@@ -71,7 +87,7 @@
       <div class="form">
         <div class="field"><label>店舗名</label><input id="s_name" placeholder="○○自動車"></div>
         <div class="field"><label>サブドメイン（任意）</label><input id="s_sub" placeholder="maruo"></div>
-        <div class="field"><label>初期プラン</label><select id="s_plan"><option value="free">無料</option><option value="standard">標準</option><option value="vip">VIP</option></select></div>
+        <div class="field"><label>初期プラン</label><select id="s_plan"><option value="free">無料</option><option value="vip">VIP</option></select></div>
         <div class="field"><label>状態</label><select id="s_status"><option value="trial">トライアル</option><option value="active">稼働中</option></select></div>
       </div>
       <label class="chk"><input type="checkbox" id="s_trial" checked> 30日トライアルの期限を設定する</label>
@@ -97,6 +113,34 @@
 
   <div data-c="plans" class="hide">
     <div class="card"><div class="card-l">プラン定義と機能フラグ</div><div id="planTable" class="small">読み込み中…</div></div>
+  </div>
+</div>
+
+<div class="overlay" id="ov">
+  <div class="modal">
+    <h3 id="e_title">店舗</h3>
+    <div class="sub">この店舗のプラン・支払い・有効期限を設定します</div>
+    <div class="field"><label>プラン</label>
+      <select id="e_plan"><option value="free">無料</option><option value="vip">VIP</option></select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>支払い</label><select id="e_billing"><option value="monthly">月々（5,000円）</option><option value="annual">年（48,000円・一括）</option></select></div>
+      <div class="field"><label>状態</label><select id="e_status"><option value="trial">トライアル</option><option value="active">稼働中</option><option value="suspended">停止中</option></select></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="e_option"> データしっかり保管オプション（＋月2,000円）</label>
+    <div class="field" style="margin-top:12px"><label>保存容量の上限（GB）</label><input id="e_limit" type="number" min="0" step="5">
+      <div class="hint">目安：VIP標準=5／保管オプション=50／容量追加は10GB単位で加算</div>
+    </div>
+    <div class="field"><label>VIPの有効期限</label>
+      <div class="quick"><button type="button" data-addm="12">＋1年</button><button type="button" data-addm="1">＋1ヶ月</button><button type="button" data-addm="0">クリア</button></div>
+      <input id="e_vipexp" type="date">
+    </div>
+    <div class="row2">
+      <div class="field"><label>初月無料の終了日</label><input id="e_trialend" type="date"></div>
+      <div class="field" style="display:flex;align-items:flex-end"><label class="chk"><input type="checkbox" id="e_trialused"> 初月無料を使用済み</label></div>
+    </div>
+    <div class="msg" id="e_msg"></div>
+    <div class="actions"><button class="ghost" id="e_cancel">キャンセル</button><button class="primary" id="e_save" style="margin-top:0">保存する</button></div>
   </div>
 </div>
 
@@ -128,12 +172,23 @@
     // shop select for invite
     document.getElementById('i_shop').innerHTML=SHOPS.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+'</option>';}).join('');
     if(!SHOPS.length){document.getElementById('shopList').innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
-    var h='<table><thead><tr><th>店舗名</th><th>サブドメイン</th><th>プラン</th><th>状態</th><th>作成</th></tr></thead><tbody>';
+    var h='<table><thead><tr><th>店舗名</th><th>プラン</th><th>支払い</th><th>容量</th><th>有効期限</th><th>状態</th><th></th></tr></thead><tbody>';
     SHOPS.forEach(function(s){var pl=PLANLBL[s.plan]||[s.plan,'off'];var st=STATUS[s.status]||[s.status,'off'];
-      h+='<tr><td>'+esc(s.name)+'</td><td class="mono">'+(s.subdomain?esc(s.subdomain)+'.carcheck.app':'—')+'</td>'+
-        '<td><span class="sp '+pl[1]+'">'+pl[0]+'</span></td><td><span class="sp '+st[1]+'">'+st[0]+'</span></td>'+
-        '<td class="mono">'+fmtDate(s.created_at)+'</td></tr>';});
+      var bill=(s.plan==='vip')?((s.billing==='annual')?'年':'月々'):'—';
+      var lim=(s.storage_limit_gb!=null?s.storage_limit_gb:5);
+      var usedGb=(s.storage_used_mb||0)/1024;
+      var pct=lim>0?Math.min(100,Math.round(usedGb/lim*100)):0;
+      var cap='<span class="bar2"><i style="width:'+pct+'%"></i></span><span class="cap">'+usedGb.toFixed(1)+' / '+lim+'GB'+(s.option_storage?'・保管':'')+'</span>';
+      var exp=(s.plan==='vip')?(s.vip_expires_at?fmtDate(s.vip_expires_at):'—'):((s.status==='trial'&&s.trial_ends_at)?('無料 '+fmtDate(s.trial_ends_at)):'—');
+      h+='<tr><td>'+esc(s.name)+'</td>'+
+        '<td><span class="sp '+pl[1]+'">'+pl[0]+'</span></td>'+
+        '<td>'+bill+'</td>'+
+        '<td>'+cap+'</td>'+
+        '<td class="mono">'+esc(exp)+'</td>'+
+        '<td><span class="sp '+st[1]+'">'+st[0]+'</span></td>'+
+        '<td><button class="lnk2" data-edit="'+esc(s.id)+'">編集</button></td></tr>';});
     document.getElementById('shopList').innerHTML=h+'</tbody></table>';
+    document.querySelectorAll('#shopList [data-edit]').forEach(function(b){b.onclick=function(){openEditor(b.getAttribute('data-edit'));};});
   }
 
   async function loadInvites(){
@@ -169,7 +224,7 @@
     var name=document.getElementById('s_name').value.trim();
     if(!name){msg.textContent='店舗名を入力してください。';msg.className='msg err';return;}
     var row={name:name,subdomain:document.getElementById('s_sub').value.trim()||null,
-      plan:document.getElementById('s_plan').value,status:document.getElementById('s_status').value};
+      plan:document.getElementById('s_plan').value,status:document.getElementById('s_status').value,storage_limit_gb:5};
     if(document.getElementById('s_trial').checked){row.trial_ends_at=new Date(Date.now()+30*864e5).toISOString();}
     this.disabled=true;this.textContent='作成中…';
     var r=await sb.from('shops').insert(row);
@@ -193,6 +248,63 @@
     document.getElementById('i_email').value='';document.getElementById('i_name').value='';
     loadInvites();
   };
+
+  // ---- 会員（プラン）編集 ----
+  var ed=null;
+  function $v(id){return document.getElementById(id);}
+  function openEditor(id){
+    ed=SHOPS.filter(function(s){return String(s.id)===String(id);})[0];
+    if(!ed)return;
+    $v('e_title').textContent=ed.name;
+    $v('e_plan').value=(ed.plan==='vip')?'vip':'free';
+    $v('e_billing').value=(ed.billing==='annual')?'annual':'monthly';
+    $v('e_option').checked=!!ed.option_storage;
+    $v('e_limit').value=(ed.storage_limit_gb!=null?ed.storage_limit_gb:5);
+    $v('e_status').value=ed.status||'trial';
+    $v('e_vipexp').value=ed.vip_expires_at?String(ed.vip_expires_at).slice(0,10):'';
+    $v('e_trialend').value=ed.trial_ends_at?String(ed.trial_ends_at).slice(0,10):'';
+    $v('e_trialused').checked=!!ed.trial_used;
+    $v('e_msg').textContent='';$v('e_msg').className='msg';
+    syncPlanUI();
+    $v('ov').classList.add('show');
+  }
+  function closeEditor(){$v('ov').classList.remove('show');ed=null;}
+  function syncPlanUI(){
+    var vip=$v('e_plan').value==='vip';
+    $v('e_billing').disabled=!vip;
+    $v('e_vipexp').disabled=!vip;
+  }
+  function addMonths(n){
+    if(n===0){$v('e_vipexp').value='';return;}
+    var base=$v('e_vipexp').value?new Date($v('e_vipexp').value):new Date();
+    base.setMonth(base.getMonth()+n);
+    $v('e_vipexp').value=base.toISOString().slice(0,10);
+  }
+  async function saveEditor(){
+    if(!ed)return;
+    var btn=$v('e_save'),msg=$v('e_msg');msg.textContent='';msg.className='msg';
+    var plan=$v('e_plan').value;
+    var obj={
+      plan:plan,
+      billing:$v('e_billing').value,
+      option_storage:$v('e_option').checked,
+      storage_limit_gb:parseInt($v('e_limit').value,10)||0,
+      status:$v('e_status').value,
+      vip_expires_at:(plan==='vip'&&$v('e_vipexp').value)?new Date($v('e_vipexp').value).toISOString():null,
+      trial_ends_at:$v('e_trialend').value?new Date($v('e_trialend').value).toISOString():null,
+      trial_used:$v('e_trialused').checked
+    };
+    btn.disabled=true;btn.textContent='保存中…';
+    var r=await sb.from('shops').update(obj).eq('id',ed.id);
+    btn.disabled=false;btn.textContent='保存する';
+    if(r.error){msg.textContent='保存できませんでした：'+r.error.message;msg.className='msg err';return;}
+    closeEditor();loadShops();
+  }
+  $v('e_cancel').onclick=closeEditor;
+  $v('e_save').onclick=saveEditor;
+  $v('e_plan').onchange=syncPlanUI;
+  $v('ov').onclick=function(e){if(e.target===$v('ov'))closeEditor();};
+  document.querySelectorAll('[data-addm]').forEach(function(b){b.onclick=function(){addMonths(parseInt(b.getAttribute('data-addm'),10));};});
 
   (async function(){
     var s=await sb.auth.getSession();
