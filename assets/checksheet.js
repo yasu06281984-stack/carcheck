@@ -352,7 +352,7 @@
     if (SHOP.url) shopLines += '<div>' + SHOP.url + '</div>';
     var head = '<div class="p-title">' + title + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + ((MT && MT.bizName) || '') : 'お客様名：' + (nm ? nm + ' 様' : '')) + '</div>' +
-      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v10</span></div></div></div>';
+      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v11</span></div></div></div>';
     var colorCell = CC.colorname ? ((CC.color ? '<span class="p-swatch" style="background:' + CC.color + '"></span>' : '') + CC.colorname) : '';
     var cust = '<table class="p-cust">' +
       '<tr><th>お客様名</th><td>' + (nm ? nm + ' 様' : '') + '</td><th>電話番号</th><td>' + CC.tel + '</td></tr>' +
@@ -381,20 +381,34 @@
     var bizCust = '<table class="p-cust">' +
       '<tr><th>カラー番号</th><td>' + CC.colorno + '</td><th>カラー</th><td>' + colorCell + '</td></tr>' +
       '<tr><th>走行距離</th><td colspan="3">' + (CC.mileage ? CC.mileage + ' km' : '') + '</td></tr></table>';
-    function figInner(vk) {
+    function figSizes(type) {
+      var d = FIGDIMS[type] || FIGDIMS.sedan, gap = 12, W = 686;
+      var ARf = d.f[0] / d.f[1], ARr = d.r[0] / d.r[1], ARl = d.l[0] / d.l[1], ROI = d.ro[1] / d.ro[0];
+      var S = Math.round((W - gap + 13 * ARl) / (ARf + ARr + ROI + ARl / 2));
+      return { S: S, L: Math.round((S - 26) / 2), RW: Math.round(S * ROI) };
+    }
+    function figInner(vk, sz) {
       var ms = state.records.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
-        return '<span class="p-mk" style="left:' + r.x + '%;top:' + r.y + '%;background:' + TOOL[r.tool].color + '">' + r.code + '</span>';
+        return '<span class="p-mk" style="position:absolute;left:' + r.x + '%;top:' + r.y + '%;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;background:' + TOOL[r.tool].color + '">' + r.code + '</span>';
       }).join('');
-      var img = '<img src="' + VEH[state.type].dir + '/' + vk + '.png"><div class="p-ly">' + ms + '</div>';
-      if (vk === 'roof') img = '<div class="roofrot">' + img + '</div>';
-      return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
+      var src = VEH[state.type].dir + '/' + vk + '.png';
+      var isRoof = vk === 'roof', isLR = (vk === 'left' || vk === 'right');
+      var h = isLR ? sz.L : sz.S;
+      var vt = '<div class="p-vt" style="height:24px;line-height:16px;box-sizing:border-box;font-size:13px;color:#1f4e74;background:#eaf1f8;border:1px solid #1f4e74;border-bottom:0;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;font-weight:700;border-radius:4px 4px 0 0">' + VIEWLBL[vk] + '</div>';
+      var boxStyle = 'position:relative;border:1px solid #1f4e74;border-top:0;overflow:hidden;box-sizing:border-box;height:' + ((isRoof ? sz.S : h) + 2) + 'px' + (isRoof ? (';width:' + sz.RW + 'px') : '');
+      var ly = '<div class="p-ly" style="position:absolute;inset:0">' + ms + '</div>';
+      var inner = isRoof
+        ? '<div class="roofrot" style="position:absolute;top:50%;left:50%;width:' + sz.S + 'px;transform:translate(-50%,-50%) rotate(90deg)"><img src="' + src + '" style="width:' + sz.S + 'px;height:auto;display:block">' + ly + '</div>'
+        : '<img src="' + src + '" style="height:' + h + 'px;width:auto;display:block">' + ly;
+      return vt + '<div class="p-fig" style="' + boxStyle + '">' + inner + '</div>';
     }
     function figsHtml(big) {
-      return '<div class="p-figs' + (big ? ' big' : '') + '" style="' + figVars(state.type) + '">' +
-        '<div class="p-cell">' + figInner('front') + '</div>' +
-        '<div class="p-cell">' + figInner('rear') + '</div>' +
-        '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +
-        '<div class="p-cell pf-roof">' + figInner('roof') + '</div>' +
+      var sz = figSizes(state.type), cs = 'display:flex;flex-direction:column;min-width:0';
+      return '<div class="p-figs' + (big ? ' big' : '') + '" style="display:flex;align-items:flex-start;gap:4px;margin-top:6px">' +
+        '<div class="p-cell" style="' + cs + '">' + figInner('front', sz) + '</div>' +
+        '<div class="p-cell" style="' + cs + '">' + figInner('rear', sz) + '</div>' +
+        '<div class="p-cell pf-lr" style="' + cs + '">' + figInner('left', sz) + figInner('right', sz) + '</div>' +
+        '<div class="p-cell pf-roof" style="' + cs + '">' + figInner('roof', sz) + '</div>' +
         '</div>';
     }
     var figs = figsHtml(false);

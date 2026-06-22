@@ -13,6 +13,12 @@
     var s = Math.round((W - gap + 13 * ARl) / (ARf + ARr + ROI + ARl / 2));
     return '--fh:' + s + 'px;--rw:' + Math.round(s * ROI) + 'px';
   }
+  function figSizes(type) {
+    var d = FIGDIMS[type] || FIGDIMS.sedan, gap = 12, W = 686;
+    var ARf = d.f[0] / d.f[1], ARr = d.r[0] / d.r[1], ARl = d.l[0] / d.l[1], ROI = d.ro[1] / d.ro[0];
+    var S = Math.round((W - gap + 13 * ARl) / (ARf + ARr + ROI + ARl / 2));
+    return { S: S, L: Math.round((S - 26) / 2), RW: Math.round(S * ROI) };
+  }
   var TYPELBL = { intake: '入庫受付チェックシート', estimate: '見積もり依頼チェックシート', business: '業者受付チェックシート' };
 
   var TERMS = '【利用規約（サンプル）】\n\n本規約は、お客様の車両の点検・整備・修理および見積りに関する受付に適用されます。\n\n1. 受付内容の確認\n本シートに記載の車両状態・損傷箇所・修理希望は、受付時点の確認内容です。作業中に追加の不具合が判明した場合は、別途ご連絡のうえ対応します。\n\n2. 車両のお預かり\n当店は善良な管理者の注意をもって車両を管理します。天災・盗難その他当店の責によらない事由による損害については責任を負いかねる場合があります。\n\n3. 貴重品について\n車内の貴重品・現金・ETCカード等は、必ずお客様ご自身でお持ち帰りください。車内に残された物品の紛失・破損について当店は責任を負いません。\n\n4. 見積り・費用\nお見積りは概算です。部品価格・作業内容の変更により金額が変動する場合があります。作業開始前にご確認・ご同意をいただきます。\n\n5. 個人情報の取り扱い\nご記入いただいた情報は、本件の受付・整備・連絡・見積りの目的にのみ利用します。\n\n6. 撮影データ\n車検証・車両の撮影画像は、受付および見積りの目的で利用します。\n\n以上の内容にご同意のうえ、ご署名ください。\n（この規約文はサンプルです。実際の文面に差し替えてください。）\n';
@@ -185,20 +191,28 @@
         '<tr><th>カラー番号</th><td>' + esc(c.colorno) + '</td><th>カラー</th><td>' + colorCell + '</td></tr></table>';
       custHeading = 'お客様情報';
     }
-    function figInner(vk) {
+    function figInner(vk, sz) {
       var ms = recs.filter(function (r) { return r.views ? r.views.indexOf(vk) >= 0 : r.view === vk; }).map(function (r) {
         var col = TOOL[r.tool] ? TOOL[r.tool].c : '#888';
-        return '<span class="p-mk" style="left:' + r.x + '%;top:' + r.y + '%;background:' + col + '">' + esc(r.code) + '</span>';
+        return '<span class="p-mk" style="position:absolute;left:' + r.x + '%;top:' + r.y + '%;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;background:' + col + '">' + esc(r.code) + '</span>';
       }).join('');
-      var img = '<img src="' + dir + '/' + vk + '.png" alt=""><div class="p-ly">' + ms + '</div>';
-      if (vk === 'roof') img = '<div class="roofrot">' + img + '</div>';
-      return '<div class="p-vt">' + VIEWLBL[vk] + '</div><div class="p-fig">' + img + '</div>';
+      var src = dir + '/' + vk + '.png';
+      var isRoof = vk === 'roof', isLR = (vk === 'left' || vk === 'right');
+      var h = isLR ? sz.L : sz.S;
+      var vt = '<div class="p-vt" style="height:24px;line-height:16px;box-sizing:border-box;font-size:13px;color:#1f4e74;background:#eaf1f8;border:1px solid #1f4e74;border-bottom:0;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;font-weight:700;border-radius:4px 4px 0 0">' + VIEWLBL[vk] + '</div>';
+      var boxStyle = 'position:relative;border:1px solid #1f4e74;border-top:0;overflow:hidden;box-sizing:border-box;height:' + ((isRoof ? sz.S : h) + 2) + 'px' + (isRoof ? (';width:' + sz.RW + 'px') : '');
+      var ly = '<div class="p-ly" style="position:absolute;inset:0">' + ms + '</div>';
+      var inner = isRoof
+        ? '<div class="roofrot" style="position:absolute;top:50%;left:50%;width:' + sz.S + 'px;transform:translate(-50%,-50%) rotate(90deg)"><img src="' + src + '" alt="" style="width:' + sz.S + 'px;height:auto;display:block">' + ly + '</div>'
+        : '<img src="' + src + '" alt="" style="height:' + h + 'px;width:auto;display:block">' + ly;
+      return vt + '<div class="p-fig" style="' + boxStyle + '">' + inner + '</div>';
     }
-    var figs = '<div class="p-figs" style="' + figVars(v) + '">' +
-      '<div class="p-cell">' + figInner('front') + '</div>' +
-      '<div class="p-cell">' + figInner('rear') + '</div>' +
-      '<div class="p-cell pf-lr">' + figInner('left') + figInner('right') + '</div>' +
-      '<div class="p-cell pf-roof">' + figInner('roof') + '</div>' +
+    var figSz = figSizes(v), figCs = 'display:flex;flex-direction:column;min-width:0';
+    var figs = '<div class="p-figs" style="display:flex;align-items:flex-start;gap:4px;margin-top:6px">' +
+      '<div class="p-cell" style="' + figCs + '">' + figInner('front', figSz) + '</div>' +
+      '<div class="p-cell" style="' + figCs + '">' + figInner('rear', figSz) + '</div>' +
+      '<div class="p-cell pf-lr" style="' + figCs + '">' + figInner('left', figSz) + figInner('right', figSz) + '</div>' +
+      '<div class="p-cell pf-roof" style="' + figCs + '">' + figInner('roof', figSz) + '</div>' +
       '</div>';
     var rows = recs.map(function (r) {
       var T = TOOL[r.tool] || { w: '' };
@@ -216,7 +230,7 @@
     var _tl = []; if (shop.tel) _tl.push('TEL：' + esc(shop.tel)); if (shop.hours) _tl.push('営業：' + esc(shop.hours));
     if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
-    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v10</span></div>';
+    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v11</span></div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
     var valSec = '';
@@ -246,7 +260,7 @@
   }
   function openLoanOverlay() {
     storeLoanHandoff();
-    var f = $('loanFrame'); if (f) f.src = 'daisha.html?v=10';
+    var f = $('loanFrame'); if (f) f.src = 'daisha.html?v=11';
     var ov = $('loanOverlay'); if (ov) ov.style.display = '';
   }
   function chooseLoanYes() {

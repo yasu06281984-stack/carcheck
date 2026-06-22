@@ -175,6 +175,7 @@
   var VIEWS=[['front','正面'],['rear','後方'],['left','左側面'],['right','右側面'],['roof','ルーフ']];
   var FIGDIMS={hatchback:{f:[296,237],r:[292,240],l:[566,231],ro:[628,327]},minivan:{f:[282,261],r:[283,269],l:[549,259],ro:[781,345]},onebox:{f:[231,208],r:[228,208],l:[455,208],ro:[499,237]},sedan:{f:[301,228],r:[308,231],l:[652,228],ro:[650,304]},suv:{f:[253,211],r:[252,208],l:[544,209],ro:[628,283]}};
   function figVars(type){var d=FIGDIMS[type]||FIGDIMS.sedan,gap=12,W=686;var ARf=d.f[0]/d.f[1],ARr=d.r[0]/d.r[1],ARl=d.l[0]/d.l[1],ROI=d.ro[1]/d.ro[0];var s=Math.round((W-gap+13*ARl)/(ARf+ARr+ROI+ARl/2));return '--fh:'+s+'px;--rw:'+Math.round(s*ROI)+'px';}
+  function figSizes(type){var d=FIGDIMS[type]||FIGDIMS.sedan,gap=12,W=686;var ARf=d.f[0]/d.f[1],ARr=d.r[0]/d.r[1],ARl=d.l[0]/d.l[1],ROI=d.ro[1]/d.ro[0];var S=Math.round((W-gap+13*ARl)/(ARf+ARr+ROI+ARl/2));return {S:S,L:Math.round((S-26)/2),RW:Math.round(S*ROI)};}
   var KINDS={kizu:{label:'キズ',color:'#E8810C'},heko:{label:'ヘコミ',color:'#C8443B'},ware:{label:'割れ・欠け',color:'#7A3DB8'},sabi:{label:'サビ',color:'#2E9E6B'}};
   var AMT={once:'1回',day:'1日',insurance:'保険利用',free:'無料'};
   var FUELMAP={};
@@ -287,18 +288,25 @@
     if(_tl.length)shopLines+='<div>'+_tl.join('　／　')+'</div>';
     if(SHOPINFO.url)shopLines+='<div>'+esc(SHOPINFO.url)+'</div>';
     var ft=(x.fig_type||'hatchback');
+    var _sz=figSizes(ft);
     function _fig(v){
-      var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
-      var img='<img src="assets/vehicles/'+ft+'/'+v[0]+'.png">'+marks;
-      if(v[0]==='roof')img='<div class="roofrot">'+img+'</div>';
-      return '<div class="pfig"><div class="l">'+v[1]+'</div><div class="w">'+img+'</div></div>';
+      var isRoof=v[0]==='roof', isLR=(v[0]==='left'||v[0]==='right'), h=isLR?_sz.L:_sz.S;
+      var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="position:absolute;left:'+m.x+'%;top:'+m.y+'%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      var src='assets/vehicles/'+ft+'/'+v[0]+'.png';
+      var lbl='<div class="l" style="height:24px;line-height:16px;box-sizing:border-box;font-size:13px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;padding:3px 6px;white-space:nowrap;overflow:hidden">'+v[1]+'</div>';
+      var wStyle='position:relative;border:1px solid #143A57;border-top:0;overflow:hidden;box-sizing:border-box;height:'+((isRoof?_sz.S:h)+2)+'px'+(isRoof?(';width:'+_sz.RW+'px'):'');
+      var inner=isRoof
+        ? '<div class="roofrot" style="position:absolute;top:50%;left:50%;width:'+_sz.S+'px;transform:translate(-50%,-50%) rotate(90deg)"><img src="'+src+'" style="width:'+_sz.S+'px;height:auto;display:block">'+marks+'</div>'
+        : '<img src="'+src+'" style="height:'+h+'px;width:auto;display:block">'+marks;
+      return '<div class="pfig" style="position:relative">'+lbl+'<div class="w" style="'+wStyle+'">'+inner+'</div></div>';
     }
     var _V={};VIEWS.forEach(function(v){_V[v[0]]=v;});
-    var figs='<div class="pfigs" style="'+figVars(ft)+'">'+
-      '<div class="pfcol">'+_fig(_V.front)+'</div>'+
-      '<div class="pfcol">'+_fig(_V.rear)+'</div>'+
-      '<div class="pfcol lr">'+_fig(_V.left)+_fig(_V.right)+'</div>'+
-      '<div class="pfcol roof">'+_fig(_V.roof)+'</div>'+
+    var _fc='display:flex;flex-direction:column';
+    var figs='<div class="pfigs" style="display:flex;align-items:flex-start;gap:4px">'+
+      '<div class="pfcol" style="'+_fc+'">'+_fig(_V.front)+'</div>'+
+      '<div class="pfcol" style="'+_fc+'">'+_fig(_V.rear)+'</div>'+
+      '<div class="pfcol lr" style="'+_fc+'">'+_fig(_V.left)+_fig(_V.right)+'</div>'+
+      '<div class="pfcol roof" style="'+_fc+'">'+_fig(_V.roof)+'</div>'+
       '</div>';
     var sigTag=signData?'<img class="p-sigimg" src="'+signData+'">':'<div class="p-sigline"></div>';
     var agreed=document.getElementById('agreeChk')&&document.getElementById('agreeChk').checked;
@@ -308,7 +316,7 @@
     var sigQr=qrI?'<div class="p-sigqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr2"><div class="p-custname">お客様名：'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</div>'+
-      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v10</span></div></div></div>'+
+      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v11</span></div></div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
       '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
       '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
