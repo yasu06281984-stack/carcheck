@@ -51,30 +51,30 @@
     body > .topbar,body > .wrap{display:none!important}
     #printArea{display:block;padding:0;color:#111}
     #printArea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .p-title{text-align:center;font-size:22px;font-weight:800;color:#143A57;padding:9px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}
+    .p-title{text-align:center;font-size:26px;font-weight:800;color:#143A57;padding:11px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}
     .p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 4px}
-    .p-custname{font-size:17px;font-weight:700;color:#111}
-    .p-shop{font-size:12px;color:#333;text-align:right;line-height:1.6}
-    .p-shopco{font-weight:700;font-size:13.5px;color:#143A57}
-    .p-sec{color:#143A57;font-size:15px;font-weight:800;padding:5px 0 5px 11px;margin:16px 0 7px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}
-    table.pt{width:100%;border-collapse:collapse;font-size:14px}
-    table.pt th,table.pt td{border:1px solid #999;padding:7px 9px;text-align:left}
+    .p-custname{font-size:19px;font-weight:700;color:#111}
+    .p-shop{font-size:13.5px;color:#333;text-align:right;line-height:1.6}
+    .p-shopco{font-weight:700;font-size:15px;color:#143A57}
+    .p-sec{color:#143A57;font-size:17px;font-weight:800;padding:6px 0 6px 12px;margin:18px 0 8px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}
+    table.pt{width:100%;border-collapse:collapse;font-size:16px}
+    table.pt th,table.pt td{border:1px solid #999;padding:8px 11px;text-align:left}
     table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}
     .pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .pfig{border:1px solid #143A57;border-radius:6px;padding:5px;position:relative}
-    .pfig .l{font-size:12px;text-align:center;color:#143A57;font-weight:700}
+    .pfig .l{font-size:13.5px;text-align:center;color:#143A57;font-weight:700}
     .pfig .w{position:relative}.pfig img{width:100%;display:block}
     .pmk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}
-    .pterms{font-size:11px;white-space:pre-wrap;line-height:1.55;border:1px solid #ccc;padding:8px;border-radius:4px}
-    .p-signnote{font-size:13px;margin:0 0 8px;line-height:1.5}
+    .pterms{font-size:13px;white-space:pre-wrap;line-height:1.6;border:1px solid #ccc;padding:9px;border-radius:4px}
+    .p-signnote{font-size:15px;margin:0 0 9px;line-height:1.5}
     .p-signrow{display:flex;align-items:flex-end;gap:16px}
     .p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:90px;padding:6px 10px;display:flex;flex-direction:column;justify-content:flex-end}
     .p-sigimg{max-height:82px;max-width:100%;object-fit:contain;align-self:flex-start}
     .p-sigline{height:62px}
-    .p-sigcap{font-size:11px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}
+    .p-sigcap{font-size:12.5px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}
     .p-sigqr{text-align:center;margin-left:8px}
     .p-sigqr img{width:104px;height:104px;image-rendering:pixelated}
-    .p-sigqr div{font-size:11px;color:#444;margin-top:3px}
+    .p-sigqr div{font-size:12.5px;color:#444;margin-top:3px}
   }
 </style>
 </head>
@@ -311,28 +311,28 @@
     var css='<style>'+
       'body{margin:0;padding:16px;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-      '.p-title{text-align:center;font-size:22px;font-weight:800;color:#143A57;padding:9px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}'+
+      '.p-title{text-align:center;font-size:26px;font-weight:800;color:#143A57;padding:11px 0;border-top:3px solid #143A57;border-bottom:3px solid #E8810C;margin-bottom:12px;letter-spacing:.07em}'+
       '.p-hdr2{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:6px 0 4px}'+
-      '.p-custname{font-size:17px;font-weight:700;color:#111}'+
-      '.p-shop{font-size:12px;color:#333;text-align:right;line-height:1.6}'+
-      '.p-shopco{font-weight:700;font-size:13.5px;color:#143A57}'+
-      '.p-sec{color:#143A57;font-size:15px;font-weight:800;padding:5px 0 5px 11px;margin:16px 0 7px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
-      'table.pt{width:100%;border-collapse:collapse;font-size:14px}'+
-      'table.pt th,table.pt td{border:1px solid #999;padding:7px 9px;text-align:left}'+
+      '.p-custname{font-size:19px;font-weight:700;color:#111}'+
+      '.p-shop{font-size:13.5px;color:#333;text-align:right;line-height:1.6}'+
+      '.p-shopco{font-weight:700;font-size:15px;color:#143A57}'+
+      '.p-sec{color:#143A57;font-size:17px;font-weight:800;padding:6px 0 6px 12px;margin:18px 0 8px;border-left:6px solid #E8810C;border-bottom:2px solid #143A57;background:#f1f5f9}'+
+      'table.pt{width:100%;border-collapse:collapse;font-size:16px}'+
+      'table.pt th,table.pt td{border:1px solid #999;padding:8px 11px;text-align:left}'+
       'table.pt th{background:#eef2f6;color:#143A57;width:24%;font-weight:700}'+
       '.pfigs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}'+
       '.pfig{border:1px solid #143A57;border-radius:6px;padding:5px;position:relative}'+
-      '.pfig .l{font-size:12px;text-align:center;color:#143A57;font-weight:700}'+
+      '.pfig .l{font-size:13.5px;text-align:center;color:#143A57;font-weight:700}'+
       '.pfig .w{position:relative}.pfig img{width:100%;display:block}'+
       '.pmk{position:absolute;width:17px;height:17px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}'+
-      '.pterms{font-size:11px;white-space:pre-wrap;line-height:1.55;border:1px solid #ccc;padding:8px;border-radius:4px}'+
-      '.p-signnote{font-size:13px;margin:0 0 8px;line-height:1.5}'+
+      '.pterms{font-size:13px;white-space:pre-wrap;line-height:1.6;border:1px solid #ccc;padding:9px;border-radius:4px}'+
+      '.p-signnote{font-size:15px;margin:0 0 9px;line-height:1.5}'+
       '.p-signrow{display:flex;align-items:flex-end;gap:16px}'+
       '.p-sigbox{flex:1;border:1px solid #999;border-radius:6px;min-height:90px;padding:6px 10px;display:flex;flex-direction:column;justify-content:flex-end}'+
       '.p-sigimg{max-height:82px;max-width:100%;object-fit:contain;align-self:flex-start}'+
       '.p-sigline{height:62px}'+
-      '.p-sigcap{font-size:11px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}'+
-      '.p-sigqr{text-align:center;margin-left:8px}.p-sigqr img{width:104px;height:104px;image-rendering:pixelated}.p-sigqr div{font-size:11px;color:#444;margin-top:3px}@page{margin:12mm}'+
+      '.p-sigcap{font-size:12.5px;color:#555;border-top:1px solid #ccc;margin-top:6px;padding-top:3px}'+
+      '.p-sigqr{text-align:center;margin-left:8px}.p-sigqr img{width:104px;height:104px;image-rendering:pixelated}.p-sigqr div{font-size:12.5px;color:#444;margin-top:3px}@page{margin:12mm}'+
       '</style>';
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><base href="'+location.origin+'/"><title>代車貸出シート</title>'+css+'</head><body>'+buildSheetInner()+'</body></html>';
   }
