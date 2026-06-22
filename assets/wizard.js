@@ -246,7 +246,7 @@
   }
   function openLoanOverlay() {
     storeLoanHandoff();
-    var f = $('loanFrame'); if (f) f.src = 'daisha.html';
+    var f = $('loanFrame'); if (f) f.src = 'daisha.html?v=10';
     var ov = $('loanOverlay'); if (ov) ov.style.display = '';
   }
   function chooseLoanYes() {
