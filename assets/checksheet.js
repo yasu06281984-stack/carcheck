@@ -352,7 +352,7 @@
     if (SHOP.url) shopLines += '<div>' + SHOP.url + '</div>';
     var head = '<div class="p-title">' + title + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + ((MT && MT.bizName) || '') : 'お客様名：' + (nm ? nm + ' 様' : '')) + '</div>' +
-      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v13</span></div></div></div>';
+      '<div class="p-shop">' + shopLines + '<div>作成：' + ds + '　<span style="color:#9aa;font-size:11px">v14</span></div></div></div>';
     var colorCell = CC.colorname ? ((CC.color ? '<span class="p-swatch" style="background:' + CC.color + '"></span>' : '') + CC.colorname) : '';
     var cust = '<table class="p-cust">' +
       '<tr><th>お客様名</th><td>' + (nm ? nm + ' 様' : '') + '</td><th>電話番号</th><td>' + CC.tel + '</td></tr>' +

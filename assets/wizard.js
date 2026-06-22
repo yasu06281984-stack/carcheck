@@ -224,7 +224,7 @@
     var _tl = []; if (shop.tel) _tl.push('TEL：' + esc(shop.tel)); if (shop.hours) _tl.push('営業：' + esc(shop.hours));
     if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
-    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v13</span></div>';
+    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v14</span></div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
     var valSec = '';
