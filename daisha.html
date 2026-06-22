@@ -308,7 +308,7 @@
     var sigQr=qrI?'<div class="p-sigqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr2"><div class="p-custname">お客様名：'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</div>'+
-      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'</div></div></div>'+
+      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v10</span></div></div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
       '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
       '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
