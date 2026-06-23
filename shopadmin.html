@@ -169,6 +169,25 @@
   </div>
 </div>
 
+<div id="ovStaff" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;place-items:center;padding:20px">
+  <div style="background:#fff;width:100%;max-width:380px;border-radius:14px;padding:22px">
+    <div class="card-l">スタッフのパスワード変更</div>
+    <div class="small" id="ps_who" style="margin:4px 0 12px;color:var(--muted)"></div>
+    <div class="field"><label>新しいパスワード（8桁の数字）</label><input id="ps_pw" inputmode="numeric" maxlength="8" placeholder="12345678"></div>
+    <button id="ps_gen" type="button" style="width:100%;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px;border-radius:10px;font-weight:700;cursor:pointer;margin:0 0 10px">8桁を自動生成</button>
+    <div class="msg" id="ps_msg"></div>
+    <div id="ps_result" hidden style="margin:8px 0 0">
+      <textarea id="ps_notice" readonly style="width:100%;height:170px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.85rem;line-height:1.7"></textarea>
+      <button class="primary" id="ps_copy" style="margin-top:8px">全文コピー</button>
+      <div class="small" id="ps_copymsg" style="margin-top:6px;color:var(--brand)"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="ps_cancel" type="button" style="flex:1;background:#fff;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:10px;font-weight:700;cursor:pointer">閉じる</button>
+      <button class="primary" id="ps_save" style="flex:1;margin:0">変更する</button>
+    </div>
+  </div>
+</div>
+
 <script>
   var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
   var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
@@ -266,16 +285,23 @@
   };
 
   async function loadStaff(){
-    var r=await sb.from('profiles').select('name,role,login_name').eq('shop_id',SHOP);
+    var r=await sb.from('profiles').select('id,name,role,login_name').eq('shop_id',SHOP);
     if(r.error){document.getElementById('staffList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
     STAFF_N=(r.data||[]).filter(function(p){return p.role==='staff';}).length; updateStaffGate();
     LAST_STAFF_NAMES=(r.data||[]).map(function(p){return p.login_name;}).filter(Boolean);
     var rows=(r.data||[]).sort(function(a,b){return (a.role==='shop_admin'?0:1)-(b.role==='shop_admin'?0:1);});
     if(!rows.length){document.getElementById('staffList').innerHTML='まだスタッフがいません。';return;}
-    var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>ログイン名</th><th>役割</th></tr></thead><tbody>';
-    rows.forEach(function(p){h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+esc(p.name||'（未設定）')+'</td>'+
-      '<td class="small mono">'+esc(p.login_name||'—')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td></tr>';});
-    document.getElementById('staffList').innerHTML=h+'</tbody></table>';
+    var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>ログイン名</th><th>役割</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(p){
+      var ops=(p.role==='staff')
+        ? '<td class="ops"><button class="lnk" data-pw="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'" style="color:var(--brand)">パスワード変更</button> <button class="lnk" data-del="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'">削除</button></td>'
+        : '<td class="ops"></td>';
+      h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+esc(p.name||'（未設定）')+'</td>'+
+        '<td class="small mono">'+esc(p.login_name||'—')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td>'+ops+'</tr>';
+    });
+    var box=document.getElementById('staffList'); box.innerHTML=h+'</tbody></table>';
+    box.querySelectorAll('[data-pw]').forEach(function(b){b.onclick=function(){openPw(b.getAttribute('data-pw'),b.getAttribute('data-nm'));};});
+    box.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){delStaff(b.getAttribute('data-del'),b.getAttribute('data-nm'));};});
   }
   function gen8(){var s='';for(var i=0;i<8;i++)s+=Math.floor(Math.random()*10);return s;}
   document.getElementById('st_gen').onclick=function(){setVal('st_pw',gen8());};
@@ -323,6 +349,64 @@
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(done,function(){try{document.execCommand('copy');done();}catch(e){}});}
     else{try{document.execCommand('copy');done();}catch(e){}}
   };
+
+  // ---- スタッフのパスワード変更・削除 ----
+  var PS_ID=null;
+  function noticeText(code,loginName,password){
+    return '【入庫カルテ ログイン情報】\n'+
+      'ログインページ： https://nyukokarte.com/staff\n'+
+      '店舗コード：'+code+'\n'+
+      'お名前：'+loginName+'\n'+
+      'パスワード：'+password+'\n\n'+
+      '▼ログイン方法\n'+
+      '上のページを開き、店舗コード・お名前・パスワードを入力してログインしてください。\n'+
+      '※このパスワードは他の人に教えないでください。';
+  }
+  function openPw(id,nm){
+    PS_ID=id;
+    document.getElementById('ps_who').textContent='対象：'+(nm||'')+' さん';
+    setVal('ps_pw','');
+    var m=document.getElementById('ps_msg');m.textContent='';m.className='msg';
+    document.getElementById('ps_result').hidden=true;
+    document.getElementById('ps_copymsg').textContent='';
+    document.getElementById('ovStaff').style.display='grid';
+  }
+  function closePw(){document.getElementById('ovStaff').style.display='none';PS_ID=null;}
+  document.getElementById('ps_gen').onclick=function(){setVal('ps_pw',gen8());};
+  document.getElementById('ps_cancel').onclick=closePw;
+  document.getElementById('ovStaff').onclick=function(e){if(e.target===document.getElementById('ovStaff'))closePw();};
+  document.getElementById('ps_save').onclick=async function(){
+    var msg=document.getElementById('ps_msg');msg.textContent='';msg.className='msg';
+    var pw=val('ps_pw');
+    if(!/^[0-9]{8}$/.test(pw)){msg.textContent='8桁の数字で入力してください（自動生成も使えます）。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='変更中…';
+    try{
+      var s=await sb.auth.getSession();var token=(s.data&&s.data.session)?s.data.session.access_token:'';
+      var r=await fetch('/api/staff-manage',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'password',staffId:PS_ID,password:pw})});
+      var d=await r.json().catch(function(){return {};});
+      this.disabled=false;this.textContent='変更する';
+      if(!r.ok||!d.ok){msg.textContent='変更できませんでした：'+(d.error||r.status);msg.className='msg err';return;}
+      document.getElementById('ps_notice').value=noticeText(d.code,d.loginName,d.password);
+      document.getElementById('ps_result').hidden=false;
+      msg.textContent='変更しました。新しいパスワードを下の文面でお伝えください。';msg.className='msg ok';
+    }catch(e){this.disabled=false;this.textContent='変更する';msg.textContent='通信エラーが発生しました。';msg.className='msg err';}
+  };
+  document.getElementById('ps_copy').onclick=function(){
+    var ta=document.getElementById('ps_notice');ta.select();
+    var done=function(){document.getElementById('ps_copymsg').textContent='コピーしました。';};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(done,function(){try{document.execCommand('copy');done();}catch(e){}});}
+    else{try{document.execCommand('copy');done();}catch(e){}}
+  };
+  async function delStaff(id,nm){
+    if(!confirm((nm||'このスタッフ')+' さんを削除します。よろしいですか？（元に戻せません）'))return;
+    try{
+      var s=await sb.auth.getSession();var token=(s.data&&s.data.session)?s.data.session.access_token:'';
+      var r=await fetch('/api/staff-manage',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'delete',staffId:id})});
+      var d=await r.json().catch(function(){return {};});
+      if(!r.ok||!d.ok){alert('削除できませんでした：'+(d.error||r.status));return;}
+      loadStaff();
+    }catch(e){alert('通信エラーが発生しました。');}
+  }
 
   function listMaster(table,listId){
     return sb.from(table).select('id,name').eq('shop_id',SHOP).order('created_at').then(function(r){
