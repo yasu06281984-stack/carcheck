@@ -25,19 +25,25 @@
   button:disabled{opacity:.6}
   .msg{margin-top:12px;font-size:.85rem;text-align:center;min-height:1.2em}
   .msg.err{color:var(--red)}
+  .msg.ok{color:#1f6b2a}
   .note{margin-top:16px;font-size:.72rem;color:var(--muted);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="brand"><span class="logo">入</span><b>入庫カルテ</b></div>
-  <h1>ログイン</h1>
+  <h1 id="title">ログイン</h1>
   <div class="f"><label for="email">メールアドレス</label><input id="email" type="email" autocomplete="username"></div>
-  <div class="f"><label for="pw">パスワード</label><input id="pw" type="password" autocomplete="current-password"></div>
+  <div class="f" id="pwField"><label for="pw">パスワード</label><input id="pw" type="password" autocomplete="current-password"></div>
+  <p id="forgotLead" hidden style="font-size:.85rem;color:var(--muted);line-height:1.6;margin:0 0 14px;text-align:center">登録したメールアドレスを入力し、「私はロボットではありません」にチェックして、下のボタンを押してください。パスワード再設定用のリンクをメールでお送りします。</p>
   <div class="cf-turnstile" data-sitekey="0x4AAAAAADoIX0U2L82sEhxt" data-callback="onTok"></div>
   <button id="go">ログイン</button>
+  <button id="sendReset" hidden>再設定メールを送信</button>
   <div id="msg" class="msg"></div>
-  <div style="text-align:center;margin-top:10px"><a href="#" id="forgot" style="font-size:.8rem;color:var(--brand);text-decoration:none">パスワードを忘れた方</a></div>
+  <div style="text-align:center;margin-top:10px">
+    <a href="#" id="toForgot" style="font-size:.8rem;color:var(--brand);text-decoration:none">パスワードを忘れた方はこちら</a>
+    <a href="#" id="toLogin" hidden style="font-size:.8rem;color:var(--brand);text-decoration:none">← ログイン画面に戻る</a>
+  </div>
   <div class="note">スタッフの方は、店舗から配布されたメール・パスワードでログインしてください。</div>
 </div>
 <script>
@@ -65,16 +71,33 @@
     }
     location.replace('home.html');
   });
-  document.getElementById('forgot').addEventListener('click',async function(e){
-    e.preventDefault();
+  // ログイン ⇄ パスワード再設定 の表示切替
+  var elTitle=document.getElementById('title');
+  var elPwField=document.getElementById('pwField');
+  var elLead=document.getElementById('forgotLead');
+  var btnGo=document.getElementById('go');
+  var btnReset=document.getElementById('sendReset');
+  var lnkToForgot=document.getElementById('toForgot');
+  var lnkToLogin=document.getElementById('toLogin');
+  function showForgot(on){
+    msg.textContent='';msg.className='msg';
+    elTitle.textContent=on?'パスワード再設定':'ログイン';
+    elPwField.hidden=on; elLead.hidden=!on;
+    btnGo.hidden=on; btnReset.hidden=!on;
+    lnkToForgot.hidden=on; lnkToLogin.hidden=!on;
+  }
+  lnkToForgot.addEventListener('click',function(e){e.preventDefault();showForgot(true);});
+  lnkToLogin.addEventListener('click',function(e){e.preventDefault();showForgot(false);});
+
+  btnReset.addEventListener('click',async function(){
     msg.textContent='';msg.className='msg';
     var email=document.getElementById('email').value.trim();
-    if(!email){msg.textContent='先にメールアドレスを入力してください。';msg.className='msg err';return;}
+    if(!email){msg.textContent='メールアドレスを入力してください。';msg.className='msg err';return;}
     var opts={redirectTo:'https://nyukokarte.com/reset.html'};
     if(tok)opts.captchaToken=tok;
-    this.style.pointerEvents='none';this.textContent='送信中…';
+    this.disabled=true;this.textContent='送信中…';
     var r=await sb.auth.resetPasswordForEmail(email,opts);
-    this.style.pointerEvents='';this.textContent='パスワードを忘れた方';
+    this.disabled=false;this.textContent='再設定メールを送信';
     if(r.error){
       msg.textContent='送信できませんでした：'+r.error.message+'（「私はロボットではありません」にチェックしてから、もう一度お試しください）';
       msg.className='msg err';
@@ -82,7 +105,7 @@
       return;
     }
     msg.textContent='再設定メールを送信しました。届いたメールのリンクから新しいパスワードを設定してください。';
-    msg.className='msg';
+    msg.className='msg ok';
   });
 </script>
 </body>
