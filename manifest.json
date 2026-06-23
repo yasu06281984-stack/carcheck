@@ -1,0 +1,14 @@
+{
+  "name": "入庫カルテ",
+  "short_name": "入庫カルテ",
+  "description": "自動車整備工場の受付を、その場でA4一枚に。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d97706",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
