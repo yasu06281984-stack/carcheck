@@ -57,9 +57,9 @@
   .nav .links a.login{color:#cfe0f0;text-decoration:none;font-size:.9rem;padding:8px 10px}
 
   /* hero */
-  .hero{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:64px 0 72px}
-  .hero h1{font-size:2.1rem;line-height:1.45;margin:0 0 14px;letter-spacing:.01em}
-  .hero p{font-size:1.02rem;color:#dce7f2;margin:0 0 26px;max-width:620px}
+  .hero{position:relative;background:linear-gradient(90deg,rgba(14,36,55,.94) 0%,rgba(17,46,71,.78) 40%,rgba(20,58,87,.45) 72%,rgba(20,58,87,.30) 100%),linear-gradient(135deg,rgba(20,58,87,.30),rgba(31,78,116,.18)),url('/hero.jpg') center right/cover no-repeat;color:#fff;padding:64px 0 72px}
+  .hero h1{font-size:2.1rem;line-height:1.45;margin:0 0 14px;letter-spacing:.01em;text-shadow:0 1px 14px rgba(0,0,0,.35)}
+  .hero p{font-size:1.02rem;color:#eaf1f8;margin:0 0 26px;max-width:620px;text-shadow:0 1px 10px rgba(0,0,0,.30)}
   .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
   .hero .note{margin-top:16px;font-size:.82rem;color:#aebfd2}
 
@@ -105,6 +105,7 @@
 
   @media(max-width:680px){
     .hero h1{font-size:1.6rem}
+    .hero{background:linear-gradient(180deg,rgba(14,36,55,.86) 0%,rgba(16,42,64,.74) 55%,rgba(18,50,76,.66) 100%),url('/hero.jpg') center/cover no-repeat;padding:48px 0 56px}
     .grid,.plans{grid-template-columns:1fr}
     .steps{grid-template-columns:repeat(2,1fr)}
     .nav .links a.login{display:none}
