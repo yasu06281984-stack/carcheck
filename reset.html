@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>パスワード再設定 — 入庫カルテ</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--surface2:#F6F8FA;--red:#C8443B}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand-deep),var(--brand));font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);padding:20px}
+  .card{background:#fff;width:100%;max-width:380px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:30px 26px}
+  .brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+  .logo{width:34px;height:34px;border-radius:9px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .brand b{font-size:1.1rem;letter-spacing:.08em}
+  h1{text-align:center;font-size:1.15rem;margin:6px 0 20px;color:var(--brand)}
+  .f{margin-bottom:14px}
+  .f label{display:block;font-size:.78rem;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .f input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit}
+  .f input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(31,78,116,.12)}
+  button{width:100%;background:var(--brand);color:#fff;border:0;padding:13px;border-radius:11px;font-size:1rem;font-weight:700;cursor:pointer}
+  button:disabled{opacity:.6}
+  .msg{margin-top:12px;font-size:.85rem;text-align:center;min-height:1.2em;line-height:1.5}
+  .msg.err{color:var(--red)}
+  .msg.ok{color:#1f6b2a}
+  .note{margin-top:16px;font-size:.72rem;color:var(--muted);text-align:center;line-height:1.6}
+  .note a{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><span class="logo">入</span><b>入庫カルテ</b></div>
+  <h1>パスワード再設定</h1>
+  <div class="f"><label for="pw1">新しいパスワード</label><input id="pw1" type="password" autocomplete="new-password" placeholder="6文字以上"></div>
+  <div class="f"><label for="pw2">新しいパスワード（確認）</label><input id="pw2" type="password" autocomplete="new-password"></div>
+  <button id="go">パスワードを変更</button>
+  <div id="msg" class="msg"></div>
+  <div class="note">このページは、メールの「Reset password」リンクから開いてください。<br><a href="login.html">ログイン画面へ戻る</a></div>
+</div>
+<script>
+  var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
+  var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
+  var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
+  var msg=document.getElementById('msg');
+  // メールのリンクから来ると、URLの鍵を読み取ってセッションが確立されます
+  sb.auth.onAuthStateChange(function(event,session){});
+  document.getElementById('go').addEventListener('click',async function(){
+    msg.textContent='';msg.className='msg';
+    var p1=document.getElementById('pw1').value;
+    var p2=document.getElementById('pw2').value;
+    if(!p1||p1.length<6){msg.textContent='6文字以上のパスワードを入力してください。';msg.className='msg err';return;}
+    if(p1!==p2){msg.textContent='確認用パスワードが一致しません。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='変更中…';
+    var r=await sb.auth.updateUser({password:p1});
+    if(r.error){
+      msg.textContent='変更できませんでした：'+r.error.message+'。再設定リンクの期限切れかもしれません。お手数ですが、ログイン画面の「パスワードを忘れた方」からもう一度お試しください。';
+      msg.className='msg err';
+      this.disabled=false;this.textContent='パスワードを変更';
+      return;
+    }
+    msg.textContent='パスワードを変更しました。ログイン画面に移動します…';
+    msg.className='msg ok';
+    setTimeout(function(){location.replace('login.html');},1800);
+  });
+</script>
+</body>
+</html>

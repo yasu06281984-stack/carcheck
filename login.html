@@ -37,6 +37,7 @@
   <div class="cf-turnstile" data-sitekey="0x4AAAAAADoIX0U2L82sEhxt" data-callback="onTok"></div>
   <button id="go">ログイン</button>
   <div id="msg" class="msg"></div>
+  <div style="text-align:center;margin-top:10px"><a href="#" id="forgot" style="font-size:.8rem;color:var(--brand);text-decoration:none">パスワードを忘れた方</a></div>
   <div class="note">スタッフの方は、店舗から配布されたメール・パスワードでログインしてください。</div>
 </div>
 <script>
@@ -63,6 +64,25 @@
       return;
     }
     location.replace('home.html');
+  });
+  document.getElementById('forgot').addEventListener('click',async function(e){
+    e.preventDefault();
+    msg.textContent='';msg.className='msg';
+    var email=document.getElementById('email').value.trim();
+    if(!email){msg.textContent='先にメールアドレスを入力してください。';msg.className='msg err';return;}
+    var opts={redirectTo:'https://nyukokarte.com/reset.html'};
+    if(tok)opts.captchaToken=tok;
+    this.style.pointerEvents='none';this.textContent='送信中…';
+    var r=await sb.auth.resetPasswordForEmail(email,opts);
+    this.style.pointerEvents='';this.textContent='パスワードを忘れた方';
+    if(r.error){
+      msg.textContent='送信できませんでした：'+r.error.message+'（「私はロボットではありません」にチェックしてから、もう一度お試しください）';
+      msg.className='msg err';
+      if(window.turnstile)try{turnstile.reset();}catch(e2){}tok='';
+      return;
+    }
+    msg.textContent='再設定メールを送信しました。届いたメールのリンクから新しいパスワードを設定してください。';
+    msg.className='msg';
   });
 </script>
 </body>
