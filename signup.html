@@ -36,13 +36,19 @@
 <div class="card">
   <div class="brand"><span class="logo">入</span><b>入庫カルテ</b></div>
   <h1>新規登録</h1>
+  <div id="formArea">
   <div class="lead">店舗から招待されたメールアドレスで登録してください。パスワードはご自身で設定します。</div>
   <div class="f"><label for="email">メールアドレス</label><input id="email" type="email" autocomplete="username"></div>
   <div class="f"><label for="pw">パスワード（8文字以上）</label><input id="pw" type="password" autocomplete="new-password"></div>
   <div class="cf-turnstile" data-sitekey="0x4AAAAAADoIX0U2L82sEhxt" data-callback="onTok"></div>
   <label class="agree"><input type="checkbox" id="agree"><span><a href="terms.html" target="_blank" rel="noopener">利用規約</a>と<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</span></label>
   <button id="go">登録する</button>
+  </div>
   <div id="msg" class="msg"></div>
+  <div id="sentPanel" hidden style="text-align:center;padding:6px 0">
+    <div style="font-weight:700;color:var(--brand);font-size:1.05rem;margin-bottom:10px">確認メールを送信しました</div>
+    <div style="font-size:.86rem;color:var(--muted);line-height:1.8"><b id="sentTo" style="color:var(--ink)"></b> 宛にメールをお送りしました。<br>メール内のリンクを押すと登録が完了し、そのままログインできます。<br><br>※ 数分待っても届かない場合は、迷惑メールフォルダもご確認ください。</div>
+  </div>
   <div class="note">すでにアカウントをお持ちの方は <a href="login.html">ログイン</a></div>
 </div>
 <script>
@@ -58,7 +64,7 @@
     if(!email||password.length<8){msg.textContent='メールと8文字以上のパスワードを入力してください。';msg.className='msg err';return;}
     if(!document.getElementById('agree').checked){msg.textContent='利用規約とプライバシーポリシーへの同意が必要です。';msg.className='msg err';return;}
     this.disabled=true;this.textContent='登録中…';
-    var opts={};if(tok)opts.captchaToken=tok;
+    var opts={emailRedirectTo:'https://nyukokarte.com/login.html'};if(tok)opts.captchaToken=tok;
     var res=await sb.auth.signUp({email:email,password:password,options:opts});
     if(res.error){
       msg.textContent='登録できませんでした：'+res.error.message;msg.className='msg err';
@@ -66,9 +72,11 @@
       if(window.turnstile)try{turnstile.reset();}catch(e){}tok='';return;
     }
     if(res.data&&res.data.session){location.replace('home.html');return;}
-    // メール確認が必要な設定の場合
-    msg.textContent='登録しました。確認メールが届いた場合はリンクを開いてから、ログインしてください。';msg.className='msg ok';
-    this.textContent='登録済み';
+    // メール確認が必要な設定：送信完了パネルへ切替
+    document.getElementById('formArea').hidden=true;
+    document.getElementById('sentTo').textContent=email;
+    document.getElementById('sentPanel').hidden=false;
+    msg.textContent='';msg.className='msg';
   });
 </script>
 </body>
