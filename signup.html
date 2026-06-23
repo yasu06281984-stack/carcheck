@@ -41,6 +41,7 @@
   <div class="f"><label for="company">会社名・店舗名</label><input id="company" type="text" placeholder="○○自動車"></div>
   <div class="f"><label for="owner">代表者名</label><input id="owner" type="text" placeholder="山田 太郎"></div>
   <div class="f"><label for="tel">電話番号</label><input id="tel" type="tel" placeholder="03-1234-5678" autocomplete="tel"></div>
+  <div class="f"><label for="zip">郵便番号（ハイフンなし7桁）</label><input id="zip" type="text" inputmode="numeric" maxlength="8" placeholder="1810004" autocomplete="postal-code"><div style="font-size:.72rem;color:var(--muted);margin-top:4px">郵便番号を入れると住所が途中まで自動で入ります。続きはご入力ください。</div></div>
   <div class="f"><label for="address">住所</label><input id="address" type="text" placeholder="東京都〇〇区〇〇1-2-3"></div>
   <div class="f"><label for="email">メールアドレス（ログインに使います）</label><input id="email" type="email" autocomplete="username"></div>
   <div class="f"><label for="pw">パスワード（8文字以上）</label><input id="pw" type="password" autocomplete="new-password"></div>
@@ -61,6 +62,26 @@
   var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
   var tok='';window.onTok=function(t){tok=t;};
   var msg=document.getElementById('msg');
+  // 郵便番号 → 住所 自動補完（zipcloud・キー不要）
+  (function(){
+    var zip=document.getElementById('zip');
+    function lookup(){
+      var z=(zip.value||'').replace(/[^0-9]/g,'');
+      if(z.length!==7)return;
+      fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode='+z)
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d&&d.status===200&&d.results&&d.results[0]){
+            var a=d.results[0];
+            var base=(a.address1||'')+(a.address2||'')+(a.address3||'');
+            var cur=document.getElementById('address');
+            if(!cur.value.trim()){ cur.value=base; cur.focus(); }  // 空のときだけ補完
+          }
+        }).catch(function(){});
+    }
+    zip.addEventListener('blur',lookup);
+    zip.addEventListener('input',function(){ if((zip.value||'').replace(/[^0-9]/g,'').length===7)lookup(); });
+  })();
   document.getElementById('go').addEventListener('click',async function(){
     msg.textContent='';msg.className='msg';
     var company=document.getElementById('company').value.trim();
