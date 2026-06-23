@@ -39,10 +39,17 @@
   function saveStaffList(arr) { try { localStorage.setItem(STAFF, arr.join('\n')); } catch (e) {} }
   function fillStaffSelect() {
     var sel = $('wizStaff'); if (!sel) return;
-    var cur = sel.value, arr = loadStaff();
+    var cur = sel.value || wiz.staff || '';
+    var arr = loadStaff().slice();
+    var myName = (window.csAuth && window.csAuth.name) ? String(window.csAuth.name) : '';
+    if (myName && arr.indexOf(myName) < 0) arr.unshift(myName);
     sel.innerHTML = '<option value="">選択してください</option>';
     arr.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
-    if (arr.indexOf(cur) >= 0) sel.value = cur;
+    var want = (arr.indexOf(cur) >= 0) ? cur : (myName || '');
+    if (arr.indexOf(want) >= 0) {
+      sel.value = want;
+      if (!wiz.staff) { wiz.staff = want; setStaffDisp(); }
+    }
   }
   function setStaffDisp() { var d = $('staffNameDisp'); if (d) d.textContent = wiz.staff || '—'; }
 
@@ -224,7 +231,7 @@
     var _tl = []; if (shop.tel) _tl.push('TEL：' + esc(shop.tel)); if (shop.hours) _tl.push('営業：' + esc(shop.hours));
     if (_tl.length) shopLines += '<div>' + _tl.join('　／　') + '</div>';
     if (shop.url) shopLines += '<div>' + esc(shop.url) + '</div>';
-    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v16</span></div>';
+    var _n = new Date(); shopLines += '<div>作成：' + _n.getFullYear() + '/' + ('0' + (_n.getMonth() + 1)).slice(-2) + '/' + ('0' + _n.getDate()).slice(-2) + ' ' + ('0' + _n.getHours()).slice(-2) + ':' + ('0' + _n.getMinutes()).slice(-2) + '　<span style="color:#9aa;font-size:11px">v14</span></div>';
     var head = '<div class="p-title">' + (TYPELBL[d.sheetType] || '受付チェックシート') + '</div>' +
       '<div class="p-hdr2"><div class="p-custname">' + (isBiz ? '業者名：' + esc(d.bizName) : 'お客様名：' + (c.name ? esc(c.name) + ' 様' : '')) + '</div><div class="p-shop">' + shopLines + '</div></div>';
     var valSec = '';
