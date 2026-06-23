@@ -120,6 +120,11 @@
         <textarea id="st_notice" readonly style="width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.85rem;line-height:1.7;resize:vertical"></textarea>
         <button class="primary" id="st_copy" style="margin-top:8px">全文コピー</button>
         <div class="small" id="st_copymsg" style="margin-top:6px;color:var(--brand)"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input id="st_to" type="email" placeholder="スタッフのメール（任意）" style="flex:1;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:.9rem;font-family:inherit">
+          <button id="st_send" type="button" style="white-space:nowrap;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;margin:0">このアドレスに送る</button>
+        </div>
+        <div class="small" id="st_sendmsg" style="margin-top:6px"></div>
         <div class="small" style="margin-top:6px;color:var(--muted)">メールやLINEでスタッフへお伝えください。</div>
       </div>
     </div>
@@ -180,6 +185,11 @@
       <textarea id="ps_notice" readonly style="width:100%;height:170px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.85rem;line-height:1.7"></textarea>
       <button class="primary" id="ps_copy" style="margin-top:8px">全文コピー</button>
       <div class="small" id="ps_copymsg" style="margin-top:6px;color:var(--brand)"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="ps_to" type="email" placeholder="スタッフのメール（任意）" style="flex:1;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:.9rem;font-family:inherit">
+        <button id="ps_send" type="button" style="white-space:nowrap;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;margin:0">このアドレスに送る</button>
+      </div>
+      <div class="small" id="ps_sendmsg" style="margin-top:6px"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button id="ps_cancel" type="button" style="flex:1;background:#fff;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:10px;font-weight:700;cursor:pointer">閉じる</button>
@@ -407,6 +417,25 @@
       loadStaff();
     }catch(e){alert('通信エラーが発生しました。');}
   }
+  async function sendNotice(noticeId,toId,msgId){
+    var to=val(toId); var msgEl=document.getElementById(msgId);
+    msgEl.textContent='';msgEl.style.color='';
+    if(!to){msgEl.textContent='送信先メールを入力してください。';msgEl.style.color='#C8443B';return;}
+    var text=document.getElementById(noticeId).value;
+    msgEl.textContent='送信中…';msgEl.style.color='';
+    try{
+      var s=await sb.auth.getSession();var token=(s.data&&s.data.session)?s.data.session.access_token:'';
+      var r=await fetch('/api/notify-email',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({to:to,text:text})});
+      var d=await r.json().catch(function(){return {};});
+      if(!r.ok||!d.ok){
+        var em=(d.error==='no_resend_key')?'メール送信が未設定です（運営にご連絡ください）。':('送信できませんでした：'+(d.error||r.status));
+        msgEl.textContent=em;msgEl.style.color='#C8443B';return;
+      }
+      msgEl.textContent='送信しました（'+to+'）。';msgEl.style.color='var(--brand)';
+    }catch(e){msgEl.textContent='通信エラーが発生しました。';msgEl.style.color='#C8443B';}
+  }
+  document.getElementById('st_send').onclick=function(){sendNotice('st_notice','st_to','st_sendmsg');};
+  document.getElementById('ps_send').onclick=function(){sendNotice('ps_notice','ps_to','ps_sendmsg');};
 
   function listMaster(table,listId){
     return sb.from(table).select('id,name').eq('shop_id',SHOP).order('created_at').then(function(r){
