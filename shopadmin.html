@@ -103,18 +103,26 @@
   <div data-c="staff" class="hide">
     <div class="card"><div class="card-l">スタッフ一覧</div><div id="staffList" class="small">読み込み中…</div></div>
     <div class="card">
-      <div class="card-l">スタッフを招待</div>
-      <div class="small" id="st_cap" style="margin-bottom:10px;color:var(--brand);font-weight:600"></div>
+      <div class="card-l">スタッフを追加（メール不要）</div>
+      <div class="small" id="st_cap" style="margin-bottom:8px;color:var(--brand);font-weight:600"></div>
+      <div class="small" style="margin-bottom:12px">この店舗の <b>店舗コード：<span id="st_code" style="font-family:ui-monospace,monospace;letter-spacing:.1em">—</span></b>（スタッフのログインに使います）</div>
       <div class="form">
-        <div class="field"><label>姓</label><input id="st_sei" placeholder="田中"></div>
-        <div class="field"><label>名</label><input id="st_mei" placeholder="健"></div>
-        <div class="field" style="grid-column:1/-1"><label>メールアドレス</label><input id="st_email" type="email" placeholder="staff@example.com"></div>
+        <div class="field"><label>姓</label><input id="st_sei" placeholder="山田"></div>
+        <div class="field"><label>名</label><input id="st_mei" placeholder="太郎"></div>
+        <div class="field"><label>パスワード（8桁の数字）</label><input id="st_pw" inputmode="numeric" maxlength="8" placeholder="12345678"></div>
+        <div class="field" style="display:flex;align-items:flex-end"><button id="st_gen" type="button" style="width:100%;background:#fff;border:1px solid var(--line);color:var(--brand);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;margin:0">8桁を自動生成</button></div>
       </div>
-      <button class="primary" id="st_invite">招待を登録</button>
+      <button class="primary" id="st_add">スタッフを追加</button>
       <div class="msg" id="st_msg"></div>
-      <div class="small" style="margin-top:6px">登録後、この方が新規登録ページ（/signup.html）でこのメールで登録すると、この店舗のスタッフになります。バッジは「姓1＋名1」で表示されます。</div>
+
+      <div id="st_result" hidden style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+        <div class="card-l" style="font-size:.95rem">追加しました。下の案内をスタッフへ伝えてください。</div>
+        <textarea id="st_notice" readonly style="width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.85rem;line-height:1.7;resize:vertical"></textarea>
+        <button class="primary" id="st_copy" style="margin-top:8px">全文コピー</button>
+        <div class="small" id="st_copymsg" style="margin-top:6px;color:var(--brand)"></div>
+        <div class="small" style="margin-top:6px;color:var(--muted)">メールやLINEでスタッフへお伝えください。</div>
+      </div>
     </div>
-    <div class="card"><div class="card-l">招待中（未登録）</div><div id="stInviteList" class="small">読み込み中…</div></div>
   </div>
 
   <div data-c="vendor" class="hide">
@@ -170,15 +178,12 @@
   function setVal(id,v){var e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
   function val(id){var e=document.getElementById(id);return e?String(e.value).trim():'';}
   var SHOP=null;
-  var SHOP_PLAN='free', SHOP_VIPEXP=null, STAFF_N=0, STINV_N=0;
+  var SHOP_PLAN='free', SHOP_VIPEXP=null, STAFF_N=0, STINV_N=0, SHOP_CODE='', LAST_STAFF_NAMES=[];
   function isVipNow(){return (SHOP_PLAN==='vip')&&(!SHOP_VIPEXP||new Date(SHOP_VIPEXP)>new Date());}
   function updateStaffGate(){
-    var capEl=document.getElementById('st_cap'), btn=document.getElementById('st_invite');
-    var total=STAFF_N+STINV_N;
-    if(isVipNow()){ if(capEl)capEl.textContent='VIPプラン：スタッフは無制限です。'; if(btn)btn.disabled=false; return; }
-    var remain=Math.max(0,2-total);
-    if(capEl)capEl.textContent='無料プラン：スタッフは2名まで（招待中を含む）。現在 '+total+' 名／残り '+remain+' 名。VIPで無制限になります。';
-    if(btn)btn.disabled=(total>=2);
+    var capEl=document.getElementById('st_cap'), btn=document.getElementById('st_add');
+    if(isVipNow()){ if(capEl)capEl.textContent='VIPプラン：スタッフを無制限に追加できます。'; if(btn)btn.disabled=false; }
+    else { if(capEl)capEl.textContent='スタッフの追加はVIPプランでご利用いただけます（現在は無料プラン）。'; if(btn)btn.disabled=true; }
   }
 
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
@@ -246,7 +251,8 @@
     if(r.error||!r.data)return;var s=r.data;
     setVal('sh_name',s.name);setVal('sh_company',s.company);setVal('sh_postal',s.postal);setVal('sh_address',s.address);
     setVal('sh_tel',s.tel);setVal('sh_url',s.url);setHours(s.hours_data);
-    SHOP_PLAN=s.plan||'free'; SHOP_VIPEXP=s.vip_expires_at||null;
+    SHOP_PLAN=s.plan||'free'; SHOP_VIPEXP=s.vip_expires_at||null; SHOP_CODE=s.code||'';
+    var ce=document.getElementById('st_code'); if(ce)ce.textContent=SHOP_CODE||'—';
     loadAd(s.plan,s.vip_expires_at); updateStaffGate();
   }
   document.getElementById('sh_save').onclick=async function(){
@@ -260,35 +266,62 @@
   };
 
   async function loadStaff(){
-    var r=await sb.from('profiles').select('name,email,role').eq('shop_id',SHOP);
+    var r=await sb.from('profiles').select('name,role,login_name').eq('shop_id',SHOP);
     if(r.error){document.getElementById('staffList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
     STAFF_N=(r.data||[]).filter(function(p){return p.role==='staff';}).length; updateStaffGate();
+    LAST_STAFF_NAMES=(r.data||[]).map(function(p){return p.login_name;}).filter(Boolean);
     var rows=(r.data||[]).sort(function(a,b){return (a.role==='shop_admin'?0:1)-(b.role==='shop_admin'?0:1);});
     if(!rows.length){document.getElementById('staffList').innerHTML='まだスタッフがいません。';return;}
-    var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>メール</th><th>役割</th></tr></thead><tbody>';
+    var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>ログイン名</th><th>役割</th></tr></thead><tbody>';
     rows.forEach(function(p){h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+esc(p.name||'（未設定）')+'</td>'+
-      '<td class="small">'+esc(p.email||'')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td></tr>';});
+      '<td class="small mono">'+esc(p.login_name||'—')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td></tr>';});
     document.getElementById('staffList').innerHTML=h+'</tbody></table>';
   }
-  async function loadStInvites(){
-    var r=await sb.from('invites').select('email,name').eq('shop_id',SHOP).eq('role','staff');
-    if(r.error){document.getElementById('stInviteList').innerHTML='<span style="color:#C8443B">'+esc(r.error.message)+'</span>';return;}
-    STINV_N=(r.data||[]).length; updateStaffGate();
-    var rows=r.data||[];if(!rows.length){document.getElementById('stInviteList').innerHTML='招待中のものはありません。';return;}
-    var h='<table><tbody>';rows.forEach(function(v){h+='<tr><td>'+esc(v.name||'')+'</td><td class="small">'+esc(v.email)+'</td><td class="ops"><button class="lnk" data-del="'+esc(v.email)+'">取消</button></td></tr>';});
-    document.getElementById('stInviteList').innerHTML=h+'</tbody></table>';
-    document.querySelectorAll('#stInviteList [data-del]').forEach(function(b){b.onclick=async function(){await sb.from('invites').delete().eq('email',b.getAttribute('data-del'));loadStInvites();};});
-  }
-  document.getElementById('st_invite').onclick=async function(){
+  function gen8(){var s='';for(var i=0;i<8;i++)s+=Math.floor(Math.random()*10);return s;}
+  document.getElementById('st_gen').onclick=function(){setVal('st_pw',gen8());};
+  document.getElementById('st_add').onclick=async function(){
     var msg=document.getElementById('st_msg');msg.textContent='';msg.className='msg';
-    var email=val('st_email');if(!email){msg.textContent='メールアドレスを入力してください。';msg.className='msg err';return;}
-    if(!isVipNow()&&(STAFF_N+STINV_N)>=2){msg.textContent='無料プランはスタッフ2名まで（招待中を含む）です。VIPにすると無制限になります。';msg.className='msg err';return;}
-    var nm=(val('st_sei')+' '+val('st_mei')).trim();
-    this.disabled=true;this.textContent='登録中…';
-    var r=await sb.from('invites').upsert({email:email,name:nm||null,role:'staff',shop_id:SHOP});
-    this.disabled=false;this.textContent='招待を登録';
-    if(r.error){msg.textContent='登録できませんでした：'+r.error.message;msg.className='msg err';return;}
-    msg.textContent='招待を登録しました。';msg.className='msg ok';setVal('st_email','');setVal('st_sei','');setVal('st_mei','');loadStInvites();
+    if(!isVipNow()){msg.textContent='スタッフ追加はVIPプランでご利用いただけます。';msg.className='msg err';return;}
+    var sei=val('st_sei'),mei=val('st_mei'),pw=val('st_pw');
+    if(!sei||!mei){msg.textContent='姓と名を入力してください。';msg.className='msg err';return;}
+    if(!/^[0-9]{8}$/.test(pw)){msg.textContent='パスワードは8桁の数字で入力してください（自動生成も使えます）。';msg.className='msg err';return;}
+    // 同姓同名の注意
+    var dupBase=(sei+mei);
+    var dup=(LAST_STAFF_NAMES||[]).filter(function(n){return n===dupBase;}).length;
+    if(dup>0&&!confirm('同じ店舗に「'+sei+' '+mei+'」さんが既にいます。連番を付けて追加します（例：'+dupBase+(dup+1)+'）。よろしいですか？')){return;}
+    this.disabled=true;this.textContent='追加中…';
+    try{
+      var s=await sb.auth.getSession();var token=(s.data&&s.data.session)?s.data.session.access_token:'';
+      var r=await fetch('/api/staff-create',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({sei:sei,mei:mei,password:pw})});
+      var d=await r.json().catch(function(){return {};});
+      this.disabled=false;this.textContent='スタッフを追加';
+      if(!r.ok||!d.ok){
+        var em=({not_vip:'VIPプランでのみ追加できます。',bad_password:'パスワードは8桁の数字にしてください。',no_name:'姓と名を入力してください。',no_code:'店舗コードが未発行です。運営にお問い合わせください。'})[d.error]||('追加できませんでした：'+(d.error||r.status));
+        msg.textContent=em;msg.className='msg err';return;
+      }
+      // 通知文を生成
+      var url='https://nyukokarte.com/staff';
+      var txt='【入庫カルテ ログイン情報】\n'+
+        'ログインページ： '+url+'\n'+
+        '店舗コード：'+d.code+'\n'+
+        'お名前：'+d.loginName+'\n'+
+        'パスワード：'+d.password+'\n\n'+
+        '▼ログイン方法\n'+
+        '上のページを開き、店舗コード・お名前・パスワードを入力してログインしてください。\n'+
+        '※このパスワードは他の人に教えないでください。';
+      document.getElementById('st_notice').value=txt;
+      document.getElementById('st_result').hidden=false;
+      document.getElementById('st_copymsg').textContent='';
+      msg.textContent=d.name+' さんを追加しました。';msg.className='msg ok';
+      setVal('st_sei','');setVal('st_mei','');setVal('st_pw','');
+      loadStaff();
+    }catch(e){ this.disabled=false;this.textContent='スタッフを追加'; msg.textContent='通信エラーが発生しました。';msg.className='msg err'; }
+  };
+  document.getElementById('st_copy').onclick=function(){
+    var ta=document.getElementById('st_notice');ta.select();
+    var done=function(){document.getElementById('st_copymsg').textContent='コピーしました。メールやLINEに貼り付けてください。';};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(done,function(){try{document.execCommand('copy');done();}catch(e){}});}
+    else{try{document.execCommand('copy');done();}catch(e){}}
   };
 
   function listMaster(table,listId){
@@ -405,7 +438,7 @@
     SHOP=p.data.shop_id;
     document.getElementById('whoName').textContent=(p.data.name||'店舗管理者')+' さん';
     buildLoanUI();
-    loadShop();loadStaff();loadStInvites();listMaster('vendors','vendorList');listMaster('outsourcers','outList');loadLoanCars();
+    loadShop();loadStaff();listMaster('vendors','vendorList');listMaster('outsourcers','outList');loadLoanCars();
   })();
 </script>
 </body>
