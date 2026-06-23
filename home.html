@@ -36,11 +36,18 @@
     if(role==='site_admin'){location.replace('siteadmin.html');return;}
     if(role==='shop_admin'){location.replace('shopadmin.html');return;}
     if(role==='staff'&&shopId){location.replace('uketsuke.html');return;}
-    // 店舗未所属など
+    // 店舗未所属 → 自動セットアップ（VIP30日の店舗作成）を試みる
+    try{
+      var token=s.data.session.access_token;
+      var setup=await fetch('/api/setup-shop',{method:'POST',headers:{Authorization:'Bearer '+token}});
+      var sd=await setup.json().catch(function(){return {};});
+      if(setup.ok&&sd.ok&&sd.shopId){location.replace('shopadmin.html');return;}
+    }catch(e){}
+    // それでも未所属（登録情報が無い等）の場合
     var label=ROLES[role]||role;
     document.getElementById('body').innerHTML=
       '<h1>ログイン中：'+label+'</h1>'+
-      '<div class="sub">この方はまだ店舗に所属していません。店舗からの招待メールで登録されているかご確認ください。</div>'+
+      '<div class="sub">この方はまだ店舗に所属していません。新規のご登録は <a href="signup.html">こちら</a> から、または店舗管理者にスタッフ登録を依頼してください。</div>'+
       '<button id="out">ログアウト</button>';
     document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   })();

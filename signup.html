@@ -37,8 +37,12 @@
   <div class="brand"><span class="logo">入</span><b>入庫カルテ</b></div>
   <h1>新規登録</h1>
   <div id="formArea">
-  <div class="lead">店舗から招待されたメールアドレスで登録してください。パスワードはご自身で設定します。</div>
-  <div class="f"><label for="email">メールアドレス</label><input id="email" type="email" autocomplete="username"></div>
+  <div class="lead">必要事項を入力して登録してください。確認メールのリンクを開くと、すぐに<b>VIPプラン（30日間無料）</b>でご利用いただけます。</div>
+  <div class="f"><label for="company">会社名・店舗名</label><input id="company" type="text" placeholder="○○自動車"></div>
+  <div class="f"><label for="owner">代表者名</label><input id="owner" type="text" placeholder="山田 太郎"></div>
+  <div class="f"><label for="tel">電話番号</label><input id="tel" type="tel" placeholder="03-1234-5678" autocomplete="tel"></div>
+  <div class="f"><label for="address">住所</label><input id="address" type="text" placeholder="東京都〇〇区〇〇1-2-3"></div>
+  <div class="f"><label for="email">メールアドレス（ログインに使います）</label><input id="email" type="email" autocomplete="username"></div>
   <div class="f"><label for="pw">パスワード（8文字以上）</label><input id="pw" type="password" autocomplete="new-password"></div>
   <div class="cf-turnstile" data-sitekey="0x4AAAAAADoIX0U2L82sEhxt" data-callback="onTok"></div>
   <label class="agree"><input type="checkbox" id="agree"><span><a href="terms.html" target="_blank" rel="noopener">利用規約</a>と<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</span></label>
@@ -59,12 +63,17 @@
   var msg=document.getElementById('msg');
   document.getElementById('go').addEventListener('click',async function(){
     msg.textContent='';msg.className='msg';
+    var company=document.getElementById('company').value.trim();
+    var owner=document.getElementById('owner').value.trim();
+    var tel=document.getElementById('tel').value.trim();
+    var address=document.getElementById('address').value.trim();
     var email=document.getElementById('email').value.trim();
     var password=document.getElementById('pw').value;
+    if(!company||!owner||!tel||!address){msg.textContent='会社名・代表者名・電話番号・住所をすべて入力してください。';msg.className='msg err';return;}
     if(!email||password.length<8){msg.textContent='メールと8文字以上のパスワードを入力してください。';msg.className='msg err';return;}
     if(!document.getElementById('agree').checked){msg.textContent='利用規約とプライバシーポリシーへの同意が必要です。';msg.className='msg err';return;}
     this.disabled=true;this.textContent='登録中…';
-    var opts={emailRedirectTo:'https://nyukokarte.com/login.html'};if(tok)opts.captchaToken=tok;
+    var opts={emailRedirectTo:'https://nyukokarte.com/login.html',data:{company:company,owner:owner,tel:tel,address:address}};if(tok)opts.captchaToken=tok;
     var res=await sb.auth.signUp({email:email,password:password,options:opts});
     if(res.error){
       msg.textContent='登録できませんでした：'+res.error.message;msg.className='msg err';
