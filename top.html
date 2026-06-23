@@ -10,6 +10,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>入庫チェックシートをスマホで作成｜入庫カルテ</title>
 <meta name="description" content="入庫カルテは、自動車整備工場の入庫受付をスマホで記録し、A4のPDFにまとめるサービス。車検証スキャン、5面のキズ確認シート（損傷チェック図）、お客様署名つきの車両確認書、代車貸出シート、QR共有まで対応します。">
+<link rel="canonical" href="https://nyukokarte.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="入庫カルテ">
+<meta property="og:title" content="入庫チェックシートをスマホで作成｜入庫カルテ">
+<meta property="og:description" content="自動車整備工場の入庫受付をスマホで記録し、A4のPDFに。車検証スキャン・キズ確認シート・車両確認書・代車貸出シート・QR共有に対応。初月無料。">
+<meta property="og:url" content="https://nyukokarte.com/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="入庫チェックシートをスマホで作成｜入庫カルテ">
+<meta name="twitter:description" content="自動車整備工場の入庫受付をスマホで記録し、A4のPDFに。初月無料。">
+<script type="application/ld+json">
+[
+ {"@context":"https://schema.org","@type":"Organization","name":"株式会社Pioneer Monkeys","url":"https://nyukokarte.com/","address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"東京都","addressLocality":"三鷹市","streetAddress":"新川6-1-1-3F"}},
+ {"@context":"https://schema.org","@type":"SoftwareApplication","name":"入庫カルテ","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://nyukokarte.com/","description":"自動車整備工場向けの入庫受付クラウド。車検証スキャン、5面のキズ確認シート（損傷チェック図）、お客様署名つきの車両確認書、代車貸出シート、QR共有、A4 PDF出力に対応。","offers":{"@type":"Offer","price":"5000","priceCurrency":"JPY","description":"VIPプラン 月額（初月無料／年払いは48,000円・実質月4,000円）"},"publisher":{"@type":"Organization","name":"株式会社Pioneer Monkeys"}},
+ {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+   {"@type":"Question","name":"入庫カルテとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"自動車整備工場向けの入庫受付クラウドです。受付内容をスマホで記録し、A4一枚のPDF（車両確認書・キズ確認シート）にまとめられます。"}},
+   {"@type":"Question","name":"料金はいくらですか？","acceptedAnswer":{"@type":"Answer","text":"初月無料です。VIPプランは月5,000円、または年48,000円（実質月4,000円）。オプション「データしっかり保管」は＋月2,000円です。"}},
+   {"@type":"Question","name":"車検証の読み取りはできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。カメラで車検証をスキャンし、車台番号などを自動入力できます。読めない欄は手入力で補正できます。"}},
+   {"@type":"Question","name":"スマホだけで使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。スマホ・タブレットのブラウザで使えます。専用機器は不要です。"}},
+   {"@type":"Question","name":"代車の貸出シートも作れますか？","acceptedAnswer":{"@type":"Answer","text":"はい。登録した代車から選んで、貸出シートを作成しPDF化できます。"}}
+ ]}
+]
+</script>
 <style>
   :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--amber-d:#cf6f00;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--surface2:#F6F8FA}
   *{box-sizing:border-box}
@@ -83,11 +106,62 @@
   footer a{color:#cfe0f0;text-decoration:none;margin-right:14px}
   footer .small{color:#7e91a5;font-size:.78rem;margin-top:14px;line-height:1.7}
 
+  /* ---- LP mockups ---- */
+  .shotrow{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:32px;align-items:start}
+  .shotcap{text-align:center;margin-top:12px;font-size:.9rem;color:#42505e;font-weight:700}
+  .shotcap .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--amber);color:#1b1b1b;font-weight:800;font-size:.78rem;margin-right:6px;vertical-align:middle}
+  .arrowline{text-align:center;margin-top:26px;font-size:1.02rem;color:var(--brand);font-weight:800}
+  .phone{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 32px rgba(20,40,60,.12);overflow:hidden;max-width:290px;margin:0 auto}
+  .ph-top{background:var(--brand);color:#fff;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700}
+  .ph-top .d{width:16px;height:16px;border-radius:5px;background:var(--amber);display:inline-block}
+  .ph-pills{display:flex;gap:4px;padding:8px 10px;flex-wrap:wrap;background:#eef3f7}
+  .ph-pills span{font-size:.6rem;background:#fff;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 7px}
+  .ph-pills span.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .ph-body{padding:12px 12px 16px}
+  .mk-label{font-size:.64rem;color:var(--muted);font-weight:700;margin:9px 0 3px}
+  .mk-input{border:1px solid var(--line);border-radius:8px;height:30px;background:#fff;display:flex;align-items:center;padding:0 9px;font-size:.72rem;color:#42505e}
+  .mk-scan{border:1px dashed var(--amber);border-radius:10px;background:#FFF6E9;color:var(--amber-d);text-align:center;padding:12px;font-size:.72rem;font-weight:800}
+  .mk-btn{margin-top:12px;background:var(--brand);color:#fff;border-radius:9px;text-align:center;padding:9px;font-size:.74rem;font-weight:700}
+  .mk-chips{display:flex;gap:5px;margin-bottom:8px}
+  .mk-chips span{font-size:.6rem;border-radius:999px;padding:3px 8px;border:1px solid var(--line);color:var(--muted)}
+  .car5{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .car5 .cell{border:1px solid var(--line);border-radius:8px;padding:6px 4px 3px;position:relative;background:#fff}
+  .car5 .cell svg{width:100%;height:auto;display:block}
+  .car5 .cell .lbl{font-size:.52rem;color:var(--muted);text-align:center;margin-top:2px}
+  .dot{position:absolute;width:8px;height:8px;border-radius:50%;border:1px solid #fff}
+  .a4{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px rgba(20,40,60,.12);overflow:hidden;max-width:280px;margin:0 auto}
+  .a4-h{background:var(--brand-deep);color:#fff;padding:8px 10px;font-size:.66rem;display:flex;justify-content:space-between;align-items:center}
+  .a4-b{padding:11px}
+  .a4 .ln{height:7px;background:#eef2f6;border-radius:3px;margin:5px 0}
+  .a4 .ln.s{width:58%}.a4 .ln.m{width:78%}
+  .a4 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
+  .a4 .cm{border:1px solid var(--line);border-radius:6px;height:46px}
+  .a4 .foot{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-top:10px}
+  .a4 .sign{flex:1;border:1px solid var(--line);border-radius:6px;height:42px;padding:4px}
+  /* cards */
+  .rec{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .rec .c{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 18px}
+  .rec .c .ic{width:38px;height:38px;border-radius:10px;background:#FFF1DD;color:var(--amber-d);display:grid;place-items:center;font-weight:800;font-size:1.05rem;margin-bottom:10px}
+  .rec .c h3{margin:0 0 4px;font-size:1rem;color:var(--brand)}
+  .rec .c p{margin:0;font-size:.88rem;color:#42505e}
+  .use{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .use .c{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+  .use .c .ic{width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;margin:0 auto 10px;font-weight:800}
+  .use .c h3{margin:0 0 4px;font-size:.98rem;color:var(--brand)}
+  .use .c p{margin:0;font-size:.84rem;color:#42505e}
+  .targets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:760px;margin:0 auto}
+  .targets .c{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+  .targets .c b{display:block;color:var(--brand);font-size:1.05rem;margin-bottom:4px}
+  .targets .c span{font-size:.86rem;color:#42505e}
+
   @media(max-width:680px){
     .hero h1{font-size:1.6rem}
     .hero{background:linear-gradient(180deg,rgba(14,36,55,.86) 0%,rgba(16,42,64,.74) 55%,rgba(18,50,76,.66) 100%),url('/hero.jpg') center/cover no-repeat;padding:48px 0 56px}
     .grid,.plans{grid-template-columns:1fr}
     .steps{grid-template-columns:repeat(2,1fr)}
+    .shotrow{grid-template-columns:1fr;gap:30px}
+    .rec,.targets{grid-template-columns:1fr}
+    .use{grid-template-columns:repeat(2,1fr)}
     .nav .links a.login{display:none}
   }
 </style>
@@ -119,28 +193,114 @@
 
 <section class="block">
   <div class="wrap">
-    <h2 class="h2">できること</h2>
-    <p class="lead">受付から代車の貸し出しまで、現場の作業を1つのアプリにまとめました。</p>
-    <div class="grid">
-      <div class="feat"><h3>入庫受付チェックシート（車両確認書）</h3><p>車検証をスキャンして車台番号などを自動入力。前後左右＋ルーフの5面でキズ・へこみをタップ記録（キズ確認シート）。お客様情報・署名とあわせてA4一枚のPDFに。</p></div>
-      <div class="feat"><h3>代車貸出シート</h3><p>登録した代車から選んで、貸出内容・お客様情報・署名を記録。受付からそのまま代車シートの作成へつなげられます。</p></div>
-      <div class="feat"><h3>車検証スキャン（OCR）</h3><p>カメラで車検証を読み取り、車台番号・型式・初年度登録などを自動入力。読めない欄は手入力で補正できます。</p></div>
-      <div class="feat"><h3>QRで共有</h3><p>受付票にQRコードを自動で添付。お客様がスマホで読み取ると、内容の確認やPDF保存ができます。</p></div>
-      <div class="feat"><h3>工場スケジュール（入庫管理）</h3><p>入庫・作業・納車の予定をリスト／カレンダー／車種別で見える化。工場の段取りを整理します。</p></div>
-      <div class="feat"><h3>工場ごとにデータを分離</h3><p>店舗（テナント）ごとにアカウントとデータを分けて管理。スタッフを招待して役割を分けられます。</p></div>
+    <h2 class="h2">スマホで入力、その場で受付PDFを自動作成</h2>
+    <p class="lead">入庫受付に必要な情報を、スマホやタブレットから順番に入力するだけ。受付完了と同時に、A4一枚のPDFが自動で出来上がります。</p>
+    <div class="shotrow">
+
+      <div>
+        <div class="phone">
+          <div class="ph-top"><span class="d"></span>入庫カルテ</div>
+          <div class="ph-pills"><span class="on">1 受付情報</span><span>2 写真</span><span>3 損傷</span><span>4 署名</span><span>5 完了</span></div>
+          <div class="ph-body">
+            <div class="mk-scan">車検証をスキャンして自動入力</div>
+            <div class="mk-label">お客様名</div><div class="mk-input">山田 太郎</div>
+            <div class="mk-label">車種</div><div class="mk-input">ハッチバック</div>
+            <div class="mk-label">入庫日</div><div class="mk-input">2026 / 06 / 23</div>
+            <div class="mk-btn">次へ</div>
+          </div>
+        </div>
+        <div class="shotcap"><span class="n">1</span>受付情報を入力</div>
+      </div>
+
+      <div>
+        <div class="phone">
+          <div class="ph-top"><span class="d"></span>損傷チェック</div>
+          <div class="ph-body">
+            <div class="mk-chips"><span style="border-color:var(--amber);color:var(--amber-d)">● キズ</span><span>● ヘコミ</span><span>● 割れ</span></div>
+            <div class="car5">
+              <div class="cell"><svg viewBox="0 0 60 32"><path d="M5 24 q0 -8 8 -9 l6 -7 q2 -2 4 -2 h14 q3 0 4 2 l5 7 l7 1 q3 1 3 4 v4 q0 2 -2 2 H7 q-2 0 -2 -2z" fill="none" stroke="#9bb0c4" stroke-width="2"/><circle cx="16" cy="26" r="3" fill="none" stroke="#9bb0c4" stroke-width="1.6"/><circle cx="42" cy="26" r="3" fill="none" stroke="#9bb0c4" stroke-width="1.6"/></svg><div class="dot" style="left:30%;top:38%;background:var(--amber)"></div><div class="lbl">正面</div></div>
+              <div class="cell"><svg viewBox="0 0 60 32"><path d="M5 24 q0 -8 8 -9 l6 -7 q2 -2 4 -2 h14 q3 0 4 2 l5 7 l7 1 q3 1 3 4 v4 q0 2 -2 2 H7 q-2 0 -2 -2z" fill="none" stroke="#9bb0c4" stroke-width="2"/><circle cx="16" cy="26" r="3" fill="none" stroke="#9bb0c4" stroke-width="1.6"/><circle cx="42" cy="26" r="3" fill="none" stroke="#9bb0c4" stroke-width="1.6"/></svg><div class="lbl">後方</div></div>
+              <div class="cell"><svg viewBox="0 0 60 32"><path d="M4 23 q1 -7 9 -8 l8 -7 q2 -2 5 -2 h16 q3 0 5 3 l6 6 q4 1 4 6 v3 q0 2 -2 2 H6 q-2 0 -2 -2z" fill="none" stroke="#9bb0c4" stroke-width="2"/><circle cx="17" cy="25" r="4" fill="none" stroke="#9bb0c4" stroke-width="1.6"/><circle cx="44" cy="25" r="4" fill="none" stroke="#9bb0c4" stroke-width="1.6"/></svg><div class="dot" style="left:55%;top:42%;background:#d33"></div><div class="lbl">左側面</div></div>
+              <div class="cell"><svg viewBox="0 0 60 32"><path d="M4 23 q1 -7 9 -8 l8 -7 q2 -2 5 -2 h16 q3 0 5 3 l6 6 q4 1 4 6 v3 q0 2 -2 2 H6 q-2 0 -2 -2z" fill="none" stroke="#9bb0c4" stroke-width="2"/><circle cx="17" cy="25" r="4" fill="none" stroke="#9bb0c4" stroke-width="1.6"/><circle cx="44" cy="25" r="4" fill="none" stroke="#9bb0c4" stroke-width="1.6"/></svg><div class="lbl">右側面</div></div>
+              <div class="cell"><svg viewBox="0 0 60 32"><rect x="14" y="6" width="32" height="20" rx="9" fill="none" stroke="#9bb0c4" stroke-width="2"/><line x1="14" y1="13" x2="46" y2="13" stroke="#9bb0c4" stroke-width="1.4"/><line x1="14" y1="19" x2="46" y2="19" stroke="#9bb0c4" stroke-width="1.4"/></svg><div class="dot" style="left:60%;top:40%;background:var(--amber)"></div><div class="lbl">ルーフ</div></div>
+              <div class="cell" style="display:grid;place-items:center;border-style:dashed"><div style="font-size:.6rem;color:var(--muted);text-align:center;line-height:1.4">タップで<br>記録</div></div>
+            </div>
+            <div class="mk-btn">次へ</div>
+          </div>
+        </div>
+        <div class="shotcap"><span class="n">2</span>5面の損傷をタップ</div>
+      </div>
+
+      <div>
+        <div class="a4">
+          <div class="a4-h"><span>入庫受付チェックシート</span><span>○○自動車</span></div>
+          <div class="a4-b">
+            <div class="ln m"></div><div class="ln s"></div>
+            <div class="g2"><div class="cm"></div><div class="cm"></div></div>
+            <div class="ln"></div><div class="ln m"></div><div class="ln s"></div>
+            <div class="foot">
+              <div class="sign"><svg viewBox="0 0 90 26" width="100%"><path d="M5 19 q7 -16 11 -3 t9 0 q4 -11 9 -2 q3 7 8 0 q4 -9 9 0 q3 6 9 -2 q4 -7 10 1" fill="none" stroke="#1F4E74" stroke-width="2" stroke-linecap="round"/></svg></div>
+              <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><rect width="44" height="44" fill="#fff"/><rect x="2" y="2" width="12" height="12" fill="none" stroke="#16202B" stroke-width="3"/><rect x="6" y="6" width="4" height="4" fill="#16202B"/><rect x="30" y="2" width="12" height="12" fill="none" stroke="#16202B" stroke-width="3"/><rect x="34" y="6" width="4" height="4" fill="#16202B"/><rect x="2" y="30" width="12" height="12" fill="none" stroke="#16202B" stroke-width="3"/><rect x="6" y="34" width="4" height="4" fill="#16202B"/><g fill="#16202B"><rect x="18" y="4" width="3" height="3"/><rect x="24" y="4" width="3" height="3"/><rect x="18" y="10" width="3" height="3"/><rect x="22" y="18" width="3" height="3"/><rect x="28" y="20" width="3" height="3"/><rect x="34" y="18" width="3" height="3"/><rect x="38" y="24" width="3" height="3"/><rect x="18" y="24" width="3" height="3"/><rect x="20" y="30" width="3" height="3"/><rect x="26" y="32" width="3" height="3"/><rect x="32" y="30" width="3" height="3"/><rect x="38" y="34" width="3" height="3"/><rect x="18" y="38" width="3" height="3"/><rect x="24" y="38" width="3" height="3"/></g></svg>
+            </div>
+          </div>
+        </div>
+        <div class="shotcap"><span class="n">3</span>受付PDFが完成</div>
+      </div>
+
+    </div>
+    <div class="arrowline">「入力する」から「PDFが完成する」まで、ひとつの画面で。</div>
+  </div>
+</section>
+
+<section class="block alt">
+  <div class="wrap">
+    <h2 class="h2">ひとつの受付に、まとめて記録</h2>
+    <p class="lead">バラバラになりがちな受付の情報を、1件の受付としてまとめて残せます。</p>
+    <div class="rec">
+      <div class="c"><div class="ic">車</div><h3>車検証スキャン</h3><p>カメラで読み取り、車台番号・型式などを自動入力。読めない欄は手入力で補正。</p></div>
+      <div class="c"><div class="ic">客</div><h3>お客様情報</h3><p>お名前・連絡先・住所などを記録。郵便番号から住所の自動入力にも対応。</p></div>
+      <div class="c"><div class="ic">5</div><h3>5面の損傷チェック</h3><p>前・後・左・右＋ルーフの図をタップして、キズ・ヘコミの位置を記録。</p></div>
+      <div class="c"><div class="ic">✓</div><h3>入庫時の確認事項</h3><p>貴重品・お忘れ物などのチェック項目を確認しながら受付。</p></div>
+      <div class="c"><div class="ic">署</div><h3>お客様署名</h3><p>内容を確認して、その場で画面に署名。言った・言わないを防ぎます。</p></div>
+      <div class="c"><div class="ic">代</div><h3>代車貸出記録</h3><p>登録した代車から選び、貸出内容と署名を記録。代車貸出シートも作成。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <h2 class="h2">完成したPDFは、すぐ使える</h2>
+    <p class="lead">受付完了と同時に出来上がったPDFを、その場で活用できます。</p>
+    <div class="use">
+      <div class="c"><div class="ic">PC</div><h3>パソコンへ保存</h3><p>店舗のパソコンにダウンロードして保管。</p></div>
+      <div class="c"><div class="ic">共</div><h3>スタッフで共有</h3><p>店舗のスタッフ全員で受付内容を共有。</p></div>
+      <div class="c"><div class="ic">印</div><h3>印刷してお渡し・保管</h3><p>そのまま印刷してお客様へお渡し。紙媒体でのファイリング保管にも。</p></div>
+      <div class="c"><div class="ic">QR</div><h3>QRでお客様へ</h3><p>PDFのQRコードから、お客様にその場で共有。</p></div>
     </div>
   </div>
 </section>
 
 <section class="block alt">
   <div class="wrap">
-    <h2 class="h2">かんたん4ステップ</h2>
-    <p class="lead">受付に来たお客様の前で、その場で完結します。</p>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><h4>お客様情報</h4><p>名前・連絡先・車検証スキャン</p></div>
-      <div class="step"><div class="n">2</div><h4>損傷チェック</h4><p>5面の図をタップで記録</p></div>
-      <div class="step"><div class="n">3</div><h4>確認・署名</h4><p>内容を確認してその場で署名</p></div>
-      <div class="step"><div class="n">4</div><h4>PDF / 共有</h4><p>A4一枚に出力・QRで共有</p></div>
+    <h2 class="h2">こんな現場で使えます</h2>
+    <p class="lead">紙の受付表を探す、写真を別管理する、説明内容を後から確認する——そんな手間を減らし、受付業務を効率化します。</p>
+    <div class="targets">
+      <div class="c"><b>整備工場</b><span>車検・点検・修理の入庫受付に</span></div>
+      <div class="c"><b>鈑金工場</b><span>損傷状態の記録・確認に</span></div>
+      <div class="c"><b>販売店・ディーラー等</b><span>販売した車両の入庫時の記録、外注先・修理先への共有に</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <h2 class="h2">その他の便利な機能</h2>
+    <p class="lead">受付のほかにも、現場の段取りを助ける機能をそろえています。</p>
+    <div class="grid">
+      <div class="feat"><h3>スタッフ別の作業スケジュール</h3><p>スタッフごとに作業を時間で登録。車種ごとに作業内容（脱着・交換など）をスタッフ名と紐付けるので、当日の各スタッフの作業内容が一目瞭然です。</p></div>
+      <div class="feat"><h3>入庫スケジュールの見える化</h3><p>入庫・作業・納車・外注中の予定を、リスト／カレンダー／車種別で表示。工場全体の段取りを整理できます。</p></div>
+      <div class="feat"><h3>スタッフはメール不要でログイン</h3><p>スタッフは店舗コード＋氏名＋パスワードでログイン。メールアドレスがなくても使えます。</p></div>
+      <div class="feat"><h3>クラウドで安全に保管</h3><p>受付データはクラウドに保存。端末が変わっても、いつでも呼び出せます。</p></div>
     </div>
   </div>
 </section>
@@ -173,6 +333,20 @@
       </div>
     </div>
     <div class="pricenote">年払いは48,000円（1年分一括・実質 月4,000円）。容量は10GB単位で追加できます。</div>
+  </div>
+</section>
+
+<section class="block alt">
+  <div class="wrap">
+    <h2 class="h2">よくある質問</h2>
+    <p class="lead">導入前に多いご質問をまとめました。</p>
+    <div style="max-width:720px;margin:0 auto">
+      <div style="border-top:1px solid var(--line);padding:16px 2px"><div style="font-weight:700;color:var(--brand);margin-bottom:4px">Q. 入庫カルテとは何ですか？</div><div style="color:#42505e;font-size:.93rem">自動車整備工場向けの入庫受付クラウドです。受付内容をスマホで記録し、A4一枚のPDF（車両確認書・キズ確認シート）にまとめられます。</div></div>
+      <div style="border-top:1px solid var(--line);padding:16px 2px"><div style="font-weight:700;color:var(--brand);margin-bottom:4px">Q. 料金はいくらですか？</div><div style="color:#42505e;font-size:.93rem">初月無料です。VIPプランは月5,000円、または年48,000円（実質 月4,000円）。オプション「データしっかり保管」は＋月2,000円です。お支払いは銀行振込です。</div></div>
+      <div style="border-top:1px solid var(--line);padding:16px 2px"><div style="font-weight:700;color:var(--brand);margin-bottom:4px">Q. 車検証の読み取りはできますか？</div><div style="color:#42505e;font-size:.93rem">はい。カメラで車検証をスキャンして車台番号などを自動入力できます。読めない欄は手入力で補正できます。</div></div>
+      <div style="border-top:1px solid var(--line);padding:16px 2px"><div style="font-weight:700;color:var(--brand);margin-bottom:4px">Q. スマホだけで使えますか？</div><div style="color:#42505e;font-size:.93rem">はい。スマホ・タブレットのブラウザで使えます。専用機器の購入は不要です。</div></div>
+      <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 2px"><div style="font-weight:700;color:var(--brand);margin-bottom:4px">Q. 代車の貸出シートも作れますか？</div><div style="color:#42505e;font-size:.93rem">はい。登録した代車から選んで、貸出シート（署名つき）を作成しPDF化できます。</div></div>
+    </div>
   </div>
 </section>
 
