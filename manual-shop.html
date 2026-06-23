@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>店舗管理者向け操作ガイド — 入庫カルテ</title>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.85}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:820px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 20px 70px}
+  h1{font-size:1.5rem;color:var(--brand);margin:6px 0 4px}
+  .lead{font-size:.95rem;color:var(--muted);margin-bottom:18px}
+  h2{font-size:1.18rem;color:var(--brand);margin:34px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:14px}
+  p,li{font-size:.95rem}
+  .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+  .toc b{color:var(--brand)}
+  .toc ol{margin:8px 0 0;padding-left:1.3em}.toc a{color:var(--brand);text-decoration:none}.toc a:hover{text-decoration:underline}
+  .step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#1b1b1b;font-weight:800;display:grid;place-items:center;font-size:.9rem}
+  .step .b{flex:1}.step .b b{color:var(--brand)}
+  .shot{margin:12px 0 6px;max-width:520px}
+  .shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;display:block}
+  .shot .ph{border:2px dashed #b9c6d4;border-radius:10px;background:#eef3f7;color:#5C6B7A;align-items:center;justify-content:center;text-align:center;font-size:.82rem;padding:20px;line-height:1.7}
+  .shot figcaption{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .note2{background:#FFF6E9;border:1px solid #F0D9B0;border-radius:10px;padding:12px 14px;font-size:.88rem;margin:12px 0}
+  .faq .q{font-weight:700;color:var(--brand);margin-top:16px}.faq .a{font-size:.93rem;margin-top:2px}
+  .cross{display:inline-block;margin-top:10px;background:var(--brand);color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:.92rem;font-weight:700}
+  .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>店舗管理者向け操作ガイド</h1>
+  <div class="lead">このガイドは、店舗（工場）の管理者・代表者の方向けです。スマホ・タブレット・パソコンのいずれでも操作できます。むずかしい操作はありません。順番に読めば、その日から使えます。</div>
+
+  <div class="toc">
+    <b>目次</b>
+    <ol>
+      <li><a href="#login">ログイン方法</a></li>
+      <li><a href="#staff-add">スタッフを追加する</a></li>
+      <li><a href="#staff-pw">スタッフのパスワードを変える</a></li>
+      <li><a href="#staff-del">スタッフを停止（削除）する</a></li>
+      <li><a href="#history">受付の履歴・PDFを確認する</a></li>
+      <li><a href="#reissue">PDFを再発行する</a></li>
+      <li><a href="#loan">代車を登録する</a></li>
+      <li><a href="#shopinfo">店舗情報を変更する</a></li>
+      <li><a href="#mypw">自分のパスワードを変える</a></li>
+      <li><a href="#faq">よくある質問</a></li>
+    </ol>
+  </div>
+
+  <div class="box" id="login">
+    <h2>1. ログイン方法</h2>
+    <div class="step"><div class="n">1</div><div class="b"><b>nyukokarte.com/login</b> を開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">登録した <b>メールアドレス</b> と <b>パスワード</b> を入力します。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">「私はロボットではありません」にチェックして <b>「ログイン」</b> を押すと、店舗の管理画面が開きます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0101.png" alt="ログイン画面" width="500" height="320" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:170px">IMG-0101 ／ 推奨 500×320 ／ 店舗管理者のログイン画面（メール・パスワード入力）</div>
+      <figcaption>図1：ログイン画面</figcaption>
+    </figure>
+    <div class="note2">スタッフの方は、メールではなく <b>店舗コード＋氏名＋パスワード</b> で <b>nyukokarte.com/staff</b> からログインします（次の項目で作成します）。</div>
+  </div>
+
+  <div class="box" id="staff-add">
+    <h2>2. スタッフを追加する</h2>
+    <p>スタッフはメールアドレス不要で追加できます（VIPプランの店舗で利用できます）。</p>
+    <div class="step"><div class="n">1</div><div class="b">管理画面の上のメニューで <b>「スタッフ」</b> を選びます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b"><b>姓</b>・<b>名</b>・<b>8桁のパスワード</b>（「8桁を自動生成」ボタンも使えます）を入力します。</div></div>
+    <div class="step"><div class="n">3</div><div class="b"><b>「スタッフを追加」</b> を押します。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0102.png" alt="スタッフ追加画面" width="500" height="320" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:170px">IMG-0102 ／ 推奨 500×320 ／「スタッフ」タブの追加フォーム（姓・名・8桁パスワード・店舗コード表示）</div>
+      <figcaption>図2：スタッフ追加フォーム</figcaption>
+    </figure>
+    <div class="step"><div class="n">4</div><div class="b">追加すると <b>ログイン情報の案内文</b> が表示されます。<b>「全文コピー」</b> でLINEやメールに貼り付けて渡すか、<b>スタッフのメール</b> を入れて「このアドレスに送る」で送信できます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0103.png" alt="ログイン情報の案内文" width="500" height="320" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:170px">IMG-0103 ／ 推奨 500×320 ／ 追加後に出る「ログイン情報の案内文（コピー・送信）」</div>
+      <figcaption>図3：ログイン情報の案内文（コピー／送信）</figcaption>
+    </figure>
+    <div class="note2"><b>店舗コード</b> は店舗ごとに決まった英数字です（「スタッフ」タブの上部に表示）。スタッフはこの店舗コードと氏名・パスワードでログインします。同じ姓名の方が既にいる場合は、自動で番号が付きます（例：山田太郎2）。</div>
+  </div>
+
+  <div class="box" id="staff-pw">
+    <h2>3. スタッフのパスワードを変える</h2>
+    <div class="step"><div class="n">1</div><div class="b">「スタッフ」タブの一覧で、対象スタッフの <b>「パスワード変更」</b> を押します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">新しい <b>8桁のパスワード</b> を入れて（自動生成も可）<b>「変更する」</b> を押します。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">新しいログイン情報の案内文が出るので、コピーまたは送信してスタッフへ伝えます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0105.png" alt="パスワード変更" width="460" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0105 ／ 推奨 460×300 ／ スタッフのパスワード変更の画面</div>
+      <figcaption>図4：パスワード変更</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="staff-del">
+    <h2>4. スタッフを停止（削除）する</h2>
+    <p>退職などでログインを止めたいときは、スタッフを削除します。削除するとそのスタッフはログインできなくなります。</p>
+    <div class="step"><div class="n">1</div><div class="b">「スタッフ」タブの一覧で、対象スタッフの <b>「削除」</b> を押します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">確認メッセージで <b>「OK」</b> を押すと、そのスタッフは利用できなくなります。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0104.png" alt="スタッフ削除" width="500" height="280" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:150px">IMG-0104 ／ 推奨 500×280 ／ スタッフ一覧の「削除」ボタン</div>
+      <figcaption>図5：スタッフの削除</figcaption>
+    </figure>
+    <div class="note2">削除は元に戻せません。一時的に止めたいだけの場合は、パスワードを変更して伝えない、という運用も可能です。</div>
+  </div>
+
+  <div class="box" id="history">
+    <h2>5. 受付の履歴・PDFを確認する</h2>
+    <p>受付を完了すると、その受付に <b>保存番号</b> と <b>共有用のURL・QRコード</b> が発行されます。これを使って、あとからいつでも内容を見られます。</p>
+    <div class="step"><div class="n">1</div><div class="b">受付完了時に表示された <b>QRコード</b> または <b>共有URL</b> を開きます（印刷したPDFにもQRが入っています）。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">保存番号がわかる場合は、受付アプリの呼び出し欄に番号を入れて再表示することもできます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0106.png" alt="共有URL・QR" width="500" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0106 ／ 推奨 500×300 ／ 受付完了画面の共有URL・QRコード</div>
+      <figcaption>図6：共有URL・QRコード</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="reissue">
+    <h2>6. PDFを再発行する</h2>
+    <div class="step"><div class="n">1</div><div class="b">上の方法で受付を再表示します（QR・共有URL・保存番号）。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">PDFの出力欄で、必要な印刷パターンの <b>「PDF」</b> ボタンを押せば、もう一度PDFを保存・印刷できます。</div></div>
+    <div class="note2">PDFにはQRコードも印刷されます。お客様控えとして渡すこともできます。</div>
+  </div>
+
+  <div class="box" id="loan">
+    <h2>7. 代車を登録する</h2>
+    <p>代車貸出シートで選べるように、あらかじめ代車を登録しておきます。</p>
+    <div class="step"><div class="n">1</div><div class="b">管理画面の <b>「代車登録」</b> タブを開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">代車の <b>車名・ナンバー</b> などを入力して登録します。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0107.png" alt="代車登録" width="500" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0107 ／ 推奨 500×300 ／「代車登録」タブの入力画面</div>
+      <figcaption>図7：代車登録</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="shopinfo">
+    <h2>8. 店舗情報を変更する</h2>
+    <p>店舗名・会社名・住所・電話・営業時間などは、受付PDFのヘッダーに表示されます。変更したいときは次の手順です。</p>
+    <div class="step"><div class="n">1</div><div class="b">管理画面の <b>「店舗情報」</b> タブを開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">内容を書き換えて <b>保存</b> します。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0108.png" alt="店舗情報" width="500" height="320" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:170px">IMG-0108 ／ 推奨 500×320 ／「店舗情報」タブの編集画面</div>
+      <figcaption>図8：店舗情報の編集</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="mypw">
+    <h2>9. 自分のパスワードを変える</h2>
+    <p>管理者自身のパスワードを忘れた・変えたいときは、ログイン画面から再設定します。</p>
+    <div class="step"><div class="n">1</div><div class="b">ログイン画面で <b>「パスワードを忘れた方はこちら」</b> を押します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">登録メールアドレスを入れて送信すると、再設定用のメールが届きます。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">メールのリンクを開き、新しいパスワードを設定します。</div></div>
+  </div>
+
+  <div class="box faq" id="faq">
+    <h2>10. よくある質問</h2>
+    <div class="q">Q. スタッフにメールアドレスは必要ですか？</div>
+    <div class="a">いいえ。スタッフは <b>店舗コード＋氏名＋パスワード</b> でログインするため、メールアドレスは不要です。</div>
+    <div class="q">Q. スタッフは何人まで追加できますか？</div>
+    <div class="a">VIPプランでは人数制限なく追加できます。</div>
+    <div class="q">Q. スマホでアプリのように使えますか？</div>
+    <div class="a">はい。ホーム画面に追加すると1タップで開けます。やり方は <a href="/pwa">こちらのページ</a> をご覧ください。</div>
+    <div class="q">Q. パスワードを忘れたスタッフがいます。</div>
+    <div class="a">「スタッフ」タブの「パスワード変更」で新しい8桁を設定し、案内文を渡してください。</div>
+    <div class="q">Q. うまくいかないときは？</div>
+    <div class="a"><a href="/form">お問い合わせフォーム</a> からご連絡ください。</div>
+  </div>
+
+  <div style="text-align:center">
+    <a class="cross" href="/staff-manual">スタッフ向け操作ガイドを見る →</a>
+  </div>
+
+  <a class="back" href="/">← トップへ戻る</a>
+</div>
+</body>
+</html>

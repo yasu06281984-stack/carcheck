@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お問い合わせ — 入庫カルテ</title>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--red:#C8443B}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.8}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:620px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:620px;margin:0 auto;padding:26px 20px 60px}
+  h1{font-size:1.4rem;color:var(--brand);margin:6px 0 4px}
+  .lead{font-size:.92rem;color:var(--muted);margin-bottom:18px}
+  .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+  label{display:block;font-size:.82rem;color:var(--muted);font-weight:700;margin:14px 0 6px}
+  input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(31,78,116,.12)}
+  textarea{min-height:140px;resize:vertical}
+  .hp{position:absolute;left:-9999px;top:-9999px}
+  button{margin-top:18px;width:100%;background:var(--brand);color:#fff;border:0;padding:13px;border-radius:11px;font-size:1rem;font-weight:700;cursor:pointer}
+  button:disabled{opacity:.6}
+  .msg{margin-top:12px;font-size:.9rem;min-height:1.2em}.msg.err{color:var(--red)}.msg.ok{color:#1f6b2a}
+  .back{display:inline-block;margin-top:22px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>お問い合わせ</h1>
+  <div class="lead">ご質問・ご要望・不具合のご連絡はこちらから。返信が必要な場合はメールアドレスをご記入ください。</div>
+  <div class="box">
+    <label for="name">お名前</label><input id="name" type="text" placeholder="山田 太郎">
+    <label for="shop">店舗・会社名（任意）</label><input id="shop" type="text" placeholder="○○自動車">
+    <label for="email">返信先メールアドレス（任意）</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+    <label for="message">お問い合わせ内容</label><textarea id="message" placeholder="ご用件をご記入ください。"></textarea>
+    <input id="company_url" class="hp" tabindex="-1" autocomplete="off" placeholder="（記入しないでください）">
+    <button id="send">送信する</button>
+    <div id="msg" class="msg"></div>
+  </div>
+  <a class="back" href="/">← トップへ戻る</a>
+</div>
+<script>
+  var msg=document.getElementById('msg');
+  document.getElementById('send').addEventListener('click',async function(){
+    msg.textContent='';msg.className='msg';
+    var message=document.getElementById('message').value.trim();
+    var email=document.getElementById('email').value.trim();
+    if(message.length<5){msg.textContent='お問い合わせ内容をご記入ください。';msg.className='msg err';return;}
+    if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='メールアドレスの形式をご確認ください。';msg.className='msg err';return;}
+    this.disabled=true;this.textContent='送信中…';
+    try{
+      var r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        name:document.getElementById('name').value.trim(),
+        shop:document.getElementById('shop').value.trim(),
+        email:email,
+        message:message,
+        hp:document.getElementById('company_url').value
+      })});
+      var d=await r.json().catch(function(){return {};});
+      this.disabled=false;this.textContent='送信する';
+      if(!r.ok||!d.ok){
+        var em=(d.error==='no_resend_key')?'ただいま送信できません。お手数ですが時間をおいてお試しください。':'送信できませんでした。入力をご確認ください。';
+        msg.textContent=em;msg.className='msg err';return;
+      }
+      msg.textContent='送信しました。お問い合わせありがとうございます。';msg.className='msg ok';
+      document.getElementById('name').value='';document.getElementById('shop').value='';document.getElementById('email').value='';document.getElementById('message').value='';
+    }catch(e){this.disabled=false;this.textContent='送信する';msg.textContent='通信エラーが発生しました。';msg.className='msg err';}
+  });
+</script>
+</body>
+</html>

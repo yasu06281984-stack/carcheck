@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>運営管理マニュアル — 入庫カルテ</title>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.85}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:820px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 20px 70px}
+  h1{font-size:1.5rem;color:var(--brand);margin:6px 0 4px}
+  .lead{font-size:.95rem;color:var(--muted);margin-bottom:18px}
+  h2{font-size:1.16rem;color:var(--brand);margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  p,li{font-size:.95rem}
+  .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+  .step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#1b1b1b;font-weight:800;display:grid;place-items:center;font-size:.9rem}
+  .step .b{flex:1}.step .b b{color:var(--brand)}
+  .note2{background:#FFF6E9;border:1px solid #F0D9B0;border-radius:10px;padding:12px 14px;font-size:.88rem;margin:12px 0}
+  .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>運営管理マニュアル</h1>
+  <div class="lead">システム管理者（運営）専用のガイドです。運営管理画面（siteadmin）から、店舗の状況確認やお知らせ配信を行います。</div>
+
+  <div class="box">
+    <h2>1. 店舗一覧を見る</h2>
+    <div class="step"><div class="n">1</div><div class="b">運営管理画面にログインし、<b>「店舗」</b> タブを開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">登録順に <b>店舗名・代表者・電話・プラン/期限・容量</b> が並びます。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">各行の <b>「詳細」</b> を押すと、<b>住所・代表者メール・所属スタッフ</b> が表示されます。</div></div>
+    <div class="note2">新規登録した店舗は、メール確認後ログインすると <b>自動でVIP30日</b> が付与され、この一覧に並びます（承認操作は不要です）。</div>
+  </div>
+
+  <div class="box">
+    <h2>2. 契約状況を確認する</h2>
+    <p>店舗一覧の <b>プラン/期限</b> 欄で、各店舗が無料・VIP・期限切れのいずれかを確認できます。各行の <b>「編集」</b> から、プラン・支払い方法・容量・有効期限を変更できます（＋1年／＋1ヶ月ボタンあり）。</p>
+  </div>
+
+  <div class="box">
+    <h2>3. 店舗を停止する（無効化）</h2>
+    <div class="step"><div class="n">1</div><div class="b">対象店舗の <b>「編集」</b> を開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b"><b>状態</b> を「停止」に変更して保存すると、その店舗は利用できなくなります。</div></div>
+    <div class="note2">「停止」は無効化です。利用を再開する場合は、状態を戻してください。</div>
+  </div>
+
+  <div class="box">
+    <h2>4. 店舗を削除する</h2>
+    <p>店舗の完全削除は、データ保全のため通常運用では行わず、<b>「停止（無効化）」</b> で対応することを推奨します。どうしても完全削除が必要な場合は、Supabase の管理画面から対象店舗・所属ユーザーを削除します（取り消せないため、十分にご注意ください）。</p>
+  </div>
+
+  <div class="box">
+    <h2>5. お知らせを配信する</h2>
+    <div class="step"><div class="n">1</div><div class="b">運営管理画面の <b>「お知らせ」</b> タブを開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b"><b>タイトル</b> と <b>本文</b> を入力し、<b>「投稿する」</b> を押します。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">公開したお知らせは、<b>nyukokarte.com/whatsnew</b> に表示されます。不要になったら「削除」できます。</div></div>
+  </div>
+
+  <div class="box">
+    <h2>6. お問い合わせを受け取る</h2>
+    <p>サイトの <b>お問い合わせフォーム（/form）</b> から送信された内容は、運営メール <b>staff@pioneer-monkeys.jp</b> に届きます。返信先メールが入力されていれば、そのまま返信できます。</p>
+  </div>
+
+  <a class="back" href="/siteadmin.html">← 運営管理画面へ戻る</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スタッフ向け操作ガイド — 入庫カルテ</title>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.85}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:820px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:820px;margin:0 auto;padding:26px 20px 70px}
+  h1{font-size:1.5rem;color:var(--brand);margin:6px 0 4px}
+  .lead{font-size:.95rem;color:var(--muted);margin-bottom:18px}
+  h2{font-size:1.18rem;color:var(--brand);margin:34px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:14px}
+  p,li{font-size:.95rem}
+  .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+  .toc b{color:var(--brand)}.toc ol{margin:8px 0 0;padding-left:1.3em}.toc a{color:var(--brand);text-decoration:none}.toc a:hover{text-decoration:underline}
+  .step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#1b1b1b;font-weight:800;display:grid;place-items:center;font-size:.9rem}
+  .step .b{flex:1}.step .b b{color:var(--brand)}
+  .shot{margin:12px 0 6px;max-width:420px}
+  .shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;display:block}
+  .shot .ph{border:2px dashed #b9c6d4;border-radius:10px;background:#eef3f7;color:#5C6B7A;align-items:center;justify-content:center;text-align:center;font-size:.82rem;padding:20px;line-height:1.7}
+  .shot figcaption{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .note2{background:#FFF6E9;border:1px solid #F0D9B0;border-radius:10px;padding:12px 14px;font-size:.88rem;margin:12px 0}
+  .cross{display:inline-block;margin-top:10px;background:var(--brand);color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:.92rem;font-weight:700}
+  .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>スタッフ向け操作ガイド</h1>
+  <div class="lead">受付担当・整備士の方向けのガイドです。スマホ・タブレットで、お客様の前でそのまま受付できます。指でタップして進めるだけです。</div>
+
+  <div class="toc">
+    <b>目次</b>
+    <ol>
+      <li><a href="#login">ログインする</a></li>
+      <li><a href="#new">新しい受付を始める</a></li>
+      <li><a href="#scan">車検証をスキャンする</a></li>
+      <li><a href="#damage">キズ・ヘコミ（損傷）を登録する</a></li>
+      <li><a href="#photo">写真を登録する</a></li>
+      <li><a href="#sign">お客様の署名をもらう</a></li>
+      <li><a href="#pdf">PDFを発行する</a></li>
+      <li><a href="#qr">QRコードで共有する</a></li>
+      <li><a href="#loan">代車の受付をする</a></li>
+    </ol>
+  </div>
+
+  <div class="box" id="login">
+    <h2>1. ログインする</h2>
+    <div class="step"><div class="n">1</div><div class="b"><b>nyukokarte.com/staff</b> を開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">店舗から渡された <b>店舗コード</b>・<b>お名前</b>・<b>パスワード</b> を入力します。</div></div>
+    <div class="step"><div class="n">3</div><div class="b"><b>「ログイン」</b> を押すと、受付画面が開きます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0201.png" alt="スタッフログイン" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0201 ／ 推奨 380×300 ／ スタッフログイン画面（店舗コード・氏名・パスワード）</div>
+      <figcaption>図1：スタッフログイン</figcaption>
+    </figure>
+    <div class="note2">よく使う場合は、ホーム画面に追加すると1タップで開けます（<a href="/pwa">やり方はこちら</a>）。</div>
+  </div>
+
+  <div class="box" id="new">
+    <h2>2. 新しい受付を始める</h2>
+    <div class="step"><div class="n">1</div><div class="b">最初の画面で <b>シートの種類</b>（入庫受付など）と <b>担当スタッフ</b> を選びます（自分の名前が初めから選ばれています）。</div></div>
+    <div class="step"><div class="n">2</div><div class="b"><b>「スタート」</b> を押して受付を開始します。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0202.png" alt="受付開始" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0202 ／ 推奨 380×300 ／ シート種類・担当スタッフを選ぶ開始画面</div>
+      <figcaption>図2：受付の開始</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="scan">
+    <h2>3. 車検証をスキャンする</h2>
+    <div class="step"><div class="n">1</div><div class="b">案内に従って <b>車検証をカメラで撮影</b> します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">車台番号などが <b>自動で入力</b> されます。読み取れない欄は手で直せます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0203.png" alt="車検証スキャン" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0203 ／ 推奨 380×300 ／ 車検証をスキャンしている画面</div>
+      <figcaption>図3：車検証スキャン</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="damage">
+    <h2>4. キズ・ヘコミ（損傷）を登録する</h2>
+    <div class="step"><div class="n">1</div><div class="b">車の <b>5面の図</b>（前・後・左・右・上）から、キズやヘコミの <b>場所をタップ</b> します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">種類（キズ／ヘコミ等）や大きさを選びます。タップした位置から部位が自動判定されます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0204.png" alt="損傷登録" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0204 ／ 推奨 380×300 ／ 5面の損傷チェック図でタップしている画面</div>
+      <figcaption>図4：損傷の登録</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="photo">
+    <h2>5. 写真を登録する</h2>
+    <div class="step"><div class="n">1</div><div class="b">必要に応じて、車の状態などの <b>写真を撮影・登録</b> します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">登録した写真は、PDFの2ページ目に印刷できます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0205.png" alt="写真登録" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0205 ／ 推奨 380×300 ／ 写真を登録する画面</div>
+      <figcaption>図5：写真の登録</figcaption>
+    </figure>
+    <div class="note2">無料プランでは写真は前方1枚までです。VIPプランで枚数の制限がなくなります。</div>
+  </div>
+
+  <div class="box" id="sign">
+    <h2>6. お客様の署名をもらう</h2>
+    <div class="step"><div class="n">1</div><div class="b">内容をお客様に確認していただきます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">画面の <b>署名欄に指でサイン</b> していただきます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0206.png" alt="署名" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0206 ／ 推奨 380×300 ／ お客様が画面に署名している画面</div>
+      <figcaption>図6：署名</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="pdf">
+    <h2>7. PDFを発行する</h2>
+    <div class="step"><div class="n">1</div><div class="b">最後の画面で、印刷パターンを選び <b>「PDF」</b> ボタンを押します。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">PDFが作られます。保存・印刷して、お客様控えとして渡せます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0207.png" alt="PDF発行" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0207 ／ 推奨 380×300 ／ PDF出力ボタンが並ぶ画面</div>
+      <figcaption>図7：PDFの発行</figcaption>
+    </figure>
+  </div>
+
+  <div class="box" id="qr">
+    <h2>8. QRコードで共有する</h2>
+    <div class="step"><div class="n">1</div><div class="b">受付完了の画面に <b>QRコード</b> が表示されます（PDFにも印刷されます）。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">お客様がスマホで読み取ると、受付内容をその場で確認できます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0208.png" alt="QR共有" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0208 ／ 推奨 380×300 ／ 受付完了時のQRコード表示</div>
+      <figcaption>図8：QRコード共有</figcaption>
+    </figure>
+    <div class="note2">無料プランではPDF内のQRは付きません。VIPプランで利用できます。</div>
+  </div>
+
+  <div class="box" id="loan">
+    <h2>9. 代車の受付をする</h2>
+    <div class="step"><div class="n">1</div><div class="b">受付の途中・完了時に <b>代車の貸し出し</b> を選べます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">登録済みの代車から選び、貸出内容・お客様情報・署名を記録すると、<b>代車貸出シートのPDF</b> が作れます（受付情報・署名は引き継がれます）。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0209.png" alt="代車受付" width="380" height="300" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0209 ／ 推奨 380×300 ／ 代車を選んで貸出を記録する画面</div>
+      <figcaption>図9：代車の受付</figcaption>
+    </figure>
+  </div>
+
+  <div style="text-align:center">
+    <a class="cross" href="/manual-shop">店舗管理者向けガイドを見る →</a>
+  </div>
+
+  <a class="back" href="/staff">← スタッフログインへ戻る</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お知らせ — 入庫カルテ</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.85}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:760px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:760px;margin:0 auto;padding:26px 20px 60px}
+  h1{font-size:1.4rem;color:var(--brand);margin:6px 0 16px}
+  .item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:12px}
+  .item .date{font-size:.8rem;color:var(--muted)}
+  .item h2{font-size:1.05rem;color:var(--brand);margin:4px 0 6px}
+  .item .body{font-size:.93rem;white-space:pre-wrap}
+  .empty{color:var(--muted);font-size:.92rem}
+  .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>お知らせ</h1>
+  <div id="list"><div class="empty">読み込み中…</div></div>
+  <a class="back" href="/">← トップへ戻る</a>
+</div>
+<script>
+  var sb=window.supabase.createClient('https://ysxqnwxpuxfstvuobzuz.supabase.co','sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL');
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
+  function fmt(d){try{var x=new Date(d);return x.getFullYear()+'年'+(x.getMonth()+1)+'月'+x.getDate()+'日';}catch(e){return '';}}
+  (async function(){
+    var box=document.getElementById('list');
+    try{
+      var r=await sb.from('announcements').select('title,body,created_at,published').eq('published',true).order('created_at',{ascending:false});
+      if(r.error)throw r.error;
+      var rows=r.data||[];
+      if(!rows.length){box.innerHTML='<div class="empty">現在お知らせはありません。</div>';return;}
+      box.innerHTML=rows.map(function(a){
+        return '<div class="item"><div class="date">'+fmt(a.created_at)+'</div><h2>'+esc(a.title)+'</h2>'+
+          (a.body?'<div class="body">'+esc(a.body)+'</div>':'')+'</div>';
+      }).join('');
+    }catch(e){ box.innerHTML='<div class="empty">お知らせを読み込めませんでした。</div>'; }
+  })();
+</script>
+</body>
+</html>

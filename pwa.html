@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#d97706">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スマホアプリのように使う（ホーム画面に追加）— 入庫カルテ</title>
+<style>
+  :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F8FA;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.85}
+  .top{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:22px 20px}
+  .top .brand{display:flex;align-items:center;gap:10px;max-width:760px;margin:0 auto}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--amber);display:grid;place-items:center;font-weight:800;color:#1b1b1b}
+  .top b{letter-spacing:.08em}
+  .wrap{max-width:760px;margin:0 auto;padding:26px 20px 60px}
+  h1{font-size:1.4rem;color:var(--brand);margin:6px 0 4px}
+  .lead{font-size:.95rem;color:var(--muted);margin-bottom:22px}
+  h2{font-size:1.12rem;color:var(--brand);margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  p,li{font-size:.95rem}
+  .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  .step{display:flex;gap:12px;margin:14px 0;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#1b1b1b;font-weight:800;display:grid;place-items:center;font-size:.9rem}
+  .step .b{flex:1}.step .b b{color:var(--brand)}
+  .shot{margin:12px 0 6px;max-width:360px}
+  .shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;display:block}
+  .shot .ph{border:2px dashed #b9c6d4;border-radius:10px;background:#eef3f7;color:#5C6B7A;align-items:center;justify-content:center;text-align:center;font-size:.82rem;padding:18px;line-height:1.6}
+  .shot figcaption{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .note2{background:#FFF6E9;border:1px solid #F0D9B0;border-radius:10px;padding:12px 14px;font-size:.88rem;margin:12px 0}
+  .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<div class="wrap">
+  <h1>スマホアプリのように使う（ホーム画面に追加）</h1>
+  <div class="lead">入庫カルテは、スマホのホーム画面に追加すると、アプリのように1タップで開けます。インストール（ダウンロード）は不要です。お使いの端末に合わせて設定してください。</div>
+
+  <div class="box">
+    <h2>Android（Chrome）の場合</h2>
+    <div class="step"><div class="n">1</div><div class="b">Chrome で <b>nyukokarte.com</b> を開きます。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0001.png" alt="Chromeの右上メニュー" width="320" height="200" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0001 ／ 推奨 320×200 ／ Chrome右上の「⋮」メニューを開いた画面</div>
+      <figcaption>図：Chrome 右上の「⋮」メニュー</figcaption>
+    </figure>
+    <div class="step"><div class="n">2</div><div class="b">右上の <b>「⋮」（メニュー）</b> をタップします。</div></div>
+    <div class="step"><div class="n">3</div><div class="b">メニューの中の <b>「ホーム画面に追加」</b>（または「アプリをインストール」）をタップします。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0002.png" alt="ホーム画面に追加" width="320" height="200" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0002 ／ 推奨 320×200 ／「ホーム画面に追加 / アプリをインストール」を選ぶ画面</div>
+      <figcaption>図：「ホーム画面に追加」を選択</figcaption>
+    </figure>
+    <div class="step"><div class="n">4</div><div class="b"><b>「追加」</b>をタップすると、ホーム画面に入庫カルテのアイコンができます。</div></div>
+  </div>
+
+  <div class="box">
+    <h2>iPhone（Safari）の場合</h2>
+    <div class="step"><div class="n">1</div><div class="b">Safari で <b>nyukokarte.com</b> を開きます。</div></div>
+    <div class="step"><div class="n">2</div><div class="b">画面下（機種により上）の <b>「共有」ボタン</b>（□から↑が出ているマーク）をタップします。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0003.png" alt="Safariの共有ボタン" width="320" height="200" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0003 ／ 推奨 320×200 ／ Safari下部の「共有」ボタンの位置がわかる画面</div>
+      <figcaption>図：Safari の「共有」ボタン</figcaption>
+    </figure>
+    <div class="step"><div class="n">3</div><div class="b">メニューを下にスクロールし、<b>「ホーム画面に追加」</b>をタップします。</div></div>
+    <figure class="shot">
+      <img src="/img/IMG-0004.png" alt="ホーム画面に追加" width="320" height="200" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="ph" style="display:none;min-height:160px">IMG-0004 ／ 推奨 320×200 ／「ホーム画面に追加」を選ぶ画面</div>
+      <figcaption>図：「ホーム画面に追加」を選択</figcaption>
+    </figure>
+    <div class="step"><div class="n">4</div><div class="b">右上の <b>「追加」</b>をタップすると、ホーム画面に入庫カルテのアイコンができます。</div></div>
+    <div class="note2">うまくいかない場合は、「Chrome」ではなく <b>「Safari」</b> で開いているかご確認ください。iPhone では Safari からのみ追加できます。</div>
+  </div>
+
+  <a class="back" href="/">← トップへ戻る</a>
+</div>
+</body>
+</html>

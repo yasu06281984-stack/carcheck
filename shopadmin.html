@@ -341,16 +341,7 @@
         msg.textContent=em;msg.className='msg err';return;
       }
       // 通知文を生成
-      var url='https://nyukokarte.com/staff';
-      var txt='【入庫カルテ ログイン情報】\n'+
-        'ログインページ： '+url+'\n'+
-        '店舗コード：'+d.code+'\n'+
-        'お名前：'+d.loginName+'\n'+
-        'パスワード：'+d.password+'\n\n'+
-        '▼ログイン方法\n'+
-        '上のページを開き、店舗コード・お名前・パスワードを入力してログインしてください。\n'+
-        '※このパスワードは他の人に教えないでください。';
-      document.getElementById('st_notice').value=txt;
+      document.getElementById('st_notice').value=noticeText(d.code,d.loginName,d.password);
       document.getElementById('st_result').hidden=false;
       document.getElementById('st_copymsg').textContent='';
       msg.textContent=d.name+' さんを追加しました。';msg.className='msg ok';
@@ -369,13 +360,18 @@
   var PS_ID=null;
   function noticeText(code,loginName,password){
     return '【入庫カルテ ログイン情報】\n'+
-      'ログインページ： https://nyukokarte.com/staff\n'+
+      '◆ ログイン情報\n'+
       '店舗コード：'+code+'\n'+
-      'お名前：'+loginName+'\n'+
+      '氏名：'+loginName+'\n'+
+      'ログインURL： https://nyukokarte.com/staff\n'+
       'パスワード：'+password+'\n\n'+
-      '▼ログイン方法\n'+
-      '上のページを開き、店舗コード・お名前・パスワードを入力してログインしてください。\n'+
-      '※このパスワードは他の人に教えないでください。';
+      '▼ ログイン方法\n'+
+      '上のログインURLを開き、店舗コード・氏名・パスワードを入力してログインしてください。\n\n'+
+      '▼ スマホアプリのように使う（ホーム画面に追加）\n'+
+      'やり方の説明： https://nyukokarte.com/pwa\n'+
+      '・iPhone でホーム画面に追加する方法\n'+
+      '・Android でホーム画面に追加する方法\n\n'+
+      '※ このパスワードは他の人に教えないでください。';
   }
   function openPw(id,nm){
     PS_ID=id;
