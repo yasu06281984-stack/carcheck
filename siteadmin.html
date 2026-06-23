@@ -78,6 +78,7 @@
     <button data-t="invite">招待</button>
     <button data-t="plans">プラン・機能</button>
     <button data-t="ads">広告</button>
+    <button data-t="approve">承認待ち</button>
   </div>
 
   <div data-c="dash"><div class="tiles" id="tiles"></div></div>
@@ -138,6 +139,14 @@
     </div>
     <div class="small" style="color:var(--muted)">※ 広告は店舗の管理ダッシュボードに表示されます。受付ウィザード（お客様の前で開く画面）と印刷PDFには表示されません。VIPの店舗には表示されません。</div>
   </div>
+
+  <div data-c="approve" class="hide">
+    <div class="card">
+      <div class="card-l" style="display:flex;justify-content:space-between;align-items:center">承認待ち（店舗未所属のユーザー） <button class="lnk2" id="pendReload">更新</button></div>
+      <div id="pendList" class="small">読み込み中…</div>
+    </div>
+    <div class="small" style="color:var(--muted)">新規登録してメール確認を済ませた人が、まだ店舗に所属していない状態で並びます。「承認」で店舗を作成（または既存店舗に割当）すると、その人が使えるようになります。</div>
+  </div>
 </div>
 
 <div class="overlay" id="ov">
@@ -165,6 +174,23 @@
     </div>
     <div class="msg" id="e_msg"></div>
     <div class="actions"><button class="ghost" id="e_cancel">キャンセル</button><button class="primary" id="e_save" style="margin-top:0">保存する</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="ovApprove">
+  <div class="modal">
+    <h3>ユーザーを承認</h3>
+    <div class="sub" id="ap_email"></div>
+    <div class="field"><label>承認の方法</label>
+      <select id="ap_mode"><option value="new">新しい店舗を作成して、その管理者にする</option><option value="existing">既存の店舗に割り当てる</option></select>
+    </div>
+    <div class="field" id="ap_newField"><label>店舗名（新規作成）</label><input id="ap_shopName" placeholder="○○自動車"><div class="hint">初月無料（トライアル30日）で作成されます。プランは後から「店舗」タブで変更できます。</div></div>
+    <div id="ap_existField" class="hide">
+      <div class="field"><label>割り当てる店舗</label><select id="ap_shopSel"></select></div>
+      <div class="field"><label>権限</label><select id="ap_role"><option value="shop_admin">店舗管理者</option><option value="staff">スタッフ</option></select></div>
+    </div>
+    <div class="msg" id="ap_msg"></div>
+    <div class="actions"><button class="ghost" id="ap_cancel">キャンセル</button><button class="primary" id="ap_save" style="margin-top:0">承認する</button></div>
   </div>
 </div>
 
@@ -196,23 +222,61 @@
     // shop select for invite
     document.getElementById('i_shop').innerHTML=SHOPS.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+'</option>';}).join('');
     if(!SHOPS.length){document.getElementById('shopList').innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
-    var h='<table><thead><tr><th>店舗名</th><th>プラン</th><th>支払い</th><th>容量</th><th>有効期限</th><th>状態</th><th></th></tr></thead><tbody>';
-    SHOPS.forEach(function(s){var pl=PLANLBL[s.plan]||[s.plan,'off'];var st=STATUS[s.status]||[s.status,'off'];
-      var bill=(s.plan==='vip')?((s.billing==='annual')?'年':'月々'):'—';
+    renderShops();
+  }
+
+  var MEMBERS={};
+  async function loadMembers(){
+    try{
+      var s=await sb.auth.getSession(); var token=(s.data&&s.data.session)?s.data.session.access_token:'';
+      var r=await fetch('/api/shop-members',{headers:{Authorization:'Bearer '+token}});
+      if(!r.ok)return;
+      var arr=await r.json(); if(!Array.isArray(arr))return;
+      var by={}; arr.forEach(function(m){ (by[m.shop_id]=by[m.shop_id]||[]).push(m); });
+      MEMBERS=by;
+      if(SHOPS.length)renderShops();
+    }catch(e){}
+  }
+  function renderShops(){
+    var box=document.getElementById('shopList');
+    if(!SHOPS.length){box.innerHTML='まだ店舗がありません。下のフォームから作成できます。';return;}
+    var h='<table><thead><tr><th>登録日</th><th>店舗名</th><th>代表者</th><th>電話</th><th>プラン / 期限</th><th>容量</th><th></th></tr></thead><tbody>';
+    SHOPS.forEach(function(s){
+      var mem=MEMBERS[s.id]||[];
+      var owner=mem.filter(function(m){return m.role==='shop_admin';})[0];
+      var staff=mem.filter(function(m){return m.role==='staff';});
+      var ownerName=owner&&owner.name?owner.name:'—';
       var lim=(s.storage_limit_gb!=null?s.storage_limit_gb:5);
       var usedGb=(s.storage_used_mb||0)/1024;
       var pct=lim>0?Math.min(100,Math.round(usedGb/lim*100)):0;
       var cap='<span class="bar2"><i style="width:'+pct+'%"></i></span><span class="cap">'+usedGb.toFixed(1)+' / '+lim+'GB'+(s.option_storage?'・保管':'')+'</span>';
-      var exp=(s.plan==='vip')?(s.vip_expires_at?fmtDate(s.vip_expires_at):'—'):((s.status==='trial'&&s.trial_ends_at)?('無料 '+fmtDate(s.trial_ends_at)):'—');
-      h+='<tr><td>'+esc(s.name)+'</td>'+
-        '<td><span class="sp '+pl[1]+'">'+pl[0]+'</span></td>'+
-        '<td>'+bill+'</td>'+
+      var planExp=(s.plan==='vip')
+        ? ('VIP'+(s.vip_expires_at?'（〜'+fmtDate(s.vip_expires_at)+'）':''))
+        : ('無料'+((s.status==='trial'&&s.trial_ends_at)?'（〜'+fmtDate(s.trial_ends_at)+'）':''));
+      h+='<tr>'+
+        '<td class="mono">'+fmtDate(s.created_at)+'</td>'+
+        '<td>'+esc(s.name)+'</td>'+
+        '<td>'+esc(ownerName)+'</td>'+
+        '<td class="mono">'+esc(s.tel||'—')+'</td>'+
+        '<td>'+esc(planExp)+'</td>'+
         '<td>'+cap+'</td>'+
-        '<td class="mono">'+esc(exp)+'</td>'+
-        '<td><span class="sp '+st[1]+'">'+st[0]+'</span></td>'+
-        '<td><button class="lnk2" data-edit="'+esc(s.id)+'">編集</button></td></tr>';});
-    document.getElementById('shopList').innerHTML=h+'</tbody></table>';
-    document.querySelectorAll('#shopList [data-edit]').forEach(function(b){b.onclick=function(){openEditor(b.getAttribute('data-edit'));};});
+        '<td style="white-space:nowrap"><button class="lnk2" data-detail="'+esc(s.id)+'">詳細</button> <button class="lnk2" data-edit="'+esc(s.id)+'">編集</button></td></tr>';
+      var staffHtml=staff.length?staff.map(function(m){return esc(m.name||'(無名)');}).join('、'):'なし';
+      var ownerEmail=owner&&owner.email?owner.email:'—';
+      h+='<tr class="detailrow" data-detrow="'+esc(s.id)+'" hidden><td colspan="7" style="background:var(--surface2)">'+
+        '<div style="padding:8px 6px;font-size:.82rem;line-height:1.9">'+
+        '<b>住所：</b>'+esc(s.address||'—')+'<br>'+
+        '<b>代表者メール：</b>'+esc(ownerEmail)+'<br>'+
+        '<b>所属スタッフ（'+staff.length+'名）：</b>'+staffHtml+
+        '</div></td></tr>';
+    });
+    box.innerHTML=h+'</tbody></table>';
+    box.querySelectorAll('[data-edit]').forEach(function(b){b.onclick=function(){openEditor(b.getAttribute('data-edit'));};});
+    box.querySelectorAll('[data-detail]').forEach(function(b){b.onclick=function(){
+      var id=b.getAttribute('data-detail');
+      var dr=box.querySelector('tr[data-detrow="'+id+'"]');
+      if(dr)dr.hidden=!dr.hidden;
+    };});
   }
 
   async function loadInvites(){
@@ -387,6 +451,68 @@
   ['ad_image','ad_link','ad_codetext'].forEach(function(id){$v(id).addEventListener('input',adRenderPreview);});
   $v('ad_save').onclick=saveAds;
 
+  // ---- 承認待ち（店舗未所属ユーザー）----
+  var PENDING=[], apUser=null;
+  async function authToken(){ var s=await sb.auth.getSession(); return (s.data&&s.data.session)?s.data.session.access_token:''; }
+  async function loadPending(){
+    var box=document.getElementById('pendList'); if(!box)return; box.textContent='読み込み中…';
+    var token=await authToken();
+    try{
+      var r=await fetch('/api/pending-users',{headers:{Authorization:'Bearer '+token}});
+      if(!r.ok){ box.innerHTML='<span style="color:#C8443B">取得できませんでした（'+r.status+'）。functions のデプロイと環境変数（SUPABASE_SERVICE_KEY）をご確認ください。</span>'; return; }
+      PENDING=await r.json();
+      if(!PENDING.length){ box.textContent='承認待ちのユーザーはいません。'; return; }
+      var h='<table><thead><tr><th>メールアドレス</th><th>登録日</th><th>メール確認</th><th></th></tr></thead><tbody>';
+      PENDING.forEach(function(u){
+        h+='<tr><td>'+esc(u.email)+'</td><td class="mono">'+fmtDate(u.created_at)+'</td>'+
+           '<td>'+(u.confirmed?'<span class="sp ok">確認済み</span>':'<span class="sp off">未確認</span>')+'</td>'+
+           '<td><button class="lnk2" data-approve="'+esc(u.id)+'">承認</button></td></tr>';
+      });
+      box.innerHTML=h+'</tbody></table>';
+      box.querySelectorAll('[data-approve]').forEach(function(b){b.onclick=function(){openApprove(b.getAttribute('data-approve'));};});
+    }catch(e){ box.innerHTML='<span style="color:#C8443B">通信エラー：'+esc(String(e))+'</span>'; }
+  }
+  function openApprove(id){
+    apUser=PENDING.filter(function(u){return String(u.id)===String(id);})[0]; if(!apUser)return;
+    document.getElementById('ap_email').textContent=apUser.email;
+    document.getElementById('ap_mode').value='new';
+    document.getElementById('ap_shopName').value='';
+    var sel=document.getElementById('ap_shopSel'); sel.innerHTML='';
+    (SHOPS||[]).forEach(function(s){ var o=document.createElement('option'); o.value=s.id; o.textContent=s.name; sel.appendChild(o); });
+    document.getElementById('ap_role').value='shop_admin';
+    apSyncMode();
+    var m=document.getElementById('ap_msg'); m.textContent=''; m.className='msg';
+    document.getElementById('ovApprove').classList.add('show');
+  }
+  function apSyncMode(){
+    var nw=document.getElementById('ap_mode').value==='new';
+    document.getElementById('ap_newField').style.display=nw?'':'none';
+    document.getElementById('ap_existField').classList.toggle('hide',nw);
+  }
+  async function doApprove(){
+    if(!apUser)return;
+    var btn=document.getElementById('ap_save'), m=document.getElementById('ap_msg'); m.textContent=''; m.className='msg';
+    var mode=document.getElementById('ap_mode').value;
+    var payload={userId:apUser.id,mode:mode};
+    if(mode==='new'){ payload.shopName=document.getElementById('ap_shopName').value.trim(); if(!payload.shopName){m.textContent='店舗名を入力してください。';m.className='msg err';return;} }
+    else { payload.shopId=document.getElementById('ap_shopSel').value; payload.role=document.getElementById('ap_role').value; if(!payload.shopId){m.textContent='店舗を選んでください。';m.className='msg err';return;} }
+    btn.disabled=true; btn.textContent='承認中…';
+    var token=await authToken();
+    try{
+      var r=await fetch('/api/approve-user',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(payload)});
+      var d=await r.json().catch(function(){return {};});
+      btn.disabled=false; btn.textContent='承認する';
+      if(!r.ok||!d.ok){ m.textContent='承認できませんでした：'+(d.error||r.status)+(d.detail?'（'+d.detail+'）':''); m.className='msg err'; return; }
+      document.getElementById('ovApprove').classList.remove('show'); apUser=null;
+      loadShops(); loadPending(); loadMembers();
+    }catch(e){ btn.disabled=false; btn.textContent='承認する'; m.textContent='通信エラー：'+String(e); m.className='msg err'; }
+  }
+  document.getElementById('ap_cancel').onclick=function(){document.getElementById('ovApprove').classList.remove('show');apUser=null;};
+  document.getElementById('ap_save').onclick=doApprove;
+  document.getElementById('ap_mode').onchange=apSyncMode;
+  document.getElementById('ovApprove').onclick=function(e){if(e.target===document.getElementById('ovApprove')){document.getElementById('ovApprove').classList.remove('show');apUser=null;}};
+  var prb=document.getElementById('pendReload'); if(prb)prb.onclick=loadPending;
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -394,7 +520,7 @@
     var p=await sb.from('profiles').select('role,name').eq('id',uid).single();
     if(!p.data||p.data.role!=='site_admin'){location.replace('home.html');return;}
     document.getElementById('whoName').textContent=(p.data.name||'運営')+' さん';
-    refreshShops();loadInvites();loadPlans();loadAds();
+    refreshShops();loadInvites();loadPlans();loadAds();loadPending();loadMembers();
   })();
 </script>
 </body>
