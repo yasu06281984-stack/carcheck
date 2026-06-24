@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="assets/ocr.css">
 <link rel="stylesheet" href="assets/checksheet.css">
 <style>
+  *{box-sizing:border-box}
   body{margin:0;background:#eef1f5;font-family:"Noto Sans JP",sans-serif;color:#131c28;padding:20px 14px}
   .wrap{max-width:780px;margin:0 auto;padding-bottom:90px}
   .site-head{background:linear-gradient(180deg,#235784,#1f4e74);color:#fff;border-radius:14px;padding:18px 20px;margin-bottom:16px}
@@ -363,9 +364,9 @@
           <p class="muted">入力された場合、PDF等のお客様名はこちらが使われます。</p>
         </div>
         <div class="field"><label for="cust_tel">電話番号</label><input type="tel" id="cust_tel" autocomplete="tel" placeholder="例：090-1234-5678"></div>
-        <div class="field"><label for="cust_addr">住所</label>
-          <input type="text" id="cust_addr" autocomplete="street-address" placeholder="車検証の使用者の本拠の位置が自動入力されます">
-          <p class="muted">車検証の「使用者の本拠の位置」が自動入力されます。</p>
+        <div class="field"><label for="cust_plate">ナンバー（自動車登録番号）</label>
+          <input type="text" id="cust_plate" autocomplete="off" placeholder="車検証の自動車登録番号が自動入力されます">
+          <p class="muted">車検証の「自動車登録番号」が自動入力されます。</p>
         </div>
         <div class="field"><label for="cust_reqaddr">ご依頼者様の住所 <span class="opt">（任意）</span></label>
           <div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" id="req_zip" inputmode="numeric" placeholder="郵便番号（7桁）" style="flex:1"><button type="button" class="btn ghost" id="reqZipBtn" style="padding:8px 12px;font-size:.85rem;white-space:nowrap">住所検索</button></div>
@@ -576,7 +577,7 @@
 <div id="cs-print-area"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="assets/ocr.js?v=17" defer></script>
+<script src="assets/ocr.js?v=18" defer></script>
 <script src="assets/qrcode.js?v=17" defer></script>
 <script src="assets/checksheet.js?v=17" defer></script>
 <script>
@@ -739,7 +740,7 @@
   setTimeout(function () { fit(false); }, 80);
 })();
 </script>
-<script src="assets/wizard.js?v=17" defer></script>
-<script src="assets/appnav.js?v=1" defer></script>
+<script src="assets/wizard.js?v=18" defer></script>
+<script src="assets/appnav.js?v=2" defer></script>
 </body>
 </html>
