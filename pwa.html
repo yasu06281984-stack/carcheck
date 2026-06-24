@@ -32,6 +32,11 @@
   .shot figcaption{font-size:.8rem;color:var(--muted);margin-top:6px}
   .note2{background:#FFF6E9;border:1px solid #F0D9B0;border-radius:10px;padding:12px 14px;font-size:.88rem;margin:12px 0}
   .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}.back:hover{text-decoration:underline}
+  .jump{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 26px}
+  .jump a{flex:1 1 0;min-width:150px;text-align:center;text-decoration:none;background:var(--brand);color:#fff;font-weight:700;border-radius:11px;padding:14px 16px;font-size:1rem;border:1px solid var(--brand-deep)}
+  .jump a:hover{background:var(--brand-deep)}
+  .jump a small{display:block;font-weight:500;font-size:.78rem;color:#cfe0f0;margin-top:3px}
+  .box{scroll-margin-top:16px}
 </style>
 </head>
 <body>
@@ -40,7 +45,12 @@
   <h1>スマホアプリのように使う（ホーム画面に追加）</h1>
   <div class="lead">入庫カルテは、スマホのホーム画面に追加すると、アプリのように1タップで開けます。インストール（ダウンロード）は不要です。お使いの端末に合わせて設定してください。</div>
 
-  <div class="box">
+  <div class="jump">
+    <a href="#android">Androidの場合<small>Chrome をお使いの方</small></a>
+    <a href="#ios">iPhoneの場合<small>Safari をお使いの方</small></a>
+  </div>
+
+  <div class="box" id="android">
     <h2>Android（Chrome）の場合</h2>
     <div class="step"><div class="n">1</div><div class="b">Chrome で <b>nyukokarte.com</b> を開きます。</div></div>
     <figure class="shot">
@@ -58,7 +68,7 @@
     <div class="step"><div class="n">4</div><div class="b"><b>「追加」</b>をタップすると、ホーム画面に入庫カルテのアイコンができます。</div></div>
   </div>
 
-  <div class="box">
+  <div class="box" id="ios">
     <h2>iPhone（Safari）の場合</h2>
     <div class="step"><div class="n">1</div><div class="b">Safari で <b>nyukokarte.com</b> を開きます。</div></div>
     <div class="step"><div class="n">2</div><div class="b">画面下（機種により上）の <b>「共有」ボタン</b>（□から↑が出ているマーク）をタップします。</div></div>
