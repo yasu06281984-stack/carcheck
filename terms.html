@@ -28,10 +28,34 @@
   .plan li{margin-bottom:5px}
   .back{display:inline-block;margin-top:26px;color:var(--brand);font-size:.9rem;text-decoration:none}
   .back:hover{text-decoration:underline}
+  /* ===== indexと統一のヘッダー/フッター ===== */
+  header.site{position:sticky;top:0;z-index:10;background:rgba(20,58,87,.96);backdrop-filter:blur(6px);color:#fff}
+  header.site .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:1000px;margin:0 auto;gap:12px}
+  .logo-crop{display:flex;align-items:center;line-height:0}
+  .logo-crop img{width:auto;height:70px;display:block}
+  header.site .links{display:flex;gap:8px;align-items:center}
+  header.site .links a.login{color:#cfe0f0;text-decoration:none;font-size:.9rem;padding:8px 10px}
+  .btn{display:inline-block;border:0;border-radius:11px;padding:12px 22px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
+  .btn.primary{background:var(--amber);color:#1b1b1b}
+  footer.site{background:#0f2438;color:#b9c8d8;font-size:.85rem;padding:34px 0;margin-top:8px}
+  footer.site .fwrap{max-width:1000px;margin:0 auto;padding:0 20px}
+  footer.site .cols{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer.site a{color:#cfe0f0;text-decoration:none;margin-right:14px}
+  footer.site .small{color:#7e91a5;font-size:.78rem;margin-top:14px;line-height:1.7}
+  @media(max-width:680px){ header.site .links a.login{display:none} }
 </style>
 </head>
 <body>
-<div class="top"><div class="brand"><img src="/favicon.svg" alt="入庫カルテ" class="logo" style="background:none;padding:0;object-fit:contain"><b>入庫カルテ</b></div></div>
+<header class="site">
+  <div class="nav">
+    <a href="/" class="logo-crop"><img src="/img/logo-mark.png" alt="入庫カルテ"></a>
+    <div class="links">
+      <a class="login" href="login.html">ショップログイン</a>
+      <a class="login" href="/staff">スタッフログイン</a>
+      <a class="btn primary" href="signup.html">新規登録</a>
+    </div>
+  </div>
+</header>
 <div class="wrap">
   <h1>利用規約</h1>
   <div class="meta">最終改定日：2026年6月23日</div>
@@ -140,5 +164,32 @@
   </div>
   <a class="back" href="signup.html">← 登録画面に戻る</a>
 </div>
+<footer class="site">
+  <div class="fwrap">
+    <div class="cols">
+      <div>
+        <a href="/" class="logo-crop" style="margin-bottom:8px"><img src="/img/logo-mark.png" alt="入庫カルテ"></a>
+        <div>自動車整備工場のための入庫受付支援サービス</div>
+      </div>
+      <div>
+        <a href="login.html">ショップログイン</a>
+        <a href="/staff">スタッフログイン</a>
+        <a href="signup.html">新規登録</a>
+        <a href="/concept">入庫カルテとは？</a>
+        <a href="/manual-shop">使い方ガイド（管理者）</a>
+        <a href="/staff-manual">使い方ガイド（スタッフ）</a>
+        <a href="/pwa">スマホで使う</a>
+        <a href="/whatsnew">お知らせ</a>
+        <a href="/form">お問い合わせ</a>
+        <a href="terms.html">利用規約</a>
+        <a href="privacy.html">プライバシーポリシー</a>
+      </div>
+    </div>
+    <div class="small">
+      運営者：株式会社Pioneer Monkeys　／　所在地：東京都三鷹市新川6-1-1-3F<br>
+      © 2026 株式会社Pioneer Monkeys
+    </div>
+  </div>
+</footer>
 </body>
 </html>
