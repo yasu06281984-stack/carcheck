@@ -19,8 +19,10 @@
   ];
 
   var CSS = [
+    'html{overflow-x:clip}',
+    'body.has-appnav{padding-top:0}',
     '.topbar,.site-head{display:none!important}',
-    '.appnav{position:sticky;top:0;z-index:1000;background:#143A57;color:#fff;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;box-shadow:0 1px 0 rgba(255,255,255,.06),0 6px 18px rgba(8,18,28,.18)}',
+    '.appnav{position:sticky;top:0;z-index:1000;width:100vw;margin-left:calc(50% - 50vw);margin-bottom:14px;background:#143A57;color:#fff;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;box-shadow:0 1px 0 rgba(255,255,255,.06),0 6px 18px rgba(8,18,28,.18)}',
     '.appnav .inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:9px 18px;position:relative}',
     '.appnav .lg{display:flex;align-items:center;line-height:0;flex:0 0 auto}',
     '.appnav .lg img{height:36px;width:auto;display:block}',
@@ -89,6 +91,7 @@
 
     inner.appendChild(lg); inner.appendChild(menu); inner.appendChild(right); inner.appendChild(burger);
     nav.appendChild(inner);
+    document.body.classList.add('has-appnav');
     document.body.insertBefore(nav, document.body.firstChild);
   }
 

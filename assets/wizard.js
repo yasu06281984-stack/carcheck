@@ -80,7 +80,7 @@
       payMethod: wiz.payMethod, payOther: val('payOther'), termsAgreed: wiz.termsAgreed, savedNo: wiz.savedNo,
       estDate: val('est_date'), intakeDate: val('intake_date'),
       cust: {
-        name: val('cust_name'), reqname: val('cust_reqname'), tel: val('cust_tel'), addr: val('cust_addr'), reqaddr: val('cust_reqaddr'), mail: val('cust_mail'), vehicle: val('cust_vehicle'),
+        name: val('cust_name'), reqname: val('cust_reqname'), tel: val('cust_tel'), plate: val('cust_plate'), addr: val('cust_addr'), reqaddr: val('cust_reqaddr'), mail: val('cust_mail'), vehicle: val('cust_vehicle'),
         vin: val('f_vin'), year: val('f_year'), cls: val('f_class'), model: val('f_model'), engine: val('f_engine'),
         mileage: val('cust_mileage'), colorno: val('cust_colorno'), colorname: val('cust_colorname'), color: val('cust_color')
       },
@@ -103,6 +103,7 @@
     wiz.daisha = o.daisha || ''; wiz.payMethod = o.payMethod || ''; wiz.termsAgreed = !!o.termsAgreed; wiz.savedNo = o.savedNo || '';
     var c = o.cust || {};
     setVal('cust_name', c.name); setVal('cust_reqname', c.reqname); setVal('cust_tel', c.tel);
+    setVal('cust_plate', c.plate);
     setVal('cust_addr', c.addr); setVal('cust_reqaddr', c.reqaddr); setVal('cust_mail', c.mail); setVal('cust_vehicle', c.vehicle);
     setVal('f_vin', c.vin); setVal('f_year', c.year); setVal('f_class', c.cls); setVal('f_model', c.model); setVal('f_engine', c.engine);
     setVal('cust_mileage', c.mileage); setVal('cust_colorno', c.colorno); setVal('cust_colorname', c.colorname);

@@ -29,7 +29,8 @@
     model:  document.getElementById('f_model'),
     engine: document.getElementById('f_engine'),
     name:   document.getElementById('cust_name'),
-    addr:   document.getElementById('cust_addr')
+    addr:   document.getElementById('cust_addr'),
+    plate:  document.getElementById('cust_plate')
   };
 
   function markFilled(input, val) {
@@ -90,6 +91,9 @@
     var eR = region('原動機の型式') || region('原動機型式') || region('原動機');
     var em = eR.match(/[A-Z0-9]{2,}(?:\s?-\s?[A-Z0-9]+)?/);
     out.engine = em ? clean(em[0]) : '';
+    var pR = region('自動車登録番号又は車両番号', 40) || region('自動車登録番号', 40) || region('車両番号', 40);
+    var pmm = pR.match(/[一-龥]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}\s*[-‐]?\s*[0-9]{1,4}/);
+    out.plate = pmm ? pmm[0].replace(/\s+/g, '') : '';
     var nR = region('使用者の氏名又は名称', 30) || region('使用者の氏名', 30) || region('氏名又は名称', 30);
     if (nR) { var nv = nR.split(/\s{2,}|使用者|住所|本拠|車台|型式|初度|令和|平成|昭和/)[0].replace(/\s+/g, ''); if (nv.length >= 2 && nv.length <= 20) out.name = nv; }
     var aR = region('使用者の本拠の位置', 44) || region('本拠の位置', 44) || region('使用者の住所', 44);
@@ -166,6 +170,7 @@
       markFilled(fields.cls, merged.cls); markFilled(fields.model, merged.model);
       markFilled(fields.engine, merged.engine);
       markFilled(fields.name, merged.name); markFilled(fields.addr, merged.addr);
+      markFilled(fields.plate, merged.plate);
     }
     var logger = function (m) {
       if (!scanMsg || scanFinished) return;
@@ -183,8 +188,8 @@
           if (scanFinished) { try { w.terminate(); } catch (e) {} return; }
           if (i >= passes.length || allFilled(merged)) {
             applyMerged();
-            var hits = Object.keys(merged).filter(function (k) { return merged[k]; }).length;
-            endScan(hits ? '読み取り完了（' + hits + '/5項目）。内容をご確認・修正ください。'
+            var specHits = ['vin', 'year', 'cls', 'model', 'engine'].filter(function (k) { return merged[k]; }).length;
+            endScan(specHits ? '読み取り完了（' + specHits + '/5項目）。内容をご確認・修正ください。'
                          : 'うまく読み取れませんでした。各欄に直接ご入力ください。');
             return;
           }
@@ -230,6 +235,7 @@
     markFilled(fields.cls, data.cls);   markFilled(fields.model, data.model);
     markFilled(fields.engine, data.engine);
     markFilled(fields.name, data.name); markFilled(fields.addr, data.addr);
+    markFilled(fields.plate, data.plate);
     return Object.keys(data).filter(function (k) { return data[k]; }).length;
   }
 
@@ -256,11 +262,13 @@
 
     serverOCR(file).then(function (res) {
       if (scanFinished) return;
-      var hits = fillFields(res.fields || {});
-      if (hits === 0) { runOCR(file); return; }
-      if (hits < 5) showRaw(res.raw);
-      endScan('読み取り完了（' + hits + '/5項目）。内容をご確認・修正ください。'
-        + (hits < 5 ? '読み取れなかった項目は、下の「読み取った全文」からご確認ください。' : ''));
+      var f = res.fields || {};
+      fillFields(f);
+      var specHits = ['vin', 'year', 'cls', 'model', 'engine'].filter(function (k) { return f[k]; }).length;
+      if (specHits === 0) { runOCR(file); return; }
+      if (specHits < 5) showRaw(res.raw);
+      endScan('読み取り完了（' + specHits + '/5項目）。内容をご確認・修正ください。'
+        + (specHits < 5 ? '読み取れなかった項目は、下の「読み取った全文」からご確認ください。' : ''));
     }).catch(function () {
       if (scanFinished) return;
       runOCR(file);
