@@ -19,8 +19,9 @@
 <link rel="stylesheet" href="assets/checksheet.css">
 <style>
   *{box-sizing:border-box}
+  html{overflow-x:clip}
   body{margin:0;background:#eef1f5;font-family:"Noto Sans JP",sans-serif;color:#131c28;padding:20px 14px}
-  .wrap{max-width:780px;margin:0 auto;padding-bottom:90px}
+  .wrap{max-width:780px;margin:0 auto;padding-bottom:90px;overflow-x:clip}
   .site-head{background:linear-gradient(180deg,#235784,#1f4e74);color:#fff;border-radius:14px;padding:18px 20px;margin-bottom:16px}
   .site-head .brand{font-family:"Oswald",sans-serif;font-weight:600;letter-spacing:.04em;font-size:1.4rem;text-transform:uppercase}
   .site-head small{display:block;font-weight:500;font-size:.8rem;color:#cfe0f0;margin-top:5px}
@@ -170,7 +171,7 @@
     html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body{background:#fff;padding:0}
     @page{margin:8mm}
-    .wrap,.wiz-nav{display:none !important}
+    .wrap,.wiz-nav,.appnav{display:none !important}
     #loanOverlay,#loanPrintFrame,#loanArea{display:none !important}
     #cs-print-area{display:block !important;color:#111;padding:0;font-family:"Noto Sans JP",sans-serif}
     #cs-print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
