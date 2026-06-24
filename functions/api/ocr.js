@@ -209,9 +209,19 @@ function parseShaken(raw) {
   let pm = plateRe.exec(preg) || plateRe.exec(text);
   out.plate = pm ? pm[0].replace(/\s+/g, '') : '';
 
-  // 使用者名・本拠の位置（ベストエフォート）
-  let nreg = region(text, '使用者の氏名又は名称', 40) || region(text, '使用者の氏名', 40) || region(text, '氏名又は名称', 40);
-  if (nreg) { const nv = nreg.replace(/\s+/g, ''); if (nv.length >= 2 && nv.length <= 20) out.name = nv; }
+  // 使用者の氏名又は名称（ラベル直後の行＝値を取得。備考などの手前で止める）
+  const nameLabels = ['使用者の氏名又は名称', '使用者の氏名', '氏名又は名称'];
+  const nameStop = /備考|使用者の住所|使用者の本拠|所有者|自動車登録番号|車両番号|車台番号|型式|初度|有効期間|車名|燃料|総排気量|乗車定員|車体の形状/;
+  for (let ni = 0; ni < nameLabels.length && !out.name; ni++) {
+    const nm = new RegExp(lbl(nameLabels[ni])).exec(text);
+    if (!nm) continue;
+    const after = text.slice(nm.index + nm[0].length);
+    const sp = after.search(nameStop);
+    const seg = sp >= 0 ? after.slice(0, sp) : after.slice(0, 60);
+    const lines = seg.split('\n').map(function (x) { return x.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+    const nv = lines[0] || '';
+    if (nv.length >= 2 && nv.length <= 40) out.name = nv;
+  }
   let areg = region(text, '使用者の本拠の位置', 60) || region(text, '本拠の位置', 60) || region(text, '使用者の住所', 60);
   if (areg) { const av = areg.replace(/\s+/g, ''); if (av.length >= 4) out.addr = av.slice(0, 40); }
 

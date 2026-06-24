@@ -95,8 +95,18 @@
     var pR = region('自動車登録番号又は車両番号', 40) || region('自動車登録番号', 40) || region('車両番号', 40);
     var pmm = pR.match(plateRe) || text.match(plateRe);
     out.plate = pmm ? pmm[0].replace(/\s+/g, '') : '';
-    var nR = region('使用者の氏名又は名称', 30) || region('使用者の氏名', 30) || region('氏名又は名称', 30);
-    if (nR) { var nv = nR.split(/\s{2,}|使用者|住所|本拠|車台|型式|初度|令和|平成|昭和/)[0].replace(/\s+/g, ''); if (nv.length >= 2 && nv.length <= 20) out.name = nv; }
+    var nameLabels = ['使用者の氏名又は名称', '使用者の氏名', '氏名又は名称'];
+    var nameStop = /備考|使用者の住所|使用者の本拠|所有者|自動車登録番号|車両番号|車台番号|型式|初度|有効期間|車名|燃料|総排気量|乗車定員|車体の形状/;
+    for (var ni = 0; ni < nameLabels.length && !out.name; ni++) {
+      var nmm = new RegExp(lbl(nameLabels[ni])).exec(text);
+      if (!nmm) continue;
+      var aft = text.slice(nmm.index + nmm[0].length);
+      var sp = aft.search(nameStop);
+      var seg = sp >= 0 ? aft.slice(0, sp) : aft.slice(0, 60);
+      var nlines = seg.split('\n').map(function (x) { return x.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+      var nv = nlines[0] || '';
+      if (nv.length >= 2 && nv.length <= 40) out.name = nv;
+    }
     var aR = region('使用者の本拠の位置', 44) || region('本拠の位置', 44) || region('使用者の住所', 44);
     if (aR) { var av = aR.split(/\s{2,}|使用者|氏名|名称|車台|型式|初度/)[0].replace(/\s+/g, ''); if (av.length >= 4) out.addr = av.slice(0, 40); }
     return out;
