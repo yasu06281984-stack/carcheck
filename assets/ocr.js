@@ -91,8 +91,9 @@
     var eR = region('原動機の型式') || region('原動機型式') || region('原動機');
     var em = eR.match(/[A-Z0-9]{2,}(?:\s?-\s?[A-Z0-9]+)?/);
     out.engine = em ? clean(em[0]) : '';
+    var plateRe = /[一-龥ぁ-ん]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}[\s\-‐・]*[0-9]{1,4}/;
     var pR = region('自動車登録番号又は車両番号', 40) || region('自動車登録番号', 40) || region('車両番号', 40);
-    var pmm = pR.match(/[一-龥]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}\s*[-‐]?\s*[0-9]{1,4}/);
+    var pmm = pR.match(plateRe) || text.match(plateRe);
     out.plate = pmm ? pmm[0].replace(/\s+/g, '') : '';
     var nR = region('使用者の氏名又は名称', 30) || region('使用者の氏名', 30) || region('氏名又は名称', 30);
     if (nR) { var nv = nR.split(/\s{2,}|使用者|住所|本拠|車台|型式|初度|令和|平成|昭和/)[0].replace(/\s+/g, ''); if (nv.length >= 2 && nv.length <= 20) out.name = nv; }
@@ -266,7 +267,7 @@
       fillFields(f);
       var specHits = ['vin', 'year', 'cls', 'model', 'engine'].filter(function (k) { return f[k]; }).length;
       if (specHits === 0) { runOCR(file); return; }
-      if (specHits < 5) showRaw(res.raw);
+      showRaw(res.raw);
       endScan('読み取り完了（' + specHits + '/5項目）。内容をご確認・修正ください。'
         + (specHits < 5 ? '読み取れなかった項目は、下の「読み取った全文」からご確認ください。' : ''));
     }).catch(function () {
