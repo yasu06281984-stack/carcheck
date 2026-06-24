@@ -183,6 +183,15 @@
   function figVars(type){var d=FIGDIMS[type]||FIGDIMS.sedan,gap=12,W=686;var ARf=d.f[0]/d.f[1],ARr=d.r[0]/d.r[1],ARl=d.l[0]/d.l[1],ROI=d.ro[1]/d.ro[0];var s=Math.round((W-gap+13*ARl)/(ARf+ARr+ROI+ARl/2));return '--fh:'+s+'px;--rw:'+Math.round(s*ROI)+'px';}
   function figSizes(type){var d=FIGDIMS[type]||FIGDIMS.sedan,gap=12,W=686;var ARf=d.f[0]/d.f[1],ARr=d.r[0]/d.r[1],ARl=d.l[0]/d.l[1],ROI=d.ro[1]/d.ro[0];var S=Math.round((W-gap+13*ARl)/(ARf+ARr+ROI+ARl/2));return {S:S,L:Math.round((S-26)/2),RW:Math.round(S*ROI)};}
   var KINDS={kizu:{label:'キズ',color:'#E8810C'},heko:{label:'ヘコミ',color:'#C8443B'},ware:{label:'割れ・欠け',color:'#7A3DB8'},sabi:{label:'サビ',color:'#2E9E6B'}};
+  var KLET={kizu:'A',heko:'B',ware:'C',sabi:'D'};
+  function damageCodes(dmg){var c={},out={};VIEWS.forEach(function(v){((dmg&&dmg[v[0]])||[]).forEach(function(m,i){var L=KLET[m.k]||'A';c[L]=(c[L]||0)+1;out[v[0]+'_'+i]=L+'-'+c[L];});});return out;}
+  function dmgListHtml(dmg,codes){
+    var lbl={};VIEWS.forEach(function(v){lbl[v[0]]=v[1];});
+    var rows=[];VIEWS.forEach(function(v){((dmg&&dmg[v[0]])||[]).forEach(function(m,i){
+      rows.push('<tr><td>'+codes[v[0]+'_'+i]+'</td><td>'+esc(lbl[v[0]])+'</td><td>'+esc((KINDS[m.k]||KINDS.kizu).label)+'</td><td>'+esc(m.part||'')+'</td><td>'+esc(m.size||'')+'</td></tr>');
+    });});
+    return '<div class="p-sec">代車貸出時の傷箇所一覧</div><table class="pt"><tr><th style="width:46px">番号</th><th style="width:64px">ビュー</th><th style="width:74px">種別</th><th>部位</th><th style="width:92px">サイズ</th></tr>'+(rows.length?rows.join(''):'<tr><td colspan="5">傷の記録なし</td></tr>')+'</table>';
+  }
   var AMT={once:'1回',day:'1日',insurance:'保険利用',free:'無料'};
   var FUELMAP={};
   var TERMS='【代車貸出 利用規約（サンプル）】\n\n1. 貸出車両は当店の所有物です。丁寧な運転と適切な管理をお願いします。\n2. 走行中の事故・違反・駐車違反等は、原則として借受人の責任となります。\n3. 返却時は貸出時と同等の状態（燃料・清掃・装備）でのご返却をお願いします。\n4. 車両に新たな傷・汚損・破損が生じた場合は、別途修理費等をご負担いただくことがあります。\n5. 禁煙車での喫煙、ペットの同乗等はご遠慮ください。\n6. 返却予定日を過ぎる場合は、事前に必ずご連絡ください。\n\n上記の内容に同意のうえ、ご署名ください。\n（本文はサンプルです。実際の規約文に差し替えてください。）';
@@ -194,8 +203,9 @@
   document.getElementById('termsBox').textContent=TERMS;
 
   function renderViews(host,fig,damage){
+    var codes=damageCodes(damage);
     host.innerHTML=VIEWS.map(function(v){
-      var marks=((damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="mk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      var marks=((damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="mk" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+codes[v[0]+'_'+i]+'</span>';}).join('');
       return '<div class="vtile"><div class="vlbl">'+v[1]+'</div><div class="vwrap"><img src="assets/vehicles/'+(fig||'hatchback')+'/'+v[0]+'.png" alt="'+v[1]+'">'+marks+'</div></div>';
     }).join('');
   }
@@ -296,8 +306,9 @@
     var ft=(x.fig_type||'hatchback');
     var _d=FIGDIMS[ft]||FIGDIMS.sedan;
     function _lbl(t){return '<div class="l" style="height:22px;line-height:14px;box-sizing:border-box;font-size:12px;text-align:center;color:#143A57;font-weight:700;background:#eef2f8;border:1px solid #143A57;border-bottom:0;border-radius:4px 4px 0 0;white-space:nowrap;overflow:hidden">'+t+'</div>';}
+    var dcodes=damageCodes(x.damage||{});
     function _box(v){
-      var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="position:absolute;left:'+m.x+'%;top:'+m.y+'%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      var marks=((x.damage||{})[v[0]]||[]).map(function(m,i){var k=KINDS[m.k]||KINDS.kizu;return '<span class="pmk" style="position:absolute;left:'+m.x+'%;top:'+m.y+'%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid #fff;color:#fff;font-size:8px;display:grid;place-items:center;font-weight:700;background:'+k.color+'">'+dcodes[v[0]+'_'+i]+'</span>';}).join('');
       return '<div class="w" style="position:relative;border:1px solid #143A57;border-top:0;overflow:hidden"><img src="assets/vehicles/'+ft+'/'+v[0]+'.png" style="width:100%;height:auto;display:block">'+marks+'</div>';
     }
     function _col(g,inner){return '<div class="pfcol" style="display:flex;flex-direction:column;flex:'+g+' 1 0;min-width:0">'+inner+'</div>';}
@@ -317,7 +328,7 @@
     var sigQr=qrI?'<div class="p-sigqr"><img src="'+qrI+'"><div>スキャンで受付内容を表示・PDF保存</div></div>':'';
     var html='<div class="p-title">代車貸出チェックシート</div>'+
       '<div class="p-hdr2"><div class="p-custname">お客様名：'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</div>'+
-      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v13</span></div></div></div>'+
+      '<div class="p-shop">'+shopLines+'<div>貸出日：'+esc(val('lend_date')||'')+'　／　制作日：'+made+'　<span style="color:#9aa;font-size:11px">v14</span></div></div></div>'+
       '<div class="p-sec">貸出先（お客様）</div>'+
       '<table class="pt"><tr><th>お客様名</th><td>'+(val('c_name')?esc(val('c_name'))+' 様':'')+'</td><th>連絡先</th><td>'+esc(val('c_tel'))+'</td></tr>'+
       '<tr><th>預かり車両</th><td>'+esc(val('c_veh'))+'</td><th>納車予定日</th><td>'+esc(val('c_due'))+'</td></tr>'+
@@ -329,6 +340,7 @@
       '<tr><th>保険対象年齢</th><td>'+esc(x.age||'')+'</td><th>ガソリン</th><td>'+esc(x.fuel||'')+'</td></tr>'+
       '<tr><th>装備</th><td colspan="3">'+esc(eqText(x.equip))+'</td></tr></table>'+
       '<div class="p-sec">代車の状態（傷）</div>'+figs+
+      dmgListHtml(x.damage||{},dcodes)+
       '<div class="p-sec">利用規約</div><div class="pterms">'+esc(TERMS)+'</div>'+
       '<div class="p-sec">確認・お客様署名</div>'+
       '<div class="p-signnote">'+signNote+'</div>'+

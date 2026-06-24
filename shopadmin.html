@@ -170,6 +170,7 @@
         <div class="card-l" style="margin-bottom:8px">傷の登録（種類を選び、イラストをタップして印を付けます／印をタップで取消）</div>
         <div class="palette" id="lc_palette"></div>
         <div class="views" id="lc_views"></div>
+        <div id="lc_dmglist" style="margin-top:10px"></div>
         <div style="margin-top:8px"><button class="lnk" id="lc_clear">傷を全てクリア</button></div>
       </div>
       <button class="primary" id="lc_save">保存</button>
@@ -494,12 +495,15 @@
   var KINDS=[{id:'kizu',label:'キズ',color:'#E8810C'},{id:'heko',label:'ヘコミ',color:'#C8443B'},{id:'ware',label:'割れ・欠け',color:'#7A3DB8'},{id:'sabi',label:'サビ',color:'#2E9E6B'}];
   var lcKind='kizu', lcEditId=null, lcDamage={front:[],rear:[],left:[],right:[],roof:[]};
   function kindOf(id){for(var i=0;i<KINDS.length;i++){if(KINDS[i].id===id)return KINDS[i];}return KINDS[0];}
+  var KLET={kizu:'A',heko:'B',ware:'C',sabi:'D'};
+  function damageCodes(dmg){var c={},out={};VIEWS.forEach(function(v){((dmg&&dmg[v[0]])||[]).forEach(function(m,i){var L=KLET[m.k]||'A';c[L]=(c[L]||0)+1;out[v[0]+'_'+i]=L+'-'+c[L];});});return out;}
   function lcFig(){var e=document.getElementById('lc_fig');return (e&&e.value)||'hatchback';}
   function paintPalette(){document.querySelectorAll('#lc_palette button').forEach(function(b){var on=b.getAttribute('data-k')===lcKind;b.style.outline=on?'2px solid var(--brand)':'none';b.style.fontWeight=on?'700':'500';});}
   function renderViews(){
     var fig=lcFig();var box=document.getElementById('lc_views');if(!box)return;
+    var codes=damageCodes(lcDamage);
     box.innerHTML=VIEWS.map(function(v){
-      var marks=(lcDamage[v[0]]||[]).map(function(m,i){var k=kindOf(m.k);return '<span class="mk" data-v="'+v[0]+'" data-i="'+i+'" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+(i+1)+'</span>';}).join('');
+      var marks=(lcDamage[v[0]]||[]).map(function(m,i){var k=kindOf(m.k);return '<span class="mk" data-v="'+v[0]+'" data-i="'+i+'" style="left:'+m.x+'%;top:'+m.y+'%;background:'+k.color+'">'+codes[v[0]+'_'+i]+'</span>';}).join('');
       return '<div class="vtile"><div class="vlbl">'+v[1]+'</div><div class="vwrap" data-v="'+v[0]+'"><img src="assets/vehicles/'+fig+'/'+v[0]+'.png" alt="'+v[1]+'">'+marks+'</div></div>';
     }).join('');
     box.querySelectorAll('.vwrap').forEach(function(w){
@@ -513,6 +517,25 @@
     box.querySelectorAll('.mk').forEach(function(m){
       m.onclick=function(e){e.stopPropagation();var v=m.getAttribute('data-v');var i=parseInt(m.getAttribute('data-i'),10);lcDamage[v].splice(i,1);renderViews();};
     });
+    renderDmgList();
+  }
+  function renderDmgList(){
+    var box=document.getElementById('lc_dmglist');if(!box)return;
+    var codes=damageCodes(lcDamage);var rows=[];
+    VIEWS.forEach(function(v){(lcDamage[v[0]]||[]).forEach(function(m,i){
+      var code=codes[v[0]+'_'+i];var kind=kindOf(m.k).label;
+      var ep=(m.part?String(m.part).replace(/"/g,'&quot;'):'');var es=(m.size?String(m.size).replace(/"/g,'&quot;'):'');
+      rows.push('<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;padding:7px 9px;margin-bottom:6px">'
+        +'<span style="font-weight:700;color:var(--brand);min-width:40px">'+code+'</span>'
+        +'<span class="small" style="min-width:50px">'+v[1]+'</span>'
+        +'<span class="small" style="min-width:38px">'+kind+'</span>'
+        +'<input type="text" data-v="'+v[0]+'" data-i="'+i+'" data-f="part" placeholder="部位（例：フロントバンパー）" value="'+ep+'" style="flex:1;min-width:150px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:.86rem">'
+        +'<input type="text" data-v="'+v[0]+'" data-i="'+i+'" data-f="size" placeholder="サイズ（例：約5cm）" value="'+es+'" style="width:120px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:.86rem">'
+        +'<button type="button" class="lnk" data-v="'+v[0]+'" data-i="'+i+'" data-del="1">削除</button></div>');
+    });});
+    box.innerHTML=rows.length?('<div class="card-l" style="margin:4px 0 8px">傷の一覧（番号・部位・サイズ）</div>'+rows.join('')):'<div class="small" style="color:var(--muted)">イラストをタップして傷を追加すると、ここに一覧が表示されます。</div>';
+    box.querySelectorAll('input[data-f]').forEach(function(inp){inp.oninput=function(){var v=inp.getAttribute('data-v'),i=parseInt(inp.getAttribute('data-i'),10),f=inp.getAttribute('data-f');if(lcDamage[v]&&lcDamage[v][i])lcDamage[v][i][f]=inp.value;};});
+    box.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){var v=b.getAttribute('data-v'),i=parseInt(b.getAttribute('data-i'),10);if(lcDamage[v])lcDamage[v].splice(i,1);renderViews();};});
   }
   function buildLoanUI(){
     var fg=document.getElementById('lc_fig');if(!fg)return;
