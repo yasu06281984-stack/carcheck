@@ -555,11 +555,23 @@
     if(!s.data||!s.data.session){location.replace('login.html');return;}
     var uid=s.data.session.user.id;
     var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
-    if(!p.data||p.data.role!=='shop_admin'){location.replace('home.html');return;}
+    if(!p.data||!p.data.shop_id){location.replace('home.html');return;}
+    var IS_ADMIN=(p.data.role==='shop_admin');
     SHOP=p.data.shop_id;
-    document.getElementById('whoName').textContent=(p.data.name||'店舗管理者')+' さん';
+    document.getElementById('whoName').textContent=(p.data.name||(IS_ADMIN?'店舗管理者':'スタッフ'))+' さん';
+    if(!IS_ADMIN){
+      // スタッフは「店舗情報」「スタッフ」タブを非表示（管理者専用）
+      ['shop','staff'].forEach(function(t){
+        var b=document.querySelector('#tabs button[data-t="'+t+'"]'); if(b)b.style.display='none';
+        var c=document.querySelector('[data-c="'+t+'"]'); if(c)c.classList.add('hide');
+      });
+      // 現在のタブが管理者専用/未選択なら、許可された「代車登録」を開く
+      var act=document.querySelector('#tabs button.on'); var at=act&&act.getAttribute('data-t');
+      if(!act||at==='shop'||at==='staff'){ var def=document.querySelector('#tabs button[data-t="loan"]'); if(def)def.click(); }
+    }
     buildLoanUI();
-    loadShop();loadStaff();listMaster('vendors','vendorList');listMaster('outsourcers','outList');loadLoanCars();
+    listMaster('vendors','vendorList');listMaster('outsourcers','outList');loadLoanCars();
+    if(IS_ADMIN){ loadShop(); loadStaff(); }
   })();
 </script>
 </body>
