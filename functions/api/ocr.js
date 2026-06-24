@@ -203,6 +203,11 @@ function parseShaken(raw) {
   m = /[A-Z0-9]{2,}(?:\s?-\s?[A-Z0-9]+)?/.exec(ereg);
   if (m) out.engine = clean(m[0]);
 
+  // 自動車登録番号（ナンバー）
+  let preg = region(text, '自動車登録番号又は車両番号', 40) || region(text, '自動車登録番号', 40) || region(text, '車両番号', 40);
+  let pm = /[一-龥]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}\s*[-‐]?\s*[0-9]{1,4}/.exec(preg);
+  out.plate = pm ? pm[0].replace(/\s+/g, '') : (preg ? clean(preg).slice(0, 14) : '');
+
   // 使用者名・本拠の位置（ベストエフォート）
   let nreg = region(text, '使用者の氏名又は名称', 40) || region(text, '使用者の氏名', 40) || region(text, '氏名又は名称', 40);
   if (nreg) { const nv = nreg.replace(/\s+/g, ''); if (nv.length >= 2 && nv.length <= 20) out.name = nv; }
