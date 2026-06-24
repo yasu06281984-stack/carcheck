@@ -204,9 +204,10 @@ function parseShaken(raw) {
   if (m) out.engine = clean(m[0]);
 
   // 自動車登録番号（ナンバー）
+  const plateRe = /[一-龥ぁ-ん]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}[\s\-‐・]*[0-9]{1,4}/;
   let preg = region(text, '自動車登録番号又は車両番号', 40) || region(text, '自動車登録番号', 40) || region(text, '車両番号', 40);
-  let pm = /[一-龥]{1,4}\s*[0-9]{2,3}\s*[ぁ-んァ-ンA-Za-z]\s*[0-9]{1,2}\s*[-‐]?\s*[0-9]{1,4}/.exec(preg);
-  out.plate = pm ? pm[0].replace(/\s+/g, '') : (preg ? clean(preg).slice(0, 14) : '');
+  let pm = plateRe.exec(preg) || plateRe.exec(text);
+  out.plate = pm ? pm[0].replace(/\s+/g, '') : '';
 
   // 使用者名・本拠の位置（ベストエフォート）
   let nreg = region(text, '使用者の氏名又は名称', 40) || region(text, '使用者の氏名', 40) || region(text, '氏名又は名称', 40);
