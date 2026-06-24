@@ -287,6 +287,7 @@
     return {
       name: reqname || uname, addr: reqaddr || uaddr,
       username: uname, useraddr: uaddr, reqname: reqname, reqaddr: reqaddr,
+      plate: cv('cust_plate', 'plate'),
       tel: cv('cust_tel', 'tel'), mail: cv('cust_mail', 'mail'),
       vin: cv('f_vin', 'vin'), year: cv('f_year', 'year'), cls: cv('f_class', 'cls'), model: cv('f_model', 'model'), engine: cv('f_engine', 'engine'),
       mileage: cv('cust_mileage', 'mileage'), colorno: cv('cust_colorno', 'colorno'), colorname: cv('cust_colorname', 'colorname'), color: cv('cust_color', 'color')
@@ -356,6 +357,7 @@
     var colorCell = CC.colorname ? ((CC.color ? '<span class="p-swatch" style="background:' + CC.color + '"></span>' : '') + CC.colorname) : '';
     var cust = '<table class="p-cust">' +
       '<tr><th>お客様名</th><td>' + (nm ? nm + ' 様' : '') + '</td><th>電話番号</th><td>' + CC.tel + '</td></tr>' +
+      '<tr><th>ナンバー</th><td colspan="3">' + (CC.plate || '') + '</td></tr>' +
       '<tr><th>住所</th><td colspan="3">' + CC.addr + '</td></tr>' +
       '<tr><th>車台番号</th><td>' + CC.vin + '</td><th>初年度登録</th><td>' + CC.year + '</td></tr>' +
       '<tr><th>型式指定番号</th><td>' + CC.model + '</td><th>類別区分番号</th><td>' + CC.cls + '</td></tr>' +

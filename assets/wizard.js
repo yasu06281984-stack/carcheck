@@ -192,6 +192,7 @@
         '<tr><th>見積もり日</th><td>' + esc(d.estDate) + '</td><th>入庫予定日</th><td>' + esc(d.intakeDate) + '</td></tr></table>';
       cust = '<table class="p-cust">' +
         '<tr><th>お客様名</th><td>' + (c.name ? esc(c.name) + ' 様' : '') + '</td><th>電話番号</th><td>' + esc(c.tel) + '</td></tr>' +
+        '<tr><th>ナンバー</th><td colspan="3">' + esc(c.plate) + '</td></tr>' +
         '<tr><th>住所</th><td colspan="3">' + esc(c.addr) + '</td></tr>' +
         '<tr><th>車台番号</th><td>' + esc(c.vin) + '</td><th>初年度登録</th><td>' + esc(c.year) + '</td></tr>' +
         '<tr><th>型式指定番号</th><td>' + esc(c.model) + '</td><th>類別区分番号</th><td>' + esc(c.cls) + '</td></tr>' +
