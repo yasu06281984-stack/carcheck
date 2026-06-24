@@ -226,13 +226,15 @@
     var t=b.getAttribute('data-t');
     document.querySelectorAll('[data-c]').forEach(function(c){c.classList.toggle('hide',c.getAttribute('data-c')!==t);});
   };});
-  // ダッシュボード（アカウント）からのタブ指定： shopadmin.html#shop / #staff / #vendor / #outsrc / #loan
-  (function(){
+  // ダッシュボード/共通ナビからのタブ指定： shopadmin.html#shop / #staff / #vendor / #outsrc / #loan
+  function applyHashTab(){
     var h=(location.hash||'').replace('#','').trim();
     if(!h)return;
     var b=document.querySelector('#tabs button[data-t="'+h+'"]');
-    if(b)b.click();
-  })();
+    if(b&&b.style.display!=='none')b.click();
+  }
+  applyHashTab();
+  window.addEventListener('hashchange', applyHashTab);
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
 
   // ---- 営業時間 ----
@@ -586,5 +588,6 @@
     if(IS_ADMIN){ loadShop(); loadStaff(); }
   })();
 </script>
+<script src="assets/appnav.js?v=1" defer></script>
 </body>
 </html>
