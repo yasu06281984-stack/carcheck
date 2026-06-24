@@ -14,6 +14,16 @@ function restHeaders(key, extra) {
 }
 function json(o, s) { return new Response(JSON.stringify(o), { status: s || 200, headers: CORS }); }
 function rand(n) { var c = 'abcdefghijklmnopqrstuvwxyz0123456789', o = ''; for (var i = 0; i < n; i++) o += c[Math.floor(Math.random() * c.length)]; return o; }
+function genCode() { var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', o = ''; for (var i = 0; i < 6; i++) o += c[Math.floor(Math.random() * c.length)]; return o; }
+async function ensureUniqueCode(base, key) {
+  for (var k = 0; k < 25; k++) {
+    var code = genCode();
+    var r = await fetch(base + '/rest/v1/shops?code=eq.' + code + '&select=id', { headers: restHeaders(key) });
+    var rows = r.ok ? await r.json() : [];
+    if (!rows.length) return code;
+  }
+  return genCode() + ('' + Date.now()).slice(-2);
+}
 
 export async function onRequestOptions() {
   return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type,Authorization' } });
@@ -41,8 +51,11 @@ export async function onRequestPost({ request, env }) {
     if (!shop) return json({ error: 'no_shop' }, 404);
     const vip = (shop.plan === 'vip') && (!shop.vip_expires_at || new Date(shop.vip_expires_at) > new Date());
     if (!vip) return json({ error: 'not_vip' }, 403);
-    const code = shop.code;
-    if (!code) return json({ error: 'no_code' }, 500);
+    let code = shop.code;
+    if (!code) {
+      code = await ensureUniqueCode(base, env.SUPABASE_SERVICE_KEY);
+      await fetch(base + '/rest/v1/shops?id=eq.' + encodeURIComponent(auth.shopId), { method: 'PATCH', headers: restHeaders(env.SUPABASE_SERVICE_KEY, { 'Prefer': 'return=minimal' }), body: JSON.stringify({ code: code }) });
+    }
 
     // ログイン氏名（スペース除去）＋同姓同名は自動連番
     const baseName = (sei + mei).replace(/\s/g, '');
