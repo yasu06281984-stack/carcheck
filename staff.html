@@ -75,7 +75,7 @@
         this.disabled=false;this.textContent='ログイン';
         if(window.turnstile)try{turnstile.reset();}catch(e){}tok='';return;
       }
-      location.replace('uketsuke.html');
+      location.replace('home.html');
     }catch(e){
       msg.textContent='通信エラーが発生しました。時間をおいてお試しください。';msg.className='msg err';
       this.disabled=false;this.textContent='ログイン';
