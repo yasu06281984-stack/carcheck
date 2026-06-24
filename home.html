@@ -6,31 +6,93 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#d97706">
+  <meta name="theme-color" content="#143A57">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>入庫カルテ</title>
+<title>アカウント ｜ 入庫カルテ</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{--brand:#1F4E74;--brand-deep:#143A57;--amber:#E8810C;--ink:#16202B;--muted:#5C6B7A;--line:#D6DEE6;--surface2:#F6F8FA}
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;background:#EBEEF2;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink);display:grid;place-items:center;padding:20px}
+  body{margin:0;min-height:100vh;background:#EBEEF2;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;color:var(--ink)}
+  /* 上部バー */
+  .topbar{position:sticky;top:0;z-index:10;background:var(--brand-deep);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px}
+  .topbar .brand a{display:flex;align-items:center;line-height:0}
+  .topbar .brand img{height:46px;width:auto;display:block}
+  .topbar .who{display:flex;align-items:center;gap:10px;font-size:.86rem}
+  .topbar .who button{background:rgba(255,255,255,.12);border:0;color:#fff;padding:7px 13px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer}
+  /* 本文 */
+  .wrap{max-width:1000px;margin:0 auto;padding:26px 18px 48px}
+  h1{font-size:1.4rem;margin:4px 0 2px}
+  .lead{color:var(--muted);font-size:.9rem;margin:0 0 22px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .tile{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 16px;text-decoration:none;color:inherit;transition:box-shadow .15s,transform .15s,border-color .15s}
+  .tile:hover{box-shadow:0 10px 26px rgba(20,32,40,.12);transform:translateY(-2px);border-color:#c2d0de}
+  .tile .ic{flex:0 0 46px;width:46px;height:46px;border-radius:12px;background:#EAF1F8;color:var(--brand);display:grid;place-items:center}
+  .tile .ic svg{width:24px;height:24px;display:block}
+  .tile .tt{font-weight:800;font-size:1rem;line-height:1.3;margin-bottom:3px}
+  .tile .dd{color:var(--muted);font-size:.82rem;line-height:1.55}
+  .tile.alt .ic{background:#FCEFDD;color:var(--amber)}
+  /* ローディング/未所属カード */
+  .center{display:grid;place-items:center;padding:60px 18px}
   .card{background:#fff;width:100%;max-width:420px;border-radius:18px;box-shadow:0 12px 40px rgba(20,32,40,.12);padding:28px 26px;text-align:center}
-  .logo{width:36px;height:36px;border-radius:9px;background:var(--amber);display:inline-grid;place-items:center;font-weight:800;color:#1b1b1b;margin-bottom:10px}
-  h1{font-size:1.1rem;margin:0 0 6px}.sub{color:var(--muted);font-size:.88rem;line-height:1.7}
-  button{margin-top:16px;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px 18px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .card img{height:70px;width:auto;display:block;margin:0 auto}
+  .sub{color:var(--muted);font-size:.88rem;line-height:1.7}
+  .card button{margin-top:16px;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px 18px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer}
+  @media(max-width:520px){ .topbar .brand img{height:40px} h1{font-size:1.2rem} }
 </style>
 </head>
 <body>
-<div class="card">
-  <a href="/" style="display:inline-flex;align-items:center;line-height:0"><img src="/img/logo-mark-b.png" alt="入庫カルテ" style="height:70px;width:auto;display:block;background:none;padding:0"></a>
-  <div id="body"><div class="sub">読み込み中…</div></div>
+<div id="root">
+  <div class="center"><div class="card"><img src="/img/logo-mark-b.png" alt="入庫カルテ"><div class="sub" style="margin-top:10px">読み込み中…</div></div></div>
 </div>
 <script>
   var SUPABASE_URL='https://ysxqnwxpuxfstvuobzuz.supabase.co';
   var SB_KEY='sb_publishable_5Wc1cQ4nYDejKaxQt7Clag_BXiVs4DL';
   var sb=window.supabase.createClient(SUPABASE_URL,SB_KEY);
   var ROLES={site_admin:'運営管理者',shop_admin:'店舗管理者',staff:'スタッフ'};
+
+  var IC={
+    uketsuke:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3.5h6v2.5H9z"/><path d="M8.5 11l1.5 1.5L13 9"/><path d="M8.5 16h7"/></svg>',
+    schedule:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/><path d="M7.5 13h3M13.5 13h3M7.5 17h3"/></svg>',
+    shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v9h16v-9"/><path d="M3 10l1.5-5h15L21 10a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-4 0z"/><path d="M10 19v-4h4v4"/></svg>',
+    loan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16v-3l1.8-4.2A2 2 0 0 1 8.7 7.5h6.6a2 2 0 0 1 1.9 1.3L19 13v3"/><path d="M3.5 16h17"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>',
+    staff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 7.2a3 3 0 0 1 0 5.6"/><path d="M17.5 19a5 5 0 0 0-3-4.6"/></svg>',
+    vendor:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M4 9h5M4 14h5"/><path d="M13 9h4M13 13h4"/></svg>',
+    outsrc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3.5 3.5 0 0 0-4.6 4.6l-5 5a1.5 1.5 0 0 0 2.1 2.1l5-5a3.5 3.5 0 0 0 4.6-4.6l-2 2-1.7-1.7z"/><path d="M14 14l5 5"/></svg>'
+  };
+
+  function tile(c){
+    return '<a class="tile'+(c.alt?' alt':'')+'" href="'+c.href+'">'+
+      '<span class="ic">'+IC[c.k]+'</span>'+
+      '<span><span class="tt">'+c.t+'</span><span class="dd">'+c.d+'</span></span></a>';
+  }
+
+  function renderDashboard(name){
+    var cards=[
+      {k:'uketsuke',t:'受付シート作成',d:'お客様の入庫受付シートを作成します',href:'uketsuke.html',alt:true},
+      {k:'schedule',t:'工場スケジュール管理',d:'入庫・納車の予定をカレンダーで管理',href:'schedule.html'},
+      {k:'shop',t:'店舗情報',d:'店舗名・住所・営業時間などの設定',href:'shopadmin.html#shop'},
+      {k:'loan',t:'代車登録',d:'貸し出す代車の登録・管理',href:'shopadmin.html#loan'},
+      {k:'staff',t:'スタッフ登録',d:'スタッフの追加・パスワード管理',href:'shopadmin.html#staff'},
+      {k:'vendor',t:'業者登録',d:'取引業者名の登録',href:'shopadmin.html#vendor'},
+      {k:'outsrc',t:'外注先登録',d:'外注先の登録',href:'shopadmin.html#outsrc'}
+    ];
+    document.getElementById('root').innerHTML=
+      '<header class="topbar">'+
+        '<div class="brand"><a href="home.html"><img src="/img/logo-mark.png" alt="入庫カルテ"></a></div>'+
+        '<div class="who"><span>'+(name?name+' さん':'')+'</span><button id="out">ログアウト</button></div>'+
+      '</header>'+
+      '<div class="wrap">'+
+        '<h1>アカウント</h1>'+
+        '<div class="lead">使いたいメニューを選んでください。</div>'+
+        '<div class="grid">'+cards.map(tile).join('')+'</div>'+
+      '</div>';
+    document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+  }
+
+  function showNotice(html){ document.getElementById('root').innerHTML='<div class="center"><div class="card"><img src="/img/logo-mark-b.png" alt="入庫カルテ">'+html+'</div></div>'; }
+
   (async function(){
     var s=await sb.auth.getSession();
     if(!s.data||!s.data.session){location.replace('login.html');return;}
@@ -38,23 +100,22 @@
     var p=await sb.from('profiles').select('role,name,shop_id').eq('id',uid).single();
     var role=(p.data&&p.data.role)||'staff';
     var shopId=p.data&&p.data.shop_id;
+    var name=(p.data&&p.data.name)||'';
     if(role==='site_admin'){location.replace('siteadmin.html');return;}
-    if(role==='shop_admin'){location.replace('shopadmin.html');return;}
+    if(role==='shop_admin'&&shopId){renderDashboard(name);return;}
     if(role==='staff'&&shopId){location.replace('uketsuke.html');return;}
     // 店舗未所属 → 自動セットアップ（VIP30日の店舗作成）を試みる
     try{
       var token=s.data.session.access_token;
       var setup=await fetch('/api/setup-shop',{method:'POST',headers:{Authorization:'Bearer '+token}});
       var sd=await setup.json().catch(function(){return {};});
-      if(setup.ok&&sd.ok&&sd.shopId){location.replace('shopadmin.html');return;}
+      if(setup.ok&&sd.ok&&sd.shopId){location.replace('home.html');return;}
     }catch(e){}
-    // それでも未所属（登録情報が無い等）の場合
     var label=ROLES[role]||role;
-    document.getElementById('body').innerHTML=
-      '<h1>ログイン中：'+label+'</h1>'+
+    showNotice('<h1 style="font-size:1.1rem;margin:10px 0 6px">ログイン中：'+label+'</h1>'+
       '<div class="sub">この方はまだ店舗に所属していません。新規のご登録は <a href="signup.html">こちら</a> から、または店舗管理者にスタッフ登録を依頼してください。</div>'+
-      '<button id="out">ログアウト</button>';
-    document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
+      '<button id="out">ログアウト</button>');
+    var o=document.getElementById('out'); if(o)o.onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
   })();
 </script>
 </body>

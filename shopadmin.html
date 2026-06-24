@@ -67,7 +67,7 @@
 <body>
 <div class="topbar">
   <div class="brand"><a href="/" style="display:inline-flex;align-items:center;line-height:0"><img src="/img/logo-mark.png" alt="入庫カルテ" style="height:70px;width:auto;display:block;background:none;padding:0"></a><div><b>店舗管理</b></div></div>
-  <div class="who"><span id="whoName"></span><a href="schedule.html" style="background:rgba(255,255,255,.12);color:#fff;padding:7px 13px;border-radius:8px;font-size:.8rem;text-decoration:none">工場スケジュール</a><button id="out">ログアウト</button></div>
+  <div class="who"><span id="whoName"></span><a href="home.html" style="background:rgba(255,255,255,.12);color:#fff;padding:7px 13px;border-radius:8px;font-size:.8rem;text-decoration:none">アカウント</a><a href="schedule.html" style="background:rgba(255,255,255,.12);color:#fff;padding:7px 13px;border-radius:8px;font-size:.8rem;text-decoration:none">工場スケジュール</a><button id="out">ログアウト</button></div>
 </div>
 <div class="wrap">
   <div class="subtabs" id="tabs">
@@ -225,6 +225,13 @@
     var t=b.getAttribute('data-t');
     document.querySelectorAll('[data-c]').forEach(function(c){c.classList.toggle('hide',c.getAttribute('data-c')!==t);});
   };});
+  // ダッシュボード（アカウント）からのタブ指定： shopadmin.html#shop / #staff / #vendor / #outsrc / #loan
+  (function(){
+    var h=(location.hash||'').replace('#','').trim();
+    if(!h)return;
+    var b=document.querySelector('#tabs button[data-t="'+h+'"]');
+    if(b)b.click();
+  })();
   document.getElementById('out').onclick=function(){sb.auth.signOut().then(function(){location.replace('login.html');});};
 
   // ---- 営業時間 ----
