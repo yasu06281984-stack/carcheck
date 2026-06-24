@@ -182,9 +182,10 @@
 
 <div id="ovStaff" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;place-items:center;padding:20px">
   <div style="background:#fff;width:100%;max-width:380px;border-radius:14px;padding:22px">
-    <div class="card-l">スタッフのパスワード変更</div>
-    <div class="small" id="ps_who" style="margin:4px 0 12px;color:var(--muted)"></div>
-    <div class="field"><label>新しいパスワード（8桁の数字）</label><input id="ps_pw" inputmode="numeric" maxlength="8" placeholder="12345678"></div>
+    <div class="card-l">スタッフのログイン情報</div>
+    <div class="small" id="ps_who" style="margin:4px 0 6px;color:var(--muted)"></div>
+    <div class="small" style="margin:0 0 12px;color:var(--muted);line-height:1.6">下の案内文は何度でもコピー／送信できます。パスワードはセキュリティ上あとから表示できません。お忘れの場合は新しいパスワードを発行してください。</div>
+    <div class="field"><label>パスワードを再発行する場合のみ入力（8桁の数字）</label><input id="ps_pw" inputmode="numeric" maxlength="8" placeholder="12345678"></div>
     <button id="ps_gen" type="button" style="width:100%;background:#fff;border:1px solid var(--line);color:var(--brand);padding:10px;border-radius:10px;font-weight:700;cursor:pointer;margin:0 0 10px">8桁を自動生成</button>
     <div class="msg" id="ps_msg"></div>
     <div id="ps_result" hidden style="margin:8px 0 0">
@@ -199,7 +200,7 @@
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button id="ps_cancel" type="button" style="flex:1;background:#fff;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:10px;font-weight:700;cursor:pointer">閉じる</button>
-      <button class="primary" id="ps_save" style="flex:1;margin:0">変更する</button>
+      <button class="primary" id="ps_save" style="flex:1;margin:0">新しいパスワードに変更</button>
     </div>
   </div>
 </div>
@@ -329,14 +330,19 @@
     if(!rows.length){document.getElementById('staffList').innerHTML='まだスタッフがいません。';return;}
     var h='<table><thead><tr><th>バッジ</th><th>氏名</th><th>ログイン名</th><th>役割</th><th></th></tr></thead><tbody>';
     rows.forEach(function(p){
-      var ops=(p.role==='staff')
-        ? '<td class="ops"><button class="lnk" data-pw="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'" style="color:var(--brand)">パスワード変更</button> <button class="lnk" data-del="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'">削除</button></td>'
+      var isStaff=(p.role==='staff');
+      var info='data-info="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'" data-ln="'+esc(p.login_name||'')+'"';
+      var nameCell=isStaff
+        ? '<button class="lnk" '+info+' style="color:var(--brand);font-weight:700;background:none;border:0;padding:0;cursor:pointer;text-align:left;font-size:inherit">'+esc(p.name||'（未設定）')+'</button>'
+        : esc(p.name||'（未設定）');
+      var ops=isStaff
+        ? '<td class="ops"><button class="lnk" '+info+' style="color:var(--brand)">ログイン情報</button> <button class="lnk" data-del="'+esc(p.id)+'" data-nm="'+esc(p.name||'')+'">削除</button></td>'
         : '<td class="ops"></td>';
-      h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+esc(p.name||'（未設定）')+'</td>'+
-        '<td class="small mono">'+esc(p.login_name||'—')+'</td><td><span class="sp '+(p.role==='staff'?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td>'+ops+'</tr>';
+      h+='<tr><td><span class="ava2">'+esc(badge(p.name))+'</span></td><td>'+nameCell+'</td>'+
+        '<td class="small mono">'+esc(p.login_name||'—')+'</td><td><span class="sp '+(isStaff?'staff':'')+'">'+(p.role==='shop_admin'?'店舗管理者':'スタッフ')+'</span></td>'+ops+'</tr>';
     });
     var box=document.getElementById('staffList'); box.innerHTML=h+'</tbody></table>';
-    box.querySelectorAll('[data-pw]').forEach(function(b){b.onclick=function(){openPw(b.getAttribute('data-pw'),b.getAttribute('data-nm'));};});
+    box.querySelectorAll('[data-info]').forEach(function(b){b.onclick=function(){openPw(b.getAttribute('data-info'),b.getAttribute('data-nm'),b.getAttribute('data-ln'));};});
     box.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){delStaff(b.getAttribute('data-del'),b.getAttribute('data-nm'));};});
   }
   function gen8(){var s='';for(var i=0;i<8;i++)s+=Math.floor(Math.random()*10);return s;}
@@ -385,7 +391,7 @@
       '店舗コード：'+code+'\n'+
       '氏名：'+loginName+'\n'+
       'ログインURL： https://nyukokarte.com/staff\n'+
-      'パスワード：'+password+'\n\n'+
+      'パスワード：'+(password||'（初回にお伝えしたパスワード）')+'\n\n'+
       '▼ ログイン方法\n'+
       '上のログインURLを開き、店舗コード・氏名・パスワードを入力してログインしてください。\n\n'+
       '▼ スマホアプリのように使う（ホーム画面に追加）\n'+
@@ -394,13 +400,15 @@
       '・Android でホーム画面に追加する方法\n\n'+
       '※ このパスワードは他の人に教えないでください。';
   }
-  function openPw(id,nm){
+  function openPw(id,nm,ln){
     PS_ID=id;
-    document.getElementById('ps_who').textContent='対象：'+(nm||'')+' さん';
+    document.getElementById('ps_who').textContent='対象：'+(nm||'')+' さん（ログイン名：'+(ln||'—')+'）';
     setVal('ps_pw','');
     var m=document.getElementById('ps_msg');m.textContent='';m.className='msg';
-    document.getElementById('ps_result').hidden=true;
     document.getElementById('ps_copymsg').textContent='';
+    var sm=document.getElementById('ps_sendmsg'); if(sm)sm.textContent='';
+    document.getElementById('ps_notice').value=noticeText(SHOP_CODE,(ln||nm||''),'');
+    document.getElementById('ps_result').hidden=false;
     document.getElementById('ovStaff').style.display='grid';
   }
   function closePw(){document.getElementById('ovStaff').style.display='none';PS_ID=null;}
