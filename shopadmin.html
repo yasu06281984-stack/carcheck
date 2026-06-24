@@ -84,6 +84,7 @@
     <div class="card">
       <div class="card-l">店舗情報（受付シートのPDFヘッダーに表示されます）</div>
       <div class="form-col">
+        <div class="field"><label>店舗コード（スタッフのログインに使用）</label><div style="font-family:ui-monospace,monospace;letter-spacing:.14em;font-weight:800;font-size:1.15rem;color:var(--brand);padding:6px 0"><span id="sh_code">—</span></div></div>
         <div class="field"><label>店舗名</label><input id="sh_name"></div>
         <div class="field"><label>会社名</label><input id="sh_company"></div>
         <div class="field"><label>郵便番号</label><div class="add"><input id="sh_postal" placeholder="1000001" inputmode="numeric"><button class="primary" id="sh_zip" style="margin-top:0;white-space:nowrap">住所を自動入力</button></div></div>
@@ -294,6 +295,17 @@
     setVal('sh_tel',s.tel);setVal('sh_url',s.url);setHours(s.hours_data);
     SHOP_PLAN=s.plan||'free'; SHOP_VIPEXP=s.vip_expires_at||null; SHOP_CODE=s.code||'';
     var ce=document.getElementById('st_code'); if(ce)ce.textContent=SHOP_CODE||'—';
+    var ce2=document.getElementById('sh_code'); if(ce2)ce2.textContent=SHOP_CODE||'—';
+    if(!SHOP_CODE){
+      try{
+        var ss=await sb.auth.getSession(); var tk=ss.data&&ss.data.session&&ss.data.session.access_token;
+        if(tk){
+          await fetch('/api/setup-shop',{method:'POST',headers:{Authorization:'Bearer '+tk}});
+          var r2=await sb.from('shops').select('code').eq('id',SHOP).single();
+          if(r2.data&&r2.data.code){ SHOP_CODE=r2.data.code; if(ce)ce.textContent=SHOP_CODE; if(ce2)ce2.textContent=SHOP_CODE; }
+        }
+      }catch(e){}
+    }
     loadAd(s.plan,s.vip_expires_at); updateStaffGate();
   }
   document.getElementById('sh_save').onclick=async function(){
