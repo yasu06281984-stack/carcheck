@@ -73,7 +73,7 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><img src="/img/logo-mark.png" alt="入庫カルテ" style="height:40px;width:auto;display:block;background:none;padding:0"><div><b>入庫カルテ</b><small>運営管理</small></div></div>
+  <div class="brand"><img src="/img/logo-mark.png" alt="入庫カルテ" style="height:70px;width:auto;display:block;background:none;padding:0"><div><b>入庫カルテ</b><small>運営管理</small></div></div>
   <div class="who"><span id="whoName"></span><button id="out">ログアウト</button></div>
 </div>
 <div class="wrap">
@@ -573,7 +573,7 @@
       var r=await fetch('/api/announce',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'create',title:title,body:body,published:published})});
       var d=await r.json().catch(function(){return {};});
       this.disabled=false;this.textContent='投稿する';
-      if(!r.ok||!d.ok){msg.textContent='投稿できませんでした：'+(d.error||r.status);msg.className='msg err';return;}
+      if(!r.ok||!d.ok){msg.textContent='投稿できませんでした：'+(d.error||r.status)+(d.detail?(' / '+d.detail):'');msg.className='msg err';return;}
       msg.textContent='投稿しました。';msg.className='msg ok';
       document.getElementById('nw_title').value='';document.getElementById('nw_body').value='';
       loadNews();
